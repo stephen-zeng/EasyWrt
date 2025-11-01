@@ -6,10 +6,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:flutter/foundation.dart';
 
-class Applogger extends Logger {
-  Applogger._internal() : super();
-  static final Applogger _instance = Applogger._internal();
-  factory Applogger() {
+class SZLogger extends Logger {
+  SZLogger._internal() : super();
+  static final SZLogger _instance = SZLogger._internal();
+  factory SZLogger() {
     return _instance;
   }
 
@@ -29,7 +29,7 @@ class Applogger extends Logger {
   static Future<File> getLogFile() async {
     final file = File(await _getLogFilePath());
     if (!await file.exists()) {
-      await Applogger._logLock.synchronized(() async {
+      await SZLogger._logLock.synchronized(() async {
         if (!await file.exists()) {
           await file.create();
         }
@@ -41,7 +41,7 @@ class Applogger extends Logger {
   static void clearLogs() async {
     final file = File(await _getLogFilePath());
     try {
-      await Applogger._logLock.synchronized(() async {
+      await SZLogger._logLock.synchronized(() async {
         await file.writeAsString("");
       });
     } catch (e) {

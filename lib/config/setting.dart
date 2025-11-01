@@ -4,6 +4,10 @@ class AppDBCode {
   static const int darkModeSystem = 0;
   static const int darkModeLight = 1;
   static const int darkModeDark = 2;
+
+  static const exitBehaviorAsk = 0;
+  static const exitBehaviorClose = 1;
+  static const exitBehaviorMinimize = 2;
 }
 
 final List<Map<String, dynamic>> AppColor = [

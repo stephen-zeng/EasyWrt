@@ -1,3 +1,4 @@
+import 'package:easywrt/database/app.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -22,5 +23,7 @@ class HiveDB {
     Hive.registerAdapter(PageAdapter());
     apps = await Hive.openBox<App>('apps');
     devices = await Hive.openBox<Device>('devices');
+
+    AppController.init();
   }
 }

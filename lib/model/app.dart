@@ -41,8 +41,11 @@ class AppPreferences {
   int darkMode;
   @HiveField(1)
   String color;
+  @HiveField(2)
+  int exitBehavior;
   AppPreferences({
     this.darkMode = AppDBCode.darkModeSystem,
     this.color = 'green', // Refers to AppColor default
+    this.exitBehavior = AppDBCode.exitBehaviorAsk,
   });
 }
