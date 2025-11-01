@@ -33,7 +33,7 @@ abstract class _DeviceControllerBase with Store {
       luciUsername: luciUsername,
       luciPassword: luciPassword,
       luciBaseURL: luciBaseURL,
-      rootMiddleware: middlewareRoot
+      rootMiddleware: DefaultMiddleware.middlewareRoot,
     );
     deviceBox.put(device.uuid, device);
     init();
