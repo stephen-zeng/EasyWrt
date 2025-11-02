@@ -1,3 +1,4 @@
+import 'package:easywrt/bean/theme/color.dart';
 import 'package:hive/hive.dart';
 import 'package:easywrt/database/storage.dart';
 import '../config/setting.dart';
@@ -40,12 +41,18 @@ class AppPreferences {
   @HiveField(0)
   int darkMode;
   @HiveField(1)
-  String color;
+  int color;
   @HiveField(2)
   int exitBehavior;
+  @HiveField(3)
+  bool oledEnabled;
+  @HiveField(4)
+  bool showWindowButtons;
   AppPreferences({
-    this.darkMode = AppDBCode.darkModeSystem,
-    this.color = 'green', // Refers to AppColor default
+    this.darkMode = AppDBCode.themeModeSystem,
+    this.color = defaultColorCode, // Refers to AppColor default
     this.exitBehavior = AppDBCode.exitBehaviorAsk,
+    this.oledEnabled = false,
+    this.showWindowButtons = true,
   });
 }

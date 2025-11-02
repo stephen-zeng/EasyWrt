@@ -185,6 +185,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.3.6"
+  dynamic_color:
+    dependency: "direct main"
+    description:
+      name: dynamic_color
+      sha256: "43a5a6679649a7731ab860334a5812f2067c2d9ce6452cf069c5e0c25336c17c"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "1.8.1"
   fake_async:
     dependency: transitive
     description:
@@ -613,6 +621,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "2.1.1"
+  screen_pixel:
+    dependency: "direct main"
+    description:
+      name: screen_pixel
+      sha256: b7310d81d98289ba1d6fb381ec95094b30b43ee1e901fefb65a3cf4de7d77e6b
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "0.0.3"
   screen_retriever:
     dependency: transitive
     description:

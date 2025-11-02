@@ -1,5 +1,6 @@
 // learning for kazumi, big thanks to their team!
 // works for flutter dialog management with context handling
+// Suggestion: more study here
 import 'package:flutter/material.dart';
 
 import '../../config/meta.dart';

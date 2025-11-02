@@ -1,12 +1,18 @@
 import 'dart:io';
 
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:easywrt/bean/setting/theme.dart';
+import 'package:easywrt/bean/theme/theme.dart';
 import 'package:easywrt/database/app.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:easywrt/utils/utils.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:hive/hive.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:easywrt/database/storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'bean/dialog/dialog.dart';
 import 'config/setting.dart';
 
@@ -61,7 +67,7 @@ class _AppWidgetState extends State<AppWidget>
   void onWindowClose() async {
     final currentPreferences = AppController.getAppPreferences();
 
-    void _updateExitBehaviorIfNeeded(bool remember, int newBehavior) {
+    void _updateExitBehavior(bool remember, int newBehavior) {
       if (remember) {
         currentPreferences.exitBehavior = newBehavior;
         AppController.updateAppPreferences(currentPreferences); // Attention: maybe need deep copy
@@ -102,14 +108,14 @@ class _AppWidgetState extends State<AppWidget>
               actions: [
                 TextButton(
                   onPressed: () {
-                    _updateExitBehaviorIfNeeded(rememberChoice, AppDBCode.exitBehaviorClose);
+                    _updateExitBehavior(rememberChoice, AppDBCode.exitBehaviorClose);
                     exit(0);
                   },
                   child: const Text('直接退出'),
                 ),
                 TextButton(
                   onPressed: () {
-                    _updateExitBehaviorIfNeeded(rememberChoice, AppDBCode.exitBehaviorMinimize);
+                    _updateExitBehavior(rememberChoice, AppDBCode.exitBehaviorMinimize);
                     SZDialog.dismiss();
                     windowManager.hide();
                   },
@@ -126,7 +132,6 @@ class _AppWidgetState extends State<AppWidget>
         break;
       case AppDBCode.exitBehaviorClose: // case 1
         exit(0);
-        break;
       case AppDBCode.exitBehaviorMinimize: // case 2
       default:
         windowManager.hide();
@@ -138,17 +143,88 @@ class _AppWidgetState extends State<AppWidget>
   void didChangeAppLifecycleState(AppLifecycleState state) async {
     super.didChangeAppLifecycleState(state);
     if (state == AppLifecycleState.paused) {
-      debugPrint("应用进入后台");
+      debugPrint("go to background");
     } else if (state == AppLifecycleState.resumed) {
-      debugPrint("应用回到前台");
+      debugPrint("back to foreground");
     } else if (state == AppLifecycleState.inactive) {
-      debugPrint("应用处于非活动状态");
+      debugPrint("inactive");
     }
+  }
+
+  Future<void> _handleTray() async {
+    if (Platform.isWindows) {
+      await trayManager.setIcon('/assets/logo/logo.ico');
+    } else {
+      await trayManager.setIcon('/assets/logo/logo.png');
+    }
+
+    if (!Platform.isLinux) {
+      await trayManager.setToolTip('Kazumi');
+    }
+
+    Menu trayMenu = Menu(items: [
+      MenuItem(key: 'show_window', label: '显示窗口'),
+      MenuItem.separator(),
+      MenuItem(key: 'exit', label: '退出应用'),
+    ]);
+    await trayManager.setContextMenu(trayMenu);
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    final appPreferences = AppController.getAppPreferences();
+    final ThemeProvider themeProvider = Provider.of<ThemeProvider>(context);
+    if (Utils.isDesktop()) {
+      _handleTray();
+    }
+
+    switch (appPreferences.darkMode) {
+      case AppDBCode.themeModeLight:
+        themeProvider.setThemeMode(ThemeMode.light, notify: false);
+        break;
+      case AppDBCode.themeModeDark:
+        themeProvider.setThemeMode(ThemeMode.dark, notify: false);
+        break;
+      case AppDBCode.themeModeSystem:
+      default:
+        themeProvider.setThemeMode(ThemeMode.system, notify: false);
+        break;
+    }
+
+    final dynamic color = Color(appPreferences.color);
+    themeProvider.setTheme(
+        ThemeGetter.getLightTheme(color),
+        appPreferences.oledEnabled ?
+        ThemeGetter.getOLEDDarkTheme(color) :
+        ThemeGetter.getDarkTheme(color),
+        notify: false
+    );
+
+    var app = DynamicColorBuilder(builder: (lightColorScheme, darkColorScheme) {
+      if (themeProvider.useDynamicColor && lightColorScheme != null && darkColorScheme != null) {
+        themeProvider.setTheme(
+          ThemeGetter.getDynamicLightTheme(lightColorScheme),
+          appPreferences.oledEnabled ?
+          ThemeGetter.getDynamicOLEDDarkTheme(darkColorScheme) :
+          ThemeGetter.getDynamicDarkTheme(darkColorScheme),
+        );
+      }
+      return MaterialApp.router(
+        title: 'EasyWRT',
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        supportedLocales: const [
+          Locale.fromSubtags(
+              languageCode: 'zh', scriptCode: 'Hans', countryCode: "CN")
+        ],
+        locale: const Locale.fromSubtags(
+            languageCode: 'zh', scriptCode: 'Hans', countryCode: "CN"),
+        theme: themeProvider.light,
+        darkTheme: themeProvider.dark,
+        themeMode: themeProvider.themeMode,
+        routerConfig: Modular.routerConfig,
+      );
+    });
+    Modular.setObservers([SZDialog.observer]);
+    return app;
   }
 }

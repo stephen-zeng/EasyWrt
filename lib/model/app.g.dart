@@ -98,21 +98,24 @@ class AppPreferencesAdapter extends TypeAdapter<AppPreferences> {
     };
     return AppPreferences(
       darkMode: fields[0] as int,
-      color: fields[1] as String,
+      color: fields[1] as int,
       exitBehavior: fields[2] as int,
+      oledEnabled: fields[3] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppPreferences obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(4)
       ..writeByte(0)
       ..write(obj.darkMode)
       ..writeByte(1)
       ..write(obj.color)
       ..writeByte(2)
-      ..write(obj.exitBehavior);
+      ..write(obj.exitBehavior)
+      ..writeByte(3)
+      ..write(obj.oledEnabled);
   }
 
   @override

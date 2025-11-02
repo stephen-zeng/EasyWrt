@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ThemeNotifier extends ChangeNotifier {
+class ThemeProvider extends ChangeNotifier {
   ThemeMode themeMode = ThemeMode.system;
   bool useDynamicColor = false;
   late ThemeData light;

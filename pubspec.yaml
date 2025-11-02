@@ -26,6 +26,8 @@ dependencies:
   flutter_modular: any
   tray_manager: any
   window_manager: any
+  dynamic_color: any
+  screen_pixel: any
 
 dev_dependencies:
   flutter_test:
