@@ -48,11 +48,14 @@ class AppPreferences {
   bool oledEnabled;
   @HiveField(4)
   bool showWindowButtons;
+  @HiveField(5)
+  bool useDynamicColor;
   AppPreferences({
     this.darkMode = AppDBCode.themeModeSystem,
     this.color = defaultColorCode, // Refers to AppColor default
     this.exitBehavior = AppDBCode.exitBehaviorAsk,
     this.oledEnabled = false,
     this.showWindowButtons = true,
+    this.useDynamicColor = false,
   });
 }

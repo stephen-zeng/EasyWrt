@@ -1,4 +1,4 @@
-import 'package:easywrt/page/index_module.dart';
+import 'package:easywrt/page/module.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AppModule extends Module {
