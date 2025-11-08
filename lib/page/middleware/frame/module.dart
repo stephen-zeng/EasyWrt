@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-import '../database/device.dart';
-import 'dev.dart';
-import 'index.dart';
-import 'init.dart';
+import '../../../database/device.dart';
+import '../../../base/base.dart';
+import 'route.dart';
 
-class IndexModule extends Module {
+class BaseModule extends Module {
   @override
   void binds(i) {
     i.addSingleton(DeviceController.new);
@@ -23,20 +22,8 @@ class IndexModule extends Module {
             body: const Center(child: Text("初始化失败")),
           ),
         ),
+        ...baseRoute.routes
       ],
-      transition: TransitionType.fadeIn
-    );
-
-    r.child(
-      "/tab",
-      child: (_) {
-        return const IndexPage();
-      },
-    );
-
-    r.child(
-      "/dev",
-      child: (_) => const DevPage(),
       transition: TransitionType.fadeIn
     );
   }

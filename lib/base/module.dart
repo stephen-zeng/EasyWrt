@@ -1,4 +1,4 @@
-import 'package:easywrt/page/module.dart';
+import 'package:easywrt/page/middleware/base/base_module.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class AppModule extends Module {
@@ -7,6 +7,6 @@ class AppModule extends Module {
   
   @override
   void routes(r) {
-    r.module("/", module: IndexModule());
+    r.module("/", module: BaseModule());
   }
 }
