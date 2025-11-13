@@ -1,6 +1,7 @@
 import 'package:easywrt/database/storage.dart';
 import 'package:easywrt/default/middleware.dart';
 import 'package:easywrt/model/device.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
 import 'package:mobx/mobx.dart';
 import 'package:uuid/uuid.dart';
@@ -26,16 +27,19 @@ abstract class _DeviceControllerBase with Store {
     required String luciUsername,
     required String luciPassword,
     required String luciBaseURL,
+    required String token,
 }){
     Device device = Device(
       uuid: const Uuid().v4(),
       name: name,
+      token: token,
       luciUsername: luciUsername,
       luciPassword: luciPassword,
       luciBaseURL: luciBaseURL,
       rootMiddleware: DefaultMiddleware.middlewareRoot,
     );
     deviceBox.put(device.uuid, device);
+    debugPrint('New Device: ${device.name} (${device.uuid}, ${device.token})');
     init();
   }
 
@@ -51,5 +55,13 @@ abstract class _DeviceControllerBase with Store {
 
   Device? getDeviceByUUID(String uuid){
     return deviceBox.get(uuid);
+  }
+
+  Device? getDeviceByName(String name){
+    try {
+      return deviceBox.values.firstWhere((device) => device.name == name);
+    } catch (_) {
+      return null;
+    }
   }
 }

@@ -18,7 +18,10 @@ enum Exceptions {
   // 2xx: wrt登录相关错误
   wrtOtherLoginError(200, "Other login error"),
   wrtInvalidLoginCredentials(201, "Invalid username or password"),
-  wrtInvalidLoginCookie(202, "Empty cookie");
+  wrtInvalidLoginCookie(202, "Empty cookie"),
+
+  // 3xx: 设备相关错误
+  deviceNotFound(300, "Device not found");
 
   final int code;
   final String message;

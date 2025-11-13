@@ -2,13 +2,13 @@ import 'package:easywrt/page/middleware/dev/dev_module.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-class BaseRouteItem {
+class MiddlewareRouteItem {
   final Module module;
   final String path;
   final String name;
   final IconData icon; // 增加一个Icon属性
 
-  const BaseRouteItem({
+  const MiddlewareRouteItem({
     required this.module,
     required this.path,
     required this.name,
@@ -16,21 +16,10 @@ class BaseRouteItem {
   });
 }
 
-class BaseRoute {
-  final List<BaseRouteItem> menuList;
-  List<ListTile> get listTileList {
-    return menuList.map((item) {
-      return ListTile(
-        leading: Icon(item.icon),
-        title: Text(item.name),
-        onTap: () {
-          Modular.to.navigate(item.path);
-        },
-      );
-    }).toList();
-  }
+class MiddlewareRoute {
+  final List<MiddlewareRouteItem> menuList;
 
-  const BaseRoute(this.menuList);
+  const MiddlewareRoute(this.menuList);
 
   int get length => menuList.length;
 
@@ -43,8 +32,8 @@ class BaseRoute {
   }
 }
 
-final BaseRoute baseRoute = BaseRoute([
-  BaseRouteItem(
+final MiddlewareRoute middlewareRoute = MiddlewareRoute([
+  MiddlewareRouteItem(
     module: DevModule(),
     path: "/dev",
     name: "Dev",

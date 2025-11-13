@@ -1,4 +1,4 @@
-import 'package:easywrt/page/dev/dev.dart';
+import './dev.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class DevModule extends Module {

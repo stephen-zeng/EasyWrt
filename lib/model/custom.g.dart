@@ -69,7 +69,7 @@ class PageAdapter extends TypeAdapter<Page> {
       name: fields[0] as String,
       path: fields[1] as String,
       fatherPath: fields[2] as String,
-      icon: fields[3] as IconData,
+      icon: fields[3] as String,
     );
   }
 

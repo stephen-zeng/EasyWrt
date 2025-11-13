@@ -23,6 +23,7 @@ class DeviceAdapter extends TypeAdapter<Device> {
       luciUsername: fields[2] as String,
       luciPassword: fields[3] as String,
       luciBaseURL: fields[4] as String,
+      token: fields[9] as String,
       luciUnsafe: fields[5] as bool,
       SSHUsername: fields[6] as String,
       SSHPassword: fields[7] as String,
@@ -32,7 +33,7 @@ class DeviceAdapter extends TypeAdapter<Device> {
   @override
   void write(BinaryWriter writer, Device obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.uuid)
       ..writeByte(1)
@@ -50,7 +51,9 @@ class DeviceAdapter extends TypeAdapter<Device> {
       ..writeByte(7)
       ..write(obj.SSHPassword)
       ..writeByte(8)
-      ..write(obj.rootMiddleware);
+      ..write(obj.rootMiddleware)
+      ..writeByte(9)
+      ..write(obj.token);
   }
 
   @override

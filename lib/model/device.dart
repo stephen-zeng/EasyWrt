@@ -24,6 +24,8 @@ class Device {
   String SSHPassword;
   @HiveField(8)
   Middleware rootMiddleware;
+  @HiveField(9)
+  String token;
 
   Device({
     required this.uuid,
@@ -32,6 +34,7 @@ class Device {
     required this.luciUsername,
     required this.luciPassword,
     required this.luciBaseURL,
+    required this.token,
     this.luciUnsafe = false,
     this.SSHUsername = '',
     this.SSHPassword = '',

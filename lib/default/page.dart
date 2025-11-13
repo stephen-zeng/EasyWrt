@@ -5,161 +5,161 @@ class DefaultPage {
   static final Page pageOverview = Page(
     fatherPath: '/status',
     name: 'Overview',
-    icon: Icons.dashboard,
+    icon: 'Iashboard',
     path: '/overview',
   );
 
   static final Page pageSystemStatus = Page(
     fatherPath: '/software',
     name: 'System Status',
-    icon: Icons.info,
+    icon: 'info',
     path: "/system_status",
   );
 
   static final Page pageLogView = Page(
     fatherPath: '/software',
     name: 'Log View',
-    icon: Icons.view_list,
+    icon: 'view_list',
     path: '/log_view',
   );
 
   static final Page pageInternalDeviceStatus = Page(
     fatherPath: '/hardware',
     name: 'Internal Device Status',
-    icon: Icons.devices,
+    icon: 'devices',
     path: '/internal_device_status',
   );
 
   static final Page pageExternalDeviceStatus = Page(
     fatherPath: '/hardware',
     name: 'External Device Status',
-    icon: Icons.usb,
+    icon: 'usb',
     path: '/external_device_status',
   );
 
   static final Page pageChannelScan = Page(
     fatherPath: '/network',
     name: 'Channel Scan',
-    icon: Icons.wifi_tethering,
+    icon: 'wifi_tethering',
     path: '/channel_scan',
   );
 
   static final Page pageSpeedStatus = Page(
     fatherPath: '/network',
     name: 'Speed Status',
-    icon: Icons.speed,
+    icon: 'speed',
     path: '/speed_status',
   );
 
   static final Page pageWirelessStatus = Page(
     fatherPath: '/network',
     name: 'Wireless Status',
-    icon: Icons.wifi,
+    icon: 'wifi',
     path: '/wireless_status',
   );
 
   static final Page pageInfoSettings = Page(
     fatherPath: '/settings',
     name: 'Info Settings',
-    icon: Icons.info_outline,
+    icon: 'info_outline',
     path: '/info_settings',
   );
 
   static final Page pageLanguageSettings = Page(
     fatherPath: '/settings',
     name: 'Language Settings',
-    icon: Icons.language,
+    icon: 'language',
     path: '/language_settings',
   );
 
   static final Page pageTimeSettings = Page(
     fatherPath: '/settings',
     name: 'Time Settings',
-    icon: Icons.access_time,
+    icon: 'access_time',
     path: '/time_settings',
   );
 
   static final Page pageLogSettings = Page(
     fatherPath: '/settings',
     name: 'Log Settings',
-    icon: Icons.list,
+    icon: 'list',
     path: '/log_settings',
   );
 
   static final Page pagePerformanceSettings = Page(
     fatherPath: '/settings',
     name: 'Performance Settings',
-    icon: Icons.settings_applications,
+    icon: 'settings_applications',
     path: '/performance_settings',
   );
 
   static final Page pageSSHSettings = Page(
     fatherPath: '/settings',
     name: 'SSH Settings',
-    icon: Icons.code,
+    icon: 'code',
     path: '/ssh_settings',
   );
 
   static final Page pageLuciSettings = Page(
     fatherPath: '/settings',
     name: 'Luci Settings',
-    icon: Icons.web,
+    icon: 'web',
     path: '/luci_settings',
   );
 
   static final Page pageLuciAppManager = Page(
     fatherPath: '/apps',
     name: 'App Manager',
-    icon: Icons.apps,
+    icon: 'apps',
     path: '/luci_app_manager',
   );
 
   static final Page pageNetworkInterface = Page(
     fatherPath: '/network',
     name: 'Network Interface',
-    icon: Icons.network_check,
+    icon: 'network_check',
     path: '/network_interface',
   );
 
   static final Page pageWirelessNetworks = Page(
     fatherPath: '/network',
     name: 'Wireless Networks',
-    icon: Icons.wifi_lock,
+    icon: 'wifi_lock',
     path: '/wireless_networks',
   );
 
   static final Page pageRouter = Page(
     fatherPath: '/network',
     name: 'Router',
-    icon: Icons.router,
+    icon: 'router',
     path: '/router',
   );
 
   static final Page pageDHCP = Page(
     fatherPath: '/network',
     name: 'DHCP',
-    icon: Icons.public,
+    icon: 'public',
     path: '/dhcp',
   );
 
   static final Page pageDNS = Page(
     fatherPath: '/network',
     name: 'DNS',
-    icon: Icons.dns,
+    icon: 'dns',
     path: '/dns',
   );
 
   static final Page pageFirewall = Page(
     fatherPath: '/network',
     name: 'Firewall',
-    icon: Icons.security,
+    icon: 'security',
     path: '/firewall',
   );
 
   static final Page pageDialog = Page(
     fatherPath: '/apps',
     name: 'Dialog',
-    icon: Icons.chat,
+    icon: 'chat',
     path: '/dialog',
   );
 }

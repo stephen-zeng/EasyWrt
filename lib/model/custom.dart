@@ -37,7 +37,7 @@ class Page {
   @HiveField(2)
   String fatherPath;
   @HiveField(3)
-  IconData icon;
+  String icon;
   Page({
     required this.name,
     required this.path,

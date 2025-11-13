@@ -101,13 +101,15 @@ class AppPreferencesAdapter extends TypeAdapter<AppPreferences> {
       color: fields[1] as int,
       exitBehavior: fields[2] as int,
       oledEnabled: fields[3] as bool,
+      showWindowButtons: fields[4] as bool,
+      useDynamicColor: fields[5] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppPreferences obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.darkMode)
       ..writeByte(1)
@@ -115,7 +117,11 @@ class AppPreferencesAdapter extends TypeAdapter<AppPreferences> {
       ..writeByte(2)
       ..write(obj.exitBehavior)
       ..writeByte(3)
-      ..write(obj.oledEnabled);
+      ..write(obj.oledEnabled)
+      ..writeByte(4)
+      ..write(obj.showWindowButtons)
+      ..writeByte(5)
+      ..write(obj.useDynamicColor);
   }
 
   @override

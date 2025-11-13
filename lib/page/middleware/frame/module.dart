@@ -5,7 +5,7 @@ import '../../../database/device.dart';
 import '../../../base/base.dart';
 import 'route.dart';
 
-class BaseModule extends Module {
+class MiddlewareModule extends Module {
   @override
   void binds(i) {
     i.addSingleton(DeviceController.new);
@@ -22,7 +22,7 @@ class BaseModule extends Module {
             body: const Center(child: Text("初始化失败")),
           ),
         ),
-        ...baseRoute.routes
+        ...middlewareRoute.routes
       ],
       transition: TransitionType.fadeIn
     );

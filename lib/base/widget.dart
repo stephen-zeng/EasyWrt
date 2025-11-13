@@ -13,8 +13,8 @@ import 'package:tray_manager/tray_manager.dart';
 import 'package:easywrt/database/storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'bean/dialog/dialog.dart';
-import 'config/setting.dart';
+import '../bean/dialog/dialog.dart';
+import '../config/setting.dart';
 
 class AppWidget extends StatefulWidget {
   const AppWidget({super.key});

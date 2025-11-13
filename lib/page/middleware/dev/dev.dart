@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easywrt/utils/wrt.dart';
 
 class ExampleDestination {
   const ExampleDestination(this.label, this.icon, this.selectedIcon);
@@ -23,6 +24,7 @@ class DevPage extends StatefulWidget {
 
 class _DevPageState extends State<DevPage> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  late Future<String> _status;
 
   int screenIndex = 0;
   late bool showNavigationDrawer;
@@ -127,6 +129,37 @@ class _DevPageState extends State<DevPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _status = Wrt.call(
+      "afc63af0-fcc9-4f00-80d2-b28e5e08e5c0",
+      [["network.interface", "dump"]],
+    );
+  }
+
+  Widget getStatus(BuildContext context) {
+    return FutureBuilder<String>(
+      future: _status,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator(); // 加载中
+        } else if (snapshot.hasError) {
+          return Text(
+            'Error: ${snapshot.error}',
+            style: Theme.of(context).textTheme.bodySmall,
+          );
+        } else {
+          return Text(
+            snapshot.data ?? 'No data',
+            style: Theme.of(context).textTheme.bodySmall,
+          );
+        }
+      },
+    );
+  }
+
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     showNavigationDrawer = MediaQuery.of(context).size.width >= 450;
@@ -134,6 +167,7 @@ class _DevPageState extends State<DevPage> {
 
   @override
   Widget build(BuildContext context) {
-    return showNavigationDrawer ? buildDrawerScaffold(context) : buildBottomBarScaffold();
+    return getStatus(context);
+    // return showNavigationDrawer ? buildDrawerScaffold(context) : buildBottomBarScaffold();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:easywrt/database/app.dart';
+import 'package:easywrt/database/device.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 

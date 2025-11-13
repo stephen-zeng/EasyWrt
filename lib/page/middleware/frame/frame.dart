@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import '../../../utils/macos_safe.dart';
-import 'base_route.dart';
+import 'route.dart';
 
 class MiddlewareFrame extends StatefulWidget {
   const MiddlewareFrame({super.key});
@@ -47,7 +47,16 @@ class _MiddlewareFrameState extends State<MiddlewareFrame> {
                       ),
                     ),
                   ),
-                  ...baseRoute.listTileList
+                  ...middlewareRoute.menuList.map((MiddlewareRouteItem) {
+                    return ListTile(
+                      leading: Icon(MiddlewareRouteItem.icon),
+                      title: Text(MiddlewareRouteItem.name),
+                      onTap: () {
+                        Navigator.pop(context); // 关闭抽屉
+                        Modular.to.navigate(MiddlewareRouteItem.path);
+                      },
+                    );
+                  }).toList()
                 ],
               )
           ),
