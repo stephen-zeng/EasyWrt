@@ -37,11 +37,26 @@ class AppController {
     }
   }
 
+  static void updateAppStatus(AppStatus appStatus) {
+    if (app != null) {
+      app = App(
+        appSecurity: app!.appSecurity,
+        appPreferences: app!.appPreferences,
+        appStatus: appStatus,
+      );
+      appBox.put('default', app!);
+    }
+  }
+
   static AppSecurity getAppSecurity() {
     return app?.appSecurity ?? AppSecurity();
   }
 
   static AppPreferences getAppPreferences() {
     return app?.appPreferences ?? AppPreferences();
+  }
+
+  static AppStatus getAppStatus() {
+    return app?.appStatus ?? AppStatus();
   }
 }

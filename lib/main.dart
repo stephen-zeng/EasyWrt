@@ -53,7 +53,7 @@ void main() async {
   // Default Device ID: afc63af0-fcc9-4f00-80d2-b28e5e08e5c0
   final deviceController = DeviceController();
   if (deviceController.devices.isEmpty) {
-    deviceController.newDevice(
+    final deviceUUID = deviceController.newDevice(
         name: "Default",
         luciUsername: "root",
         luciPassword: "zhz200681",
@@ -64,6 +64,10 @@ void main() async {
           password: "zhz200681",
         ) ?? '',
     );
+    final appStatus = AppController.getAppStatus();
+    appStatus.deviceID = deviceUUID;
+    debugPrint('Default Device Created: $deviceUUID');
+    AppController.updateAppStatus(appStatus);
   }
 
   runApp(

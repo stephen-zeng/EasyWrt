@@ -19,17 +19,20 @@ class AppAdapter extends TypeAdapter<App> {
     return App(
       appSecurity: fields[0] as AppSecurity?,
       appPreferences: fields[1] as AppPreferences?,
+      appStatus: fields[2] as AppStatus?,
     );
   }
 
   @override
   void write(BinaryWriter writer, App obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.appSecurity)
       ..writeByte(1)
-      ..write(obj.appPreferences);
+      ..write(obj.appPreferences)
+      ..writeByte(2)
+      ..write(obj.appStatus);
   }
 
   @override
@@ -131,6 +134,40 @@ class AppPreferencesAdapter extends TypeAdapter<AppPreferences> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AppPreferencesAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class AppStatusAdapter extends TypeAdapter<AppStatus> {
+  @override
+  final int typeId = 13;
+
+  @override
+  AppStatus read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return AppStatus(
+      deviceID: fields[0] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, AppStatus obj) {
+    writer
+      ..writeByte(1)
+      ..writeByte(0)
+      ..write(obj.deviceID);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AppStatusAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

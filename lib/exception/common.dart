@@ -27,3 +27,7 @@ enum Exceptions {
   final String message;
   const Exceptions(this.code, this.message);
 }
+
+class WrtErrorCode {
+  static const int accessDenied = -32002;
+}

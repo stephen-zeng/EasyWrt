@@ -60,7 +60,7 @@ class Wrt {
     }
   }
 
-  static Future<String> call(String deviceID, List<List<String>> segments) async {
+  static Future<List<dynamic>> call(String deviceID, List<List<String>> segments) async {
     final deviceBox = HiveDB.devices;
     final device = deviceBox.get(deviceID);
     if (device == null) {
@@ -70,28 +70,46 @@ class Wrt {
 
     // Attention: Use unsafe client to ignore invalid SSL certificates
     final http.Client httpClient = true ? GlobalClient.unsafeClient : GlobalClient.client;
-    final data = List<Map<String, dynamic>>.empty(growable: true);
-    for (final segment in segments) {
-      counter++;
-      data.add({
-        'id': counter,
-        'jsonrpc': '2.0',
-        'method': "call",
-        "params": [device.token, ...segment, {}],
-      });
-    }
-
     final uri = Uri.parse(device.luciBaseURL).resolve('/ubus?${timestamp.toString()}');
-    try {
-      final response = await httpClient.post(
-        uri,
-        headers: Meta.headers,
-        body: jsonEncode(data),
-      );
-      debugPrint(response.body);
-      return response.body;
-    } catch (e) {
-      rethrow;
+    List<dynamic> responseData = [];
+    for (int i = 0 ; i < 3; i++) {
+      final data = List<Map<String, dynamic>>.empty(growable: true);
+      for (final segment in segments) {
+        counter++;
+        data.add({
+          'id': counter,
+          'jsonrpc': '2.0',
+          'method': "call",
+          "params": [device.token, ...segment, {}],
+        });
+      }
+      try {
+        final response = await httpClient.post(
+          uri,
+          headers: Meta.headers,
+          body: jsonEncode(data),
+        );
+        responseData = jsonDecode(response.body) as List<dynamic>;
+        final firstData = responseData.first as Map<String, dynamic>;
+        if (firstData.containsKey('error')) {
+          final errorData = firstData['error'] as Map<String, dynamic>;
+          if (errorData['code'] == WrtErrorCode.accessDenied) {
+            final newToken = await login(
+              baseURL: device.luciBaseURL,
+              username: device.luciUsername,
+              password: device.luciPassword,
+            );
+            device.token = newToken ?? '';
+            await deviceBox.put(deviceID, device);
+            continue;
+          }
+        } else {
+          return responseData;
+        }
+      } catch (e) {
+        rethrow;
+      }
     }
+    return responseData;
   }
 }

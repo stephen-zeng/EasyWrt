@@ -22,7 +22,7 @@ abstract class _DeviceControllerBase with Store {
     devices.addAll(temp);
   }
 
-  void newDevice({
+  String newDevice({
     required String name,
     required String luciUsername,
     required String luciPassword,
@@ -41,6 +41,7 @@ abstract class _DeviceControllerBase with Store {
     deviceBox.put(device.uuid, device);
     debugPrint('New Device: ${device.name} (${device.uuid}, ${device.token})');
     init();
+    return device.uuid;
   }
 
   void editDevice(Device device){

@@ -11,11 +11,15 @@ class App {
   AppSecurity appSecurity;
   @HiveField(1)
   AppPreferences appPreferences;
+  @HiveField(2)
+  AppStatus appStatus;
   App({
     AppSecurity? appSecurity,
     AppPreferences? appPreferences,
+    AppStatus? appStatus,
   })  : appSecurity = appSecurity ?? AppSecurity(),
-        appPreferences = appPreferences ?? AppPreferences();
+        appPreferences = appPreferences ?? AppPreferences(),
+        appStatus = appStatus ?? AppStatus();
 }
 
 @HiveType(typeId: HiveDB.appBoxTypeId + 1)
@@ -57,5 +61,14 @@ class AppPreferences {
     this.oledEnabled = false,
     this.showWindowButtons = true,
     this.useDynamicColor = false,
+  });
+}
+
+@HiveType(typeId: HiveDB.appBoxTypeId + 3)
+class AppStatus {
+  @HiveField(0)
+  String deviceID;
+  AppStatus({
+    this.deviceID = '',
   });
 }
