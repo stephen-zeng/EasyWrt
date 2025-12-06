@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Gemini Thing
+.gemini
+GEMINI.md
+
+# Spec-kit Thing
+.specify*.env

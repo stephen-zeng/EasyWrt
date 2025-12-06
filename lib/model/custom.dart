@@ -38,10 +38,13 @@ class Page {
   String fatherPath;
   @HiveField(3)
   String icon;
+  @HiveField(4)
+  String widgetList;
   Page({
     required this.name,
     required this.path,
     required this.fatherPath,
-    required this.icon
+    required this.icon,
+    this.widgetList = '',
   });
 }

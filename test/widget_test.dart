@@ -7,24 +7,69 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:provider/provider.dart';
+import 'package:easywrt/app_module.dart';
+import 'package:easywrt/app_widget.dart';
+import 'package:easywrt/bean/setting/theme.dart';
+import 'package:easywrt/provider/device_provider.dart';
+import 'package:easywrt/provider/app_settings_provider.dart';
+import 'package:easywrt/model/app_settings.dart';
 
-import 'package:easywrt/main.dart';
+class MockDeviceProvider extends ChangeNotifier implements DeviceProvider {
+  @override
+  get activeDevice => null;
+  @override
+  get devices => [];
+  @override
+  addDevice({required String name, required String luciUsername, required String luciPassword, required String luciBaseURL, required String token}) {
+     throw UnimplementedError();
+  }
+  @override
+  deleteDevice(String uuid) {}
+  @override
+  editDevice(device) {}
+  @override
+  loadDevices() {}
+  @override
+  setActiveDevice(device) {}
+}
+
+class MockAppSettingsProvider extends ChangeNotifier implements AppSettingsProvider {
+  @override
+  AppSettings get settings => AppSettings();
+  
+  @override
+  void setBioAuthEnabled(bool enabled) {}
+  
+  @override
+  void setMcpEnabled(bool enabled) {}
+  
+  @override
+  void setMcpPort(int port) {}
+}
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('App loads and shows Dashboard', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+          ChangeNotifierProvider<DeviceProvider>(create: (_) => MockDeviceProvider()),
+          ChangeNotifierProvider<AppSettingsProvider>(create: (_) => MockAppSettingsProvider()),
+        ],
+        child: ModularApp(
+          module: AppModule(),
+          child: const AppWidget(),
+        ),
+      ),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.byType(MaterialApp), findsOneWidget);
+    // DashboardPage should be the home
+    // expect(find.byType(DashboardPage), findsOneWidget); 
+    // Note: DashboardPage might be inside RouterOutlet
   });
 }

@@ -15,8 +15,11 @@ import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'database/app.dart';
-import 'base/module.dart';
-import 'database/device.dart';
+import 'app_module.dart';
+import 'provider/app_settings_provider.dart';
+import 'provider/device_provider.dart';
+import 'services/auth/bio_auth_service.dart';
+import 'model/app_settings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,10 +27,29 @@ void main() async {
 
   try {
     await Hive.initFlutter('${(await getApplicationSupportDirectory()).path}/hive');
-    await HiveDB.init();
+    await HiveDB.init(); // HiveDB.init now registers all adapters and opens boxes
   } catch(_) {
     runApp(storageErrorApp());
     return;
+  }
+
+  // Access AppSettings directly from Hive for early bio-auth check
+  final AppSettings initialAppSettings = HiveDB.appSettings.isEmpty
+      ? AppSettings()
+      : HiveDB.appSettings.getAt(0)!;
+  if (HiveDB.appSettings.isEmpty) {
+    await HiveDB.appSettings.add(initialAppSettings);
+  }
+
+  // Bio-Authentication Check
+  if (initialAppSettings.bioAuthEnabled) {
+    final BioAuthService bioAuthService = BioAuthService();
+    bool authenticated = await bioAuthService.authenticate(
+      localizedReason: 'Authenticate to access EasyWRT',
+    );
+    if (!authenticated) {
+      exit(0); // Exit app if authentication fails
+    }
   }
 
   final appPreferences = AppController.getAppPreferences();
@@ -49,30 +71,39 @@ void main() async {
     });
   }
 
-  // Attention: Default Device added
-  // Default Device ID: afc63af0-fcc9-4f00-80d2-b28e5e08e5c0
-  final deviceController = DeviceController();
-  if (deviceController.devices.isEmpty) {
-    final deviceUUID = deviceController.newDevice(
+  // Default Device added if empty, using DeviceProvider for consistency
+  final DeviceProvider tempDeviceProvider = DeviceProvider();
+  if (tempDeviceProvider.devices.isEmpty) {
+    try {
+      final String? token = await Wrt.login(
+        baseURL: "http://192.168.6.1/",
+        username: "root",
+        password: "Rzhzoot?200681",
+      );
+      final uuid = tempDeviceProvider.addDevice(
         name: "Default",
         luciUsername: "root",
-        luciPassword: "zhz200681",
+        luciPassword: "Rzhzoot?200681",
         luciBaseURL: "http://192.168.6.1/",
-        token: await Wrt.login(
-          baseURL: "http://192.168.6.1/",
-          username: "root",
-          password: "zhz200681",
-        ) ?? '',
-    );
-    final appStatus = AppController.getAppStatus();
-    appStatus.deviceID = deviceUUID;
-    debugPrint('Default Device Created: $deviceUUID');
-    AppController.updateAppStatus(appStatus);
+        token: token ?? '',
+      );
+      final appStatus = AppController.getAppStatus();
+      appStatus.deviceID = uuid;
+      debugPrint('Default Device Created: $uuid');
+      AppController.updateAppStatus(appStatus);
+    } catch (e) {
+      debugPrint('Failed to create default device: $e');
+      // Optionally add a dummy device without token or just continue
+    }
   }
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => DeviceProvider()),
+        ChangeNotifierProvider(create: (_) => AppSettingsProvider()),
+      ],
       child: ModularApp(
         module: AppModule(),
         child: const AppWidget(),

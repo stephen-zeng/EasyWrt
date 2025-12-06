@@ -4,7 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
-  flutter_localization
+  local_auth_windows
   screen_pixel
   screen_retriever_windows
   tray_manager

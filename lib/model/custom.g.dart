@@ -70,13 +70,14 @@ class PageAdapter extends TypeAdapter<Page> {
       path: fields[1] as String,
       fatherPath: fields[2] as String,
       icon: fields[3] as String,
+      widgetList: fields[4] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Page obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -84,7 +85,9 @@ class PageAdapter extends TypeAdapter<Page> {
       ..writeByte(2)
       ..write(obj.fatherPath)
       ..writeByte(3)
-      ..write(obj.icon);
+      ..write(obj.icon)
+      ..writeByte(4)
+      ..write(obj.widgetList);
   }
 
   @override

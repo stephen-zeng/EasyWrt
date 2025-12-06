@@ -1,6 +1,5 @@
 import 'package:easywrt/database/storage.dart';
-import 'package:easywrt/default/middleware.dart';
-import 'package:easywrt/model/device.dart';
+import 'package:easywrt/model/device_profile.dart'; // Changed from device.dart
 import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
 import 'package:mobx/mobx.dart';
@@ -10,10 +9,10 @@ part 'device.g.dart';
 
 class DeviceController = _DeviceControllerBase with _$DeviceController;
 abstract class _DeviceControllerBase with Store {
-  Box<Device> deviceBox = HiveDB.devices;
+  Box<DeviceProfile> deviceBox = HiveDB.devices; // Changed to DeviceProfile
 
   @observable
-  ObservableList<Device> devices = ObservableList<Device>();
+  ObservableList<DeviceProfile> devices = ObservableList<DeviceProfile>(); // Changed to DeviceProfile
 
   void init() {
     var temp = deviceBox.values.toList();
@@ -28,15 +27,18 @@ abstract class _DeviceControllerBase with Store {
     required String luciPassword,
     required String luciBaseURL,
     required String token,
-}){
-    Device device = Device(
+  }){
+    final Uri uri = Uri.parse(luciBaseURL);
+    DeviceProfile device = DeviceProfile(
       uuid: const Uuid().v4(),
       name: name,
       token: token,
-      luciUsername: luciUsername,
-      luciPassword: luciPassword,
-      luciBaseURL: luciBaseURL,
-      rootMiddleware: DefaultMiddleware.middlewareRoot,
+      username: luciUsername, // Changed from luciUsername
+      password: luciPassword, // Changed from luciPassword
+      hostname: uri.host, // Parsed from luciBaseURL
+      protocol: uri.scheme, // Parsed from luciBaseURL
+      port: uri.port, // Parsed from luciBaseURL
+      // rootPath: DefaultMiddleware.middlewareRoot, // Removed as not in DeviceProfile
     );
     deviceBox.put(device.uuid, device);
     debugPrint('New Device: ${device.name} (${device.uuid}, ${device.token})');
@@ -44,7 +46,7 @@ abstract class _DeviceControllerBase with Store {
     return device.uuid;
   }
 
-  void editDevice(Device device){
+  void editDevice(DeviceProfile device){ // Changed to DeviceProfile
     deviceBox.put(device.uuid, device);
     init();
   }
@@ -54,11 +56,11 @@ abstract class _DeviceControllerBase with Store {
     init();
   }
 
-  Device? getDeviceByUUID(String uuid){
+  DeviceProfile? getDeviceByUUID(String uuid){ // Changed to DeviceProfile
     return deviceBox.get(uuid);
   }
 
-  Device? getDeviceByName(String name){
+  DeviceProfile? getDeviceByName(String name){ // Changed to DeviceProfile
     try {
       return deviceBox.values.firstWhere((device) => device.name == name);
     } catch (_) {

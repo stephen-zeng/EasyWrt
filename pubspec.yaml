@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   cupertino_icons: any
   go_router: any
@@ -21,13 +23,15 @@ dependencies:
   hive_flutter: any
   uuid: any
   mobx: any
-  flutter_localization: any
   provider: any
   flutter_modular: any
   tray_manager: any
   window_manager: any
   dynamic_color: any
   screen_pixel: any
+  local_auth: any
+  shelf: any
+  shelf_router: any
 
 dev_dependencies:
   flutter_test:
@@ -37,6 +41,7 @@ dev_dependencies:
   build_runner: any
   source_gen: any
   mobx_codegen: any
+  mockito: any
 
 flutter:
   uses-material-design: true

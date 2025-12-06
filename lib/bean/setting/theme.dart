@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class ThemeProvider extends ChangeNotifier {
   ThemeMode themeMode = ThemeMode.system;
   bool useDynamicColor = false;
+  Color themeColor = Colors.blue;
   late ThemeData light;
   late ThemeData dark;
 

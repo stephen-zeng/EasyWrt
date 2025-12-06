@@ -13,13 +13,13 @@ mixin _$DeviceController on _DeviceControllerBase, Store {
       Atom(name: '_DeviceControllerBase.devices', context: context);
 
   @override
-  ObservableList<Device> get devices {
+  ObservableList<DeviceProfile> get devices {
     _$devicesAtom.reportRead();
     return super.devices;
   }
 
   @override
-  set devices(ObservableList<Device> value) {
+  set devices(ObservableList<DeviceProfile> value) {
     _$devicesAtom.reportWrite(value, super.devices, () {
       super.devices = value;
     });
