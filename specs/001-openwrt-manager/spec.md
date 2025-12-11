@@ -87,7 +87,7 @@ As a security-conscious user, I want to protect the app with biometric authentic
 #### Portrait Mode
 - **Activation Scope**: Utilized when horizontal width is less than **872px**. The excess 72px is reserved for the Portrait Navigation Rail.
 - **AppBar**: A **Topbar** capable of auto-hiding.
-  - **Left**: Back Button / Switch Device (used to return to the previous level or switch devices).
+  - **Left**: Back Button.
   - **Center**: Title of the current page.
   - **Right**: Menu Button (opens a List Menu upon click).
 - **Navigation Region**: A **Navigation Bar** containing two parts for global switching:
@@ -103,7 +103,7 @@ As a security-conscious user, I want to protect the app with biometric authentic
 ##### Left Pane
 - **Naming**: The module naming must include "**Left Pane**".
 - **Layout**: 
-  - No vertical margins (top/bottom); height must be equal to the Navigation Rail.
+  - No vertical Padding (top/bottom); height must be equal to the Navigation Rail.
   - Separated from the Right Pane by a **Spacer**.
   - The Spacer is used to adjust the width of both panes.
   - Minimum width: **400px**.
@@ -115,7 +115,7 @@ As a security-conscious user, I want to protect the app with biometric authentic
 ##### Right Pane
 - **Naming**: The module naming must include "**Right Pane**".
 - **Layout**: 
-  - No vertical margins (top/bottom); height must be equal to the Navigation Rail.
+  - No vertical Padding (top/bottom); height must be equal to the Navigation Rail.
   - Separated from the Left Pane by a **Spacer**.
   - The Spacer is used to adjust the width of both panes.
   - Minimum width: **400px**.
@@ -123,6 +123,88 @@ As a security-conscious user, I want to protect the app with biometric authentic
   - **Center**: Title of the Right Pane.
   - **Right**: Menu Button (opens a List Menu upon click).
 - **Body**: The content displayed within the Right Pane.
+
+### Operational Interface Design
+
+#### Design Principles
+- **Overview**: Users navigate through a hierarchical menu system level-by-level until reaching the final operational panel (the leaf node).
+- **Construction**: The system consists of three parts: **Page**, **Middleware**, and **Widget**.
+    - **Page**: The final operational panel interface reached by the user.
+    - **Widget**: Components within a Page that directly display router data or manipulate router parameters.
+    - **Middleware**: Represents the hierarchical menu levels encountered by the user while navigating to a Page. Every menu level is an instance of Middleware.
+- **Customizable**:
+    - **Router Section**: Users can freely arrange the relationship between Middleware and Pages. Users can create new Middleware. Creating new Pages is restricted (reserved for future feature development), but the capability must be retained in the codebase. Users can freely add and adjust Widgets within specific Pages.
+    - **App Settings Section**: User customization is disabled, but the structure must allow developers to make adjustments easily.
+- **Developer Friendly**: Developers must be able to conveniently and uniformly adjust global parameters such as margins, padding, width, and height.
+- **Fluent**: Transitions between pages must feature fluent, non-linear animations, strictly adhering to the **Material Design 3 Expressive** animation specifications.
+
+#### Component Specifications
+
+##### Middleware
+- **Definition**: Middleware represents the hierarchical menu nodes users traverse before reaching a Page. Each menu level is a Middleware.
+- **Logic**: Each Middleware can navigate to a subsequent Middleware or a Page.
+- **Content**: Each Middleware contains a title, an icon, and a collection of child items (next-level Middleware and Pages).
+- **Display**:
+    - **AppBar**: Displays the title.
+    - **Body**: Displays contained Middleware and Pages in a list/menu format.
+    - **List Item**: Displays the icon (left) and title of the child Middleware or Page.
+    - **Sorting**: Default sort order is by Type (Middleware first, then Page), followed by Name (Pinyin/Alphabetical ascending).
+
+##### Page
+- **Definition**: A Page is the terminal node of the menu hierarchy. It contains multiple Widgets used to display and adjust router information.
+- **Logic**: A Page can be reached via multiple different Middleware paths. A Page cannot directly navigate to a Middleware or another Page itself, but the **Widgets** contained within it can trigger navigation to other Middleware or Pages.
+- **Content**: Each Page contains a title, an icon, and a collection of Widgets.
+- **Display**:
+    - **AppBar**: Displays the title.
+    - **Body**: Displays contained Widgets in a menu-like format.
+    - **Layout**: Must be responsive, automatically adapting to the Body's width. Users can freely arrange the layout of Widgets.
+
+##### Widget
+- **Definition**: A component that directly presents and manipulates router data. It must comply with **Material Design 3 Expressive** design styles.
+- **Logic**: A single Widget type can be reused across multiple Pages. A Page can only contain unique instances of a Widget type (no duplicates of the exact same widget instance per page). Widgets can trigger navigation to other Middleware or Pages; this navigation occurs within the corresponding display area (Pane).
+- **Content**: Content is flexible but must adhere to MD3 Expressive specifications.
+- **Dimensions**:
+    - **Height**: Determined dynamically by content.
+    - **Width**: Must be a multiple of **100px**, determined by content/settings.
+    - **Spacing**: Spacing (Padding) between Widgets is **25px** on all sides. Internal Margin within the Widget is **5px** on all sides.
+- **Display**: Rendered within the Page body as a **Masonry/Flow layout** (Information Stream). The number of columns must adjust automatically based on the Body width, with no upper limit.
+
+#### Global Display Rules
+
+##### Portrait Mode
+- **General**: Displays the content of the currently active Middleware or Page.
+- **AppBar - Back Button**:
+    - Appears on the left side for all non-root Middleware.
+    - **Action**: Returns to the parent menu level.
+    - **Long Press**: distinct menu appears displaying the navigation path (Breadcrumbs) as a list, allowing quick jumps to parent nodes.
+- **AppBar - Title**: Displays the title of the current Middleware or Page.
+- **AppBar - Menu Button**:
+    - **"Edit"**: Enables editing mode for the current Middleware or Page (grayed out if unavailable).
+    - **"Switch"**: Navigates to the Device Switching interface.
+    - *Note*: Retain extensibility for future development.
+
+##### Landscape Mode
+- **General**: The screen is split into a **Left Pane** and a **Right Pane**. They function independently but can influence each other's content.
+
+**Left Pane**
+- **Content**: Strictly displays **Middleware**.
+    - Middleware navigation triggered by Widgets (even if the Widget is in the Right Pane) or editing operations occur solely within the Left Pane.
+    - Does not affect the view state of the Right Pane directly (unless selecting a Page).
+- **AppBar - Title**: Displays the title of the current Middleware.
+- **AppBar - Back Button**:
+    - Appears for non-root Middleware.
+    - **Long Press**: Displays navigation path (Breadcrumbs) for the Left Pane hierarchy.
+
+**Right Pane**
+- **Content**: Strictly displays **Pages**.
+    - Page navigation triggered by Widgets or Page editing operations occur solely within the Right Pane.
+    - Does not affect the view state of the Left Pane.
+- **AppBar - Title**: Displays the title of the current Page.
+- **AppBar - Menu Button**:
+    - **"Edit Page"**: Edits the current Page (grayed out if unavailable).
+    - **"Edit Middleware"**: Edits the Middleware currently displayed in the **Left Pane**.
+    - **"Switch"**: Navigates to the Device Switching interface.
+    - *Note*: Retain extensibility for future development.
 
 ## Requirements *(mandatory)*
 
