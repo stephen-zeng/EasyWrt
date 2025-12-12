@@ -11,12 +11,12 @@
 #### Portrait
 - **Activation Scope**: Used when the horizontal width is less than 872px. The extra 72px is utilized for the Portrait Navigation rail.
 - **AppBar**: A Topbar that must auto-hide. The leftmost element is a **Back Button** for returning to the previous level; the center displays the **Page Title**; the rightmost element is a **Menu Button**, which opens a List menu upon clicking.
-- **Navigation Region**: A Navigation bar consisting of two Parts for global switching: **Router Page (Router)** and **App Settings (Setting)**.
+- **Navigation Region**: A Navigation bar consisting of two Modules for global switching: **Router Page (Router)** and **App Settings (Setting)**.
 - **Body Region**: Displays the corresponding main content.
 
 #### Landscape
 - **Activation Scope**: Used when the horizontal width is greater than 872px. The extra 72px is utilized for the Navigation rail.
-- **Navigation Region**: A Navigation rail consisting of two Parts for global switching: **Router Page (Router)** and **App Settings (Setting)**. Both Parts adhere to this general Layout design.
+- **Navigation Region**: A Navigation rail consisting of two Modules for global switching: **Router Page (Router)** and **App Settings (Setting)**. Both Modules adhere to this general Layout design.
 - **Body**: Divided into two separate Panes: Left and Right.
 
 ##### Left Pane
@@ -39,9 +39,9 @@
     - **Widget**: Individual components within a Page that directly display router data or manipulate router parameters.
     - **Middleware**: The hierarchical menus displayed during the user's journey to a Page. Every menu level is a Middleware.
 - **Customizable**:
-    - In the **Router Part**, users can freely arrange the relationship between different Middlewares and Pages. Users can freely create Middleware but cannot create Pages (Page creation is reserved for future feature development). However, the ability to create Pages is retained for developers.
+    - In the **Router Module**, users can freely arrange the relationship between different Middlewares and Pages. Users can freely create Middleware but cannot create Pages (Page creation is reserved for future feature development). However, the ability to create Pages is retained for developers.
     - Users can freely add and adjust Widgets within certain Pages, so Page customizability must be retained.
-    - In the **App Settings Part**, users cannot customize the layout, but it needs to be convenient for developers to adjust.
+    - In the **App Settings Module**, users cannot customize the layout, but it needs to be convenient for developers to adjust. The middlewares and pages are written in code.
 - **Developer Friendly**: Developers must be able to conveniently and uniformly adjust parameters such as margins, padding, width, and height.
 - **Fluent**: Transitions between pages must feature fluid, non-linear animations, directly utilizing the **Material Design 3 Expressive** animation design specifications.
 
@@ -86,7 +86,7 @@
 - **Menu Button On AppBar**: Menu content includes "Edit Page"—used to edit the current Page (hidden when not editable); "Edit Middleware"—used to edit the Middleware currently displayed in the Left Pane; and "Switch"—used to jump to the device switching interface (retaining extensibility for specific Middlewares or Pages).
 
 ## Middleware and Page Examples for UI/UX Framework Validation *(mandatory)*
-### Router Part
+### Router Module
 #### Middleware
 - **Router**: Icon: `router`, is the root middleware.
 - **Status**: Icon: `bar_chart`.
@@ -101,7 +101,7 @@
 #### Hierarchy
 - **Router** --> **Status** --> **Hardware** --> **Internal Device**
 
-### Setting Part
+### Setting Module
 #### Middleware
 - **Setting**: Icon: `settings`, is the root middleware.
 
@@ -117,7 +117,7 @@ As a network administrator, I want to add multiple OpenWRT routers to the app an
 
 **Acceptance Scenarios**:
 1.  **Given** a fresh install, **When** the user navigates via Settings (Root) --> Route (Page) to the router management page, **Then** clicks the FAB in the page to add, **Then** they can input IP (Domain), Port, Username, Password, and whether to use HTTPS to save a router.
-2.  **Given** saved routers, **When** the user clicks one router, **Then** the app tries to connect to the router, **Then** jumps to the Router Part's root middleware.
+2.  **Given** saved routers, **When** the user clicks one router, **Then** the app tries to connect to the router, **Then** jumps to the Router Module's root middleware.
 
 ### User Story 2 - View Router CPU Usage (Priority: P1)
 As a user monitoring network performance, I want to view the real-time hardware information of a specific router so that I can assess the CPU load and device health.

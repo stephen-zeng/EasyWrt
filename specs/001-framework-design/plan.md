@@ -58,19 +58,20 @@ specs/001-framework-design/
 ```text
 lib/
 ├── main.dart
-├── core/                # Shared kernels (Theme, Utils, Constants)
-├── data/                # Repositories, Data Sources (Hive, API)
-│   ├── models/          # DTOs
-│   ├── repositories/    # Repo Implementations
-│   └── sources/         # Remote (Dio) & Local (Hive) sources
-├── domain/              # Entities, Usecases, Repo Interfaces
-│   ├── entities/
-│   └── repositories/
-└── presentation/        # UI Layer (Riverpod Consumers)
-    ├── navigation/      # GoRouter configuration
-    ├── pages/           # Screen definitions
-    ├── widgets/         # Reusable components
-    └── providers/       # State providers
+├── beam/ # Store configurations for custom UI components, such as AppBar, Dialog, etc.
+├── db
+│   ├── hive/ # Used to store Hive-related configurations and interfaces
+│   └── models/ # Store data models
+├── modules/ # Store configuration and data information for major modules
+│   ├── router/ # Store information for the router module
+│   │   ├── middleware/ # Store middleware rendering configurations; sources include Hive, CurrentMiddleware, etc.
+│   │   ├── page/ # Store page rendering configurations; sources include Hive, CurrentPage, CurrentRouter, etc.
+│   │   └── widgets/ # Store all widget information, such as UI layout, required request parameters, request steps, request frequency, etc., and the data required.
+│   └── setting/
+│       ├── middlewares/ # Store all middleware information, such as the child pages of the middleware
+│       ├── pages/ # Store all information for pages, such as items within the page (referencing items directly)
+│       └── items/ # Store all setting items, including dialogs that may appear and the item's presentation in the page, for direct reference by the page
+└── utils/ # Store all utility functions and network request functions, etc.
 ```
 
 **Structure Decision**: Clean Architecture (Data/Domain/Presentation) to separate concerns and ensure testability (Principle I & II).
@@ -80,5 +81,5 @@ lib/
 > **Fill ONLY if Constitution Check has violations that must be justified**
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| N/A | | |
+| --------- | ---------- | ------------------------------------ |
+| N/A       |            |                                      |
