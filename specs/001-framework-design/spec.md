@@ -144,8 +144,7 @@ As a user who cares about visual aesthetics, I want to customize the app's theme
 - **FR-002**: System MUST support responsive layout for both Portrait (Phone) and Landscape (Tablet/Desktop) orientations.
 - **FR-003**: User MUST be able to customize the dashboard layout (widget visibility and order).
 - **FR-004**: System MUST communicate with OpenWRT routers via standard protocols (uBus/RPC, SSH, or LuCI API).
-- **FR-005**: System MUST provide real-time monitoring of System Load, Memory Usage, and Network Traffic.
-- **FR-006**: System MUST implement configuration screens for core OpenWRT modules: Status, System, Network, Wireless.
+- **FR-005**: System MUST provide real-time monitoring of System Load, or the CPU Usage in this spec.
 
 ### Key Entities
 

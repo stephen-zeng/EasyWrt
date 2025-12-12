@@ -48,6 +48,8 @@ description: "Task list for OpenWRT Manager App Implementation"
 
 ### Implementation for User Story 1
 
+- [ ] T014a [US1] Create unit tests for `RouterRepository` in `test/unit/router_repository_test.dart`
+- [ ] T014b [US1] Create unit tests for `OpenWrtAuthService` in `test/unit/openwrt_auth_service_test.dart`
 - [ ] T014 [US1] Implement `RouterRepository` (Hive CRUD operations) in `lib/modules/router/router_repository.dart`
 - [ ] T015 [US1] Implement `OpenWrtAuthService` (uBus login) in `lib/utils/openwrt_auth_service.dart`
 - [ ] T016 [US1] Create Settings Module Root Middleware UI in `lib/modules/setting/middlewares/setting_root_middleware.dart`
@@ -69,6 +71,7 @@ description: "Task list for OpenWRT Manager App Implementation"
 
 ### Implementation for User Story 2
 
+- [ ] T021a [US2] Create unit tests for `SystemInfoService` (mocking uBus responses) in `test/unit/system_info_service_test.dart`
 - [ ] T021 [US2] Implement `SystemInfoService` (uBus system.info/board) in `lib/utils/system_service.dart`
 - [ ] T022 [US2] Implement `MiddlewareView` (Generic rendering of MiddlewareItem) in `lib/modules/router/middleware/middleware_view.dart`
 - [ ] T023 [US2] Implement `PageView` (Generic rendering of PageItem) in `lib/modules/router/page/page_view.dart`
@@ -81,6 +84,27 @@ description: "Task list for OpenWRT Manager App Implementation"
 
 ---
 
+## Phase 4b: User Story 2b - Dashboard Customization (Priority: P1)
+
+**Goal**: User can enter "Edit Mode" to reorder widgets or modify the layout.
+
+- [ ] T027a [US2b] Implement "Edit Mode" toggle state in `lib/modules/router/router_controller.dart`
+- [ ] T027b [US2b] Implement Drag-and-Drop reordering logic for `PageView` widgets in `lib/modules/router/page/page_view.dart`
+- [ ] T027c [US2b] Implement "Add Widget" bottom sheet/dialog in `lib/modules/router/widgets/add_widget_dialog.dart`
+- [ ] T027d [US2b] Persist layout changes to Hive (`PageItem.widgetChildren`) in `lib/db/models/hierarchy_items.dart`
+
+---
+
+## Phase 4c: User Story 2c - View Router Memory & Network Usage (Priority: P1)
+
+**Goal**: Extend router monitoring to include memory and network traffic.
+
+- [ ] T027e [US2c] Implement `MemoryUsageWidget` (Material 3 Card) in `lib/modules/router/widgets/memory_usage_widget.dart`
+- [ ] T027f [US2c] Implement `NetworkTrafficWidget` (Material 3 Card) in `lib/modules/router/widgets/network_traffic_widget.dart`
+- [ ] T027g [US2c] Integrate `MemoryUsageWidget` and `NetworkTrafficWidget` into the "Internal Device" Page configuration by editing Hive database.
+
+---
+
 ## Phase 5: User Story 3 - Change App Theme (Priority: P2)
 
 **Goal**: User can switch between Light/Dark/System themes.
@@ -89,11 +113,13 @@ description: "Task list for OpenWRT Manager App Implementation"
 
 ### Implementation for User Story 3
 
-- [ ] T028 [US3] Create `ThemeRepository` (Hive persistence) in `lib/modules/setting/theme_repository.dart`
-- [ ] T029 [US3] Implement `ThemeNotifier` (State Management) in `lib/modules/setting/theme_provider.dart`
-- [ ] T030 [US3] Create Theme Selection Page in `lib/modules/setting/pages/theme_page.dart`
-- [ ] T031 [US3] Integrate Theme Page into Settings Middleware hierarchy (update seeder/config)
-- [ ] T032 [US3] Update `MaterialApp` to listen to `ThemeNotifier` in `lib/main.dart`
+- [ ] T035a [US3] Create unit tests for `ThemeRepository` in `test/unit/theme_repository_test.dart`
+- [ ] T035b [US3] Create unit tests for `ThemeNotifier` in `test/unit/theme_notifier_test.dart`
+- [ ] T035 [US3] Create `ThemeRepository` (Hive persistence) in `lib/modules/setting/theme_repository.dart`
+- [ ] T036 [US3] Implement `ThemeNotifier` (State Management) in `lib/modules/setting/theme_provider.dart`
+- [ ] T037 [US3] Create Theme Selection Page in `lib/modules/setting/pages/theme_page.dart`
+- [ ] T038 [US3] Integrate Theme Page into Settings Middleware hierarchy (update seeder/config)
+- [ ] T039 [US3] Update `MaterialApp` to listen to `ThemeNotifier` in `lib/main.dart`
 
 **Checkpoint**: Theme personalization is functional.
 
@@ -103,11 +129,11 @@ description: "Task list for OpenWRT Manager App Implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T033 Refine Portrait/Landscape transitions (ensure smooth state preservation)
-- [ ] T034 Implement "Back Button" long-press menu (Path History) in `lib/beam/history_menu.dart`
-- [ ] T035 Add error handling/snackbars for network failures (Global)
-- [ ] T036 Optimize Hive read performance (Lazy boxes if needed)
-- [ ] T037 Verify accessibility (semantics) for Navigation Rail and Widgets
+- [ ] T040 Refine Portrait/Landscape transitions (ensure smooth state preservation)
+- [ ] T041 Implement "Back Button" long-press menu (Path History) in `lib/beam/history_menu.dart`
+- [ ] T042 Add error handling/snackbars for network failures (Global)
+- [ ] T043 Optimize Hive read performance (Lazy boxes if needed)
+- [ ] T044 Verify accessibility (semantics) for Navigation Rail and Widgets
 
 ---
 
@@ -116,11 +142,15 @@ description: "Task list for OpenWRT Manager App Implementation"
 1. **Setup & Foundation**: T001-T013 MUST be done first.
 2. **US1 (Add/Connect)**: Depends on Foundation. Enables actual app usage.
 3. **US2 (View CPU)**: Depends on US1 (need a connected router to show data, using mock data at this stage).
-4. **US3 (Theme)**: Technically independent of US1/US2, but logically fits after core functionality.
+4. **US2b (Dashboard Customization)**: Depends on US2 (needs generic Middleware/PageView to customize).
+5. **US2c (View Memory & Network)**: Depends on US2 (extends monitoring capability).
+6. **US3 (Theme)**: Technically independent of US1/US2/US2b/US2c, but logically fits after core functionality.
 
 ## Implementation Strategy
 
 1. **Build the Shell**: Get the App to run with Navigation Rail (T001-T013).
 2. **Enable Data**: Allow adding a router (US1).
-3. **Show Data**: Build the dynamic UI engine (Middleware/Page/Widget) (US2).
-4. **Style**: Allow customization (US3).
+3. **Show CPU Data**: Build the dynamic UI engine and display CPU (US2).
+4. **Customize Layout**: Implement dashboard customization (US2b).
+5. **Show More Data**: Extend monitoring with Memory and Network (US2c).
+6. **Style**: Allow customization (US3).
