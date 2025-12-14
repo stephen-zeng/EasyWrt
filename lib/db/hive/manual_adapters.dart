@@ -4,11 +4,10 @@ import '../models/hierarchy_items.dart';
 import '../models/router_item.dart';
 
 /// RouterItemAdapter
-/// 
-/// Function: Hive TypeAdapter for RouterItem.
 /// RouterItemAdapter
 /// 
 /// Function: Hive TypeAdapter for RouterItem.
+/// Function: RouterItem 的 Hive 类型适配器。
 class RouterItemAdapter extends TypeAdapter<RouterItem> {
   @override
   final int typeId = 0;
@@ -52,11 +51,10 @@ class RouterItemAdapter extends TypeAdapter<RouterItem> {
 }
 
 /// AppSettingItemAdapter
-/// 
-/// Function: Hive TypeAdapter for AppSettingItem.
 /// AppSettingItemAdapter
 /// 
 /// Function: Hive TypeAdapter for AppSettingItem.
+/// Function: AppSettingItem 的 Hive 类型适配器。
 class AppSettingItemAdapter extends TypeAdapter<AppSettingItem> {
   @override
   final int typeId = 2;
@@ -88,11 +86,10 @@ class AppSettingItemAdapter extends TypeAdapter<AppSettingItem> {
 }
 
 /// ThemeModeEnumAdapter
-/// 
-/// Function: Hive TypeAdapter for ThemeModeEnum.
 /// ThemeModeEnumAdapter
 /// 
 /// Function: Hive TypeAdapter for ThemeModeEnum.
+/// Function: ThemeModeEnum 的 Hive 类型适配器。
 class ThemeModeEnumAdapter extends TypeAdapter<ThemeModeEnum> {
   @override
   final int typeId = 1;
@@ -133,11 +130,10 @@ class ThemeModeEnumAdapter extends TypeAdapter<ThemeModeEnum> {
 }
 
 /// MiddlewareItemAdapter
-/// 
-/// Function: Hive TypeAdapter for MiddlewareItem.
 /// MiddlewareItemAdapter
 /// 
 /// Function: Hive TypeAdapter for MiddlewareItem.
+/// Function: MiddlewareItem 的 Hive 类型适配器。
 class MiddlewareItemAdapter extends TypeAdapter<MiddlewareItem> {
   @override
   final int typeId = 3;
@@ -178,11 +174,10 @@ class MiddlewareItemAdapter extends TypeAdapter<MiddlewareItem> {
 }
 
 /// PageItemAdapter
-/// 
-/// Function: Hive TypeAdapter for PageItem.
 /// PageItemAdapter
 /// 
 /// Function: Hive TypeAdapter for PageItem.
+/// Function: PageItem 的 Hive 类型适配器。
 class PageItemAdapter extends TypeAdapter<PageItem> {
   @override
   final int typeId = 4;

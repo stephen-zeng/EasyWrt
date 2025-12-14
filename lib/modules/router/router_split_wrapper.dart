@@ -5,12 +5,18 @@ import 'middleware/middleware_view.dart';
 import 'page/page_view.dart';
 
 /// RouterSplitWrapper
+/// RouterSplitWrapper
 /// 
 /// Function: Handles split-view layout logic using Query Parameters.
+/// Function: 使用查询参数处理拆分视图布局逻辑。
+/// Inputs: 
 /// Inputs: 
 ///   - [state]: GoRouter state to extract 'mid' and 'pid'.
+///   - [state]: 提取 'mid' 和 'pid' 的 GoRouter 状态。
+/// Outputs: 
 /// Outputs: 
 ///   - [Widget]: Split view (Landscape) or Single view (Portrait).
+///   - [Widget]: 拆分视图（横向）或单视图（纵向）。
 class RouterSplitWrapper extends StatelessWidget {
   final GoRouterState state;
 
@@ -25,6 +31,7 @@ class RouterSplitWrapper extends StatelessWidget {
     final pid = state.uri.queryParameters['pid'];
 
     // Slide Transition Builder
+    // 滑动过渡构建器
     Widget slideTransition(Widget child, Animation<double> animation) {
       return SlideTransition(
         position: Tween<Offset>(
@@ -36,6 +43,7 @@ class RouterSplitWrapper extends StatelessWidget {
     }
 
     // Portrait Mode
+    // 纵向模式
     if (!ResponsiveLayout.isLandscape(context)) {
       final Widget child;
       final String keyName;
@@ -60,6 +68,7 @@ class RouterSplitWrapper extends StatelessWidget {
     }
 
     // Landscape Mode
+    // 横向模式
     return Row(
       children: [
         SizedBox(

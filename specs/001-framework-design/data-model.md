@@ -56,6 +56,7 @@
 | `port` | Int | Port number (default 80 or 443). |
 | `username` | String | Login username (usually "root"). |
 | `password` | String | Login password. |
+| `token` | String | Current Token of this Router |
 | `isHttps` | Boolean | Whether to use SSL/TLS. |
 
 ### CurrentMiddleware (Transient, Global)

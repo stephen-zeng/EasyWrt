@@ -5,12 +5,18 @@ import '../../../db/models/router_item.dart';
 import '../../router/router_controller.dart';
 
 /// RouterDialog
+/// RouterDialog
 /// 
 /// Function: A dialog for adding or editing a router configuration.
+/// Function: 用于添加或编辑路由器配置的对话框。
+/// Inputs: 
 /// Inputs: 
 ///   - [router]: Optional existing router to edit.
+///   - [router]: 可选的现有路由器进行编辑。
+/// Outputs: 
 /// Outputs: 
 ///   - [Widget]: Dialog with form fields.
+///   - [Widget]: 带有表单字段的对话框。
 class RouterDialog extends StatefulWidget {
   final RouterItem? router;
 

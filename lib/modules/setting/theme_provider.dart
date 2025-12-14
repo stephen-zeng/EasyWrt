@@ -4,19 +4,27 @@ import '../../db/models/app_setting_item.dart';
 import 'theme_repository.dart';
 
 /// themeRepositoryProvider
+/// themeRepositoryProvider
 /// 
 /// Function: Provides the ThemeRepository instance.
+/// Function: 提供 ThemeRepository 实例。
 final themeRepositoryProvider = Provider<ThemeRepository>((ref) {
   return ThemeRepository();
 });
 
 /// ThemeNotifier
+/// ThemeNotifier
 /// 
 /// Function: Manages the application theme state.
+/// Function: 管理应用程序主题状态。
+/// Inputs: 
 /// Inputs: 
 ///   - [setThemeMode]: Updates the theme mode.
+///   - [setThemeMode]: 更新主题模式。
+/// Outputs: 
 /// Outputs: 
 ///   - [state]: Current ThemeMode.
+///   - [state]: 当前主题模式。
 class ThemeNotifier extends StateNotifier<ThemeMode> {
   final ThemeRepository _repository;
 
@@ -55,8 +63,10 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
 }
 
 /// themeModeProvider
+/// themeModeProvider
 /// 
 /// Function: Provides the current ThemeMode state.
+/// Function: 提供当前 ThemeMode 状态。
 final themeModeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
   final repository = ref.watch(themeRepositoryProvider);
   return ThemeNotifier(repository);

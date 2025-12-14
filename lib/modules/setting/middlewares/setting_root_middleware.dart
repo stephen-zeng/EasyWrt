@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// SettingRootMiddleware
+/// SettingRootMiddleware
 /// 
 /// Function: The root navigation menu for the Settings module.
+/// Function: 设置模块的根导航菜单。
 /// Inputs: None
+/// Inputs: 无
+/// Outputs: 
 /// Outputs: 
 ///   - [Widget]: List of setting options.
+///   - [Widget]: 设置选项列表。
 class SettingRootMiddleware extends StatelessWidget {
   const SettingRootMiddleware({super.key});
 

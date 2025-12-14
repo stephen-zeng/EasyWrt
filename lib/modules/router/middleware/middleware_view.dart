@@ -5,12 +5,18 @@ import '../../../db/models/hierarchy_items.dart';
 import '../../../beam/history_menu.dart'; // Keep if needed, or replace with standard back
 
 /// MiddlewareView
+/// MiddlewareView
 /// 
 /// Function: Renders a middleware (menu list) and its children.
+/// Function: 渲染中间件（菜单列表）及其子项。
+/// Inputs: 
 /// Inputs: 
 ///   - [middlewareId]: ID of the middleware to display.
+///   - [middlewareId]: 要显示的中间件 ID。
+/// Outputs: 
 /// Outputs: 
 ///   - [Widget]: List view of children.
+///   - [Widget]: 子项的列表视图。
 class MiddlewareView extends StatelessWidget {
   final String middlewareId;
 

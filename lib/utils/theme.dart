@@ -2,11 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// AppTheme
+/// AppTheme
 /// 
 /// Function: Defines the light and dark themes for the application.
+/// Function: 定义应用程序的明亮和黑暗主题。
 /// Inputs: None
+/// Inputs: 无
+/// Outputs: 
 /// Outputs: 
 ///   - [ThemeData]: The configured theme data.
+///   - [ThemeData]: 配置好的主题数据。
 class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(

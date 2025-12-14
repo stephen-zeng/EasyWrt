@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
 
 /// AddWidgetDialog
+/// AddWidgetDialog
 /// 
 /// Function: A dialog to select a widget to add to a page.
+/// Function: 选择要添加到页面的组件的对话框。
+/// Inputs: 
 /// Inputs: 
 ///   - [onAdd]: Callback with selected widget name.
+///   - [onAdd]: 带有选定组件名称的回调。
+/// Outputs: 
 /// Outputs: 
 ///   - [Widget]: List of available widgets.
+///   - [Widget]: 可用组件列表。
 class AddWidgetDialog extends StatelessWidget {
   final Function(String) onAdd;
 

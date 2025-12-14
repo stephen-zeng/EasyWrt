@@ -4,8 +4,10 @@ part 'transient_models.freezed.dart';
 part 'transient_models.g.dart';
 
 /// CurrentRouter
+/// CurrentRouter
 /// 
 /// Function: Transient model for currently selected router state.
+/// Function: 当前选定路由器状态的临时模型。
 @freezed
 class CurrentRouter with _$CurrentRouter {
   const factory CurrentRouter({
@@ -23,8 +25,10 @@ class CurrentRouter with _$CurrentRouter {
 }
 
 /// CurrentMiddleware
+/// CurrentMiddleware
 /// 
 /// Function: Transient model for currently active middleware state.
+/// Function: 当前活动中间件状态的临时模型。
 @freezed
 class CurrentMiddleware with _$CurrentMiddleware {
   const factory CurrentMiddleware({
@@ -41,8 +45,10 @@ class CurrentMiddleware with _$CurrentMiddleware {
 }
 
 /// CurrentPage
+/// CurrentPage
 /// 
 /// Function: Transient model for currently active page state.
+/// Function: 当前活动页面状态的临时模型。
 @freezed
 class CurrentPage with _$CurrentPage {
   const factory CurrentPage({

@@ -11,12 +11,18 @@ import '../widgets/memory_usage_widget.dart';
 import '../widgets/network_traffic_widget.dart';
 
 /// RouterPageView
+/// RouterPageView
 /// 
 /// Function: Renders a page and its configured widgets. Supports edit mode for layout customization.
+/// Function: 渲染页面及其配置的组件。支持用于自定义布局的编辑模式。
+/// Inputs: 
 /// Inputs: 
 ///   - [pageId]: ID of the page to display.
+///   - [pageId]: 要显示的页面 ID。
+/// Outputs: 
 /// Outputs: 
 ///   - [Widget]: List/Reorderable list of widgets.
+///   - [Widget]: 组件的列表/可重新排序列表。
 class RouterPageView extends ConsumerWidget {
   final String pageId;
 

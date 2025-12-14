@@ -11,6 +11,7 @@ AppSettingItem _$AppSettingItemFromJson(Map<String, dynamic> json) =>
       themeMode: $enumDecode(_$ThemeModeEnumEnumMap, json['themeMode']),
       themeColor: (json['themeColor'] as num).toInt(),
       language: json['language'] as String,
+      lastConnectedRouterId: json['lastConnectedRouterId'] as String?,
     );
 
 Map<String, dynamic> _$AppSettingItemToJson(AppSettingItem instance) =>
@@ -18,6 +19,7 @@ Map<String, dynamic> _$AppSettingItemToJson(AppSettingItem instance) =>
       'themeMode': _$ThemeModeEnumEnumMap[instance.themeMode]!,
       'themeColor': instance.themeColor,
       'language': instance.language,
+      'lastConnectedRouterId': instance.lastConnectedRouterId,
     };
 
 const _$ThemeModeEnumEnumMap = {

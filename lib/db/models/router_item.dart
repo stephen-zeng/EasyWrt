@@ -4,12 +4,18 @@ import 'package:json_annotation/json_annotation.dart';
 part 'router_item.g.dart';
 
 /// RouterItem
+/// RouterItem
 /// 
 /// Function: Entity representing a stored router configuration.
+/// Function: 代表存储的路由器配置的实体。
+/// Inputs: 
 /// Inputs: 
 ///   - [id], [name], [host], [port], [username], [password], [isHttps]: Router details.
+///   - [id], [name], [host], [port], [username], [password], [isHttps]: 路由器详情。
+/// Outputs: 
 /// Outputs: 
 ///   - [RouterItem]: The entity instance.
+///   - [RouterItem]: 实体实例。
 @HiveType(typeId: 0)
 @JsonSerializable()
 class RouterItem extends HiveObject {

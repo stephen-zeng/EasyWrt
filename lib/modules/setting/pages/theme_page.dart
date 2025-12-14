@@ -3,11 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../theme_provider.dart';
 
 /// ThemePage
+/// ThemePage
 /// 
 /// Function: A page for selecting the application theme.
+/// Function: 选择应用程序主题的页面。
 /// Inputs: None
+/// Inputs: 无
+/// Outputs: 
 /// Outputs: 
 ///   - [Widget]: Radio list of theme options.
+///   - [Widget]: 主题选项的单选列表。
 class ThemePage extends ConsumerWidget {
   const ThemePage({super.key});
 
