@@ -1,23 +1,13 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../beam/responsive_layout.dart';
 import 'middleware/middleware_view.dart';
 import 'page/page_view.dart';
+import 'router_controller.dart';
 
-/// RouterSplitWrapper
-/// RouterSplitWrapper
-/// 
-/// Function: Handles split-view layout logic using Query Parameters.
-/// Function: 使用查询参数处理拆分视图布局逻辑。
-/// Inputs: 
-/// Inputs: 
-///   - [state]: GoRouter state to extract 'mid' and 'pid'.
-///   - [state]: 提取 'mid' 和 'pid' 的 GoRouter 状态。
-/// Outputs: 
-/// Outputs: 
-///   - [Widget]: Split view (Landscape) or Single view (Portrait).
-///   - [Widget]: 拆分视图（横向）或单视图（纵向）。
-class RouterSplitWrapper extends StatelessWidget {
+class RouterSplitWrapper extends ConsumerStatefulWidget {
   final GoRouterState state;
 
   const RouterSplitWrapper({
@@ -26,25 +16,43 @@ class RouterSplitWrapper extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    final mid = state.uri.queryParameters['mid'] ?? 'router_root';
-    final pid = state.uri.queryParameters['pid'];
-    debugPrint('RouterSplitWrapper: mid=$mid, pid=$pid');
+  ConsumerState<RouterSplitWrapper> createState() => _RouterSplitWrapperState();
+}
 
-    // Slide Transition Builder
-    // 滑动过渡构建器
-    Widget slideTransition(Widget child, Animation<double> animation) {
-      return SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0.2, 0.0), // Slight slide from right
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-        child: FadeTransition(opacity: animation, child: child),
+class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Widget slideTransition(Widget child, Animation<double> animation) {
+    final key = child.key;
+    final currentMw = ref.read(currentMiddlewareProvider);
+    final slideId = currentMw?.slideMiddlewareID;
+    debugPrint("Slide Transition Key: $key, SlideID: $slideId");
+
+    if (key is ValueKey<String> &&
+        (key.value.startsWith('page_') ||
+            key.value == 'mid_$slideId' ||
+            key.value == 'left_$slideId')) {
+      return CupertinoPageTransition(
+        primaryRouteAnimation: animation,
+        secondaryRouteAnimation: const AlwaysStoppedAnimation(0.0),
+        linearTransition: false,
+        child: child,
       );
     }
 
+    return FadeTransition(opacity: animation, child: child);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mid = widget.state.uri.queryParameters['mid'] ?? 'router_root';
+    final pid = widget.state.uri.queryParameters['pid'];
+
     // Portrait Mode
-    // 纵向模式
     if (!ResponsiveLayout.isLandscape(context)) {
       final Widget child;
       final String keyName;
@@ -58,9 +66,9 @@ class RouterSplitWrapper extends StatelessWidget {
 
       return AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        transitionBuilder: slideTransition,
+        switchInCurve: Curves.linear,
+        switchOutCurve: Curves.linear,
+        transitionBuilder: (child, animation) => slideTransition(child, animation),
         child: KeyedSubtree(
           key: ValueKey(keyName),
           child: child,
@@ -69,14 +77,13 @@ class RouterSplitWrapper extends StatelessWidget {
     }
 
     // Landscape Mode
-    // 横向模式
     return Row(
       children: [
         SizedBox(
           width: 300,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            transitionBuilder: slideTransition, // Slide for Left Pane too
+            transitionBuilder: (child, animation) => slideTransition(child, animation),
             child: KeyedSubtree(
               key: ValueKey('left_$mid'),
               child: MiddlewareView(middlewareId: mid),
@@ -87,12 +94,7 @@ class RouterSplitWrapper extends StatelessWidget {
         Expanded(
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
+            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
             child: KeyedSubtree(
               key: ValueKey('right_${pid ?? 'empty'}'),
               child: pid != null 

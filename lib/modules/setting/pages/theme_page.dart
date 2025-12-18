@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../beam/responsive_layout.dart';
 import '../theme_provider.dart';
 
 /// ThemePage
@@ -22,6 +24,14 @@ class ThemePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: !ResponsiveLayout.isLandscape(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  context.go('/setting');
+                },
+              )
+            : null,
         title: const Text('Theme Settings'),
       ),
       body: ListView(

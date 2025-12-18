@@ -27,14 +27,14 @@ class SettingRootMiddleware extends StatelessWidget {
             leading: const Icon(Icons.router),
             title: const Text('Router Manager'),
             onTap: () {
-              context.go('/setting/router_manager');
+              context.go('/setting?page=router_manager');
             },
           ),
           ListTile(
             leading: const Icon(Icons.color_lens),
             title: const Text('Theme'),
             onTap: () {
-              context.go('/setting/theme');
+              context.go('/setting?page=theme');
             },
           ),
         ],

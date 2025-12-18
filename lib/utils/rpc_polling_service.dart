@@ -37,13 +37,10 @@ class RpcPollingNotifier extends StateNotifier<AsyncValue<dynamic>> {
   }
 
   Future<void> _fetchData() async {
-    debugPrint('RPC Polling: ${_request.namespace}.${_request.method}');
     // If currently logging in, skip this poll cycle
     if (_isLoggingIn) return;
 
     CurrentRouter? router = _ref.read<CurrentRouter?>(currentRouterProvider);
-    debugPrint('Current Router: ${router?.routerItem.host ?? "None"}, Current Port: ${router?.routerItem.port ?? "N/A"}, Current HTTPS: ${router?.routerItem.isHttps == true ? "Yes" : "No"}');
-    debugPrint('Current Token: ${router?.token != null && router!.token!.isNotEmpty ? "Present" : "Absent"}');
 
     // If no router selected, nothing to poll
     if (router == null) return;
@@ -63,15 +60,27 @@ class RpcPollingNotifier extends StateNotifier<AsyncValue<dynamic>> {
     if (router == null || router.token == null) return;
 
     try {
-      final result = await _service.call(
-        router.routerItem.host,
-        router.routerItem.port,
-        router.token!,
-        router.routerItem.isHttps,
-        _request.namespace,
-        _request.method,
-        _request.params,
-      );
+      dynamic result;
+      for (int i=1;i<=3;i++) {
+        result = await _service.call(
+          router!.routerItem.host,
+          router.routerItem.port,
+          router.token!,
+          router.routerItem.isHttps,
+          _request.namespace,
+          _request.method,
+          _request.params,
+        );
+        if (result != null) break;
+        final success = await _attemptAutoLogin();
+        debugPrint('Auto-login attempt: ${success ? "Success" : "Failure"}');
+        if (!success) {
+          if (mounted) state = const AsyncValue.error('Not connected', StackTrace.empty);
+          return;
+        }
+        // Refresh local vars after login
+        router = _ref.read<CurrentRouter?>(currentRouterProvider);
+      }
 
       if (mounted) {
         if (result != null) {

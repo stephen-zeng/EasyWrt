@@ -5,6 +5,7 @@ import 'package:easywrt/db/models/transient_models.dart';
 import '../../router/router_controller.dart';
 import '../theme_provider.dart';
 import '../items/router_dialog.dart';
+import '../../../beam/responsive_layout.dart';
 
 /// RouterManagementPage
 /// RouterManagementPage
@@ -26,6 +27,14 @@ class RouterManagementPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: !ResponsiveLayout.isLandscape(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  context.go('/setting');
+                },
+              )
+            : null,
         title: const Text('Manage Routers'),
       ),
       floatingActionButton: FloatingActionButton(

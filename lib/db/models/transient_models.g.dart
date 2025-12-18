@@ -22,26 +22,20 @@ Map<String, dynamic> _$CurrentRouterToJson(_CurrentRouter instance) =>
 
 _CurrentMiddleware _$CurrentMiddlewareFromJson(Map<String, dynamic> json) =>
     _CurrentMiddleware(
-      id: json['id'] as String,
-      path: (json['path'] as List<dynamic>).map((e) => e as String).toList(),
-      name: json['name'] as String,
-      icon: json['icon'] as String,
-      middlewareChildren: (json['middlewareChildren'] as List<dynamic>?)
-          ?.map((e) => e as String)
+      middlewareItem: MiddlewareItem.fromJson(
+        json['middlewareItem'] as Map<String, dynamic>,
+      ),
+      historyMiddlewareIDs: (json['historyMiddlewareIDs'] as List<dynamic>)
+          .map((e) => e as String)
           .toList(),
-      pageChildren: (json['pageChildren'] as List<dynamic>?)
-          ?.map((e) => e as String)
-          .toList(),
+      slideMiddlewareID: json['slideMiddlewareID'] as String,
     );
 
 Map<String, dynamic> _$CurrentMiddlewareToJson(_CurrentMiddleware instance) =>
     <String, dynamic>{
-      'id': instance.id,
-      'path': instance.path,
-      'name': instance.name,
-      'icon': instance.icon,
-      'middlewareChildren': instance.middlewareChildren,
-      'pageChildren': instance.pageChildren,
+      'middlewareItem': instance.middlewareItem,
+      'historyMiddlewareIDs': instance.historyMiddlewareIDs,
+      'slideMiddlewareID': instance.slideMiddlewareID,
     };
 
 _CurrentPage _$CurrentPageFromJson(Map<String, dynamic> json) => _CurrentPage(

@@ -18,16 +18,35 @@ import 'modules/router/router_controller.dart';
 /// Outputs: 
 ///   - [Widget]: The scaffold layout.
 ///   - [Widget]: 配置好的 MaterialApp。
-class MainScaffold extends ConsumerWidget {
+class MainScaffold extends ConsumerStatefulWidget {
   final Widget child;
 
   const MainScaffold({super.key, required this.child});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Handle startup logic (e.g. auto-connect)
-    ref.watch(appStartupProvider);
+  ConsumerState<MainScaffold> createState() => _MainScaffoldState();
+}
 
+class _MainScaffoldState extends ConsumerState<MainScaffold> {
+  @override
+  void initState() {
+    super.initState();
+    // Handle startup logic (e.g. auto-connect)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _appStartup();
+    });
+  }
+
+  Future<void> _appStartup() async {
+    final currentRouter = ref.read(currentRouterProvider);
+    if (currentRouter != null) {
+      debugPrint("App startup: Auto-connecting to last router ${currentRouter.routerItem.host}");
+      await ref.read(routerConnectionProvider).connect(currentRouter.routerItem);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // Determine current index based on route
     // 根据路由确定当前索引
     final String location = GoRouterState.of(context).uri.toString();
@@ -72,44 +91,33 @@ class MainScaffold extends ConsumerWidget {
       ),
     ];
 
-    // Fade-in transition for Module switching
-    // 模块切换的淡入过渡效果
-    final animatedChild = AnimatedSwitcher(
-      duration: const Duration(milliseconds: 300),
-      switchInCurve: Curves.easeInOut,
-      switchOutCurve: Curves.easeInOut,
-      child: KeyedSubtree(
-        key: ValueKey(selectedIndex), // Animate when module index changes
-                                      // 当模块索引变化时进行动画
-        child: child,
-      ),
-    );
-
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor, // Set background color to match app theme
-      child: EmbeddedNativeControlArea(
-        child: ResponsiveLayout(
-          portrait: Scaffold(
-            body: animatedChild,
+      child: ResponsiveLayout(
+        portrait: EmbeddedNativeControlAreaMoveDown(
+          child: Scaffold(
+            body: widget.child,
             bottomNavigationBar: NavigationBar(
               selectedIndex: selectedIndex,
               onDestinationSelected: onDestinationSelected,
               destinations: destinations,
             ),
           ),
-          landscape: Scaffold(
-            body: Row(
-              children: [
-                NavigationRail(
+        ),
+        landscape: Scaffold(
+          body: Row(
+            children: [
+              EmbeddedNativeControlAreaMoveDown(
+                child: NavigationRail(
                   selectedIndex: selectedIndex,
                   onDestinationSelected: onDestinationSelected,
                   labelType: NavigationRailLabelType.all,
                   destinations: railDestinations,
                 ),
-                const VerticalDivider(thickness: 1, width: 1),
-                Expanded(child: animatedChild),
-              ],
-            ),
+              ),
+              const VerticalDivider(thickness: 1, width: 1),
+              Expanded(child: widget.child),
+            ],
           ),
         ),
       ),

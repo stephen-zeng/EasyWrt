@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../db/models/hierarchy_items.dart';
 import '../../db/models/router_item.dart';
 import '../../db/models/transient_models.dart';
 import '../../utils/system_service.dart';
@@ -82,6 +83,64 @@ final routerListProvider = StateNotifierProvider<RouterListNotifier, List<Router
   return RouterListNotifier(repository, ref);
 });
 
+/// CurrentMiddlewareNotifier
+class CurrentMiddlewareNotifier extends StateNotifier<CurrentMiddleware?> {
+  CurrentMiddlewareNotifier() : super(null);
+
+  void init(MiddlewareItem item) {
+    if (state == null) {
+      state = CurrentMiddleware(
+        middlewareItem: item,
+        historyMiddlewareIDs: [],
+        slideMiddlewareID: '',
+      );
+    }
+  }
+  
+  void push(MiddlewareItem newItem) {
+    if (state == null) {
+        init(newItem);
+        return;
+    }
+    // Prevent pushing same item
+    if (state!.middlewareItem.id == newItem.id) return;
+    
+    final newHistory = List<String>.from(state!.historyMiddlewareIDs)..add(state!.middlewareItem.id);
+    state = state!.copyWith(
+        middlewareItem: newItem,
+        historyMiddlewareIDs: newHistory
+    );
+  }
+
+  String? pop() {
+      if (state == null || state!.historyMiddlewareIDs.isEmpty) return null;
+      
+      final lastId = state!.historyMiddlewareIDs.last;
+      final newHistory = List<String>.from(state!.historyMiddlewareIDs)..removeLast();
+      
+      state = state!.copyWith(historyMiddlewareIDs: newHistory);
+      return lastId;
+  }
+
+  void saveSlideMiddlewareID(String id) {
+    if (state != null) {
+      state = state!.copyWith(slideMiddlewareID: id);
+    }
+  }
+  
+  void replaceCurrent(MiddlewareItem item) {
+    if (state != null) {
+      state = state!.copyWith(middlewareItem: item);
+    } else {
+      init(item);
+    }
+  }
+}
+
+final currentMiddlewareProvider = StateNotifierProvider<CurrentMiddlewareNotifier, CurrentMiddleware?>((ref) {
+  return CurrentMiddlewareNotifier();
+});
+
 // Connection State
 final currentSessionProvider = StateProvider<String?>((ref) => null);
 final connectionStatusProvider = StateProvider<bool>((ref) => false);
@@ -113,19 +172,7 @@ final systemServiceProvider = Provider<SystemInfoService>((ref) {
   return SystemInfoService();
 });
 
-/// appStartupProvider
-/// appStartupProvider
-/// 
-/// Function: Handles one-time startup logic like auto-connecting to the last router.
-/// Function: 处理一次性启动逻辑，如自动连接到上一个路由器。
-final appStartupProvider = FutureProvider<void>((ref) async {
-  final currentRouter = ref.read(currentRouterProvider);
-  if (currentRouter != null) {
-    debugPrint("App startup: Auto-connecting to last router ${currentRouter.routerItem.host}");
-    await ref.read(routerConnectionProvider).connect(currentRouter.routerItem);
-    // Attention: Error: Providers are not allowed to modify other providers during their initialization.
-  }
-});
+
 
 /// RouterConnectionNotifier
 /// RouterConnectionNotifier

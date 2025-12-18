@@ -281,7 +281,7 @@ as String?,
 /// @nodoc
 mixin _$CurrentMiddleware {
 
- String get id; List<String> get path; String get name; String get icon; List<String>? get middlewareChildren; List<String>? get pageChildren;
+ MiddlewareItem get middlewareItem; List<String> get historyMiddlewareIDs; String get slideMiddlewareID;
 /// Create a copy of CurrentMiddleware
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -294,16 +294,16 @@ $CurrentMiddlewareCopyWith<CurrentMiddleware> get copyWith => _$CurrentMiddlewar
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CurrentMiddleware&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.path, path)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&const DeepCollectionEquality().equals(other.middlewareChildren, middlewareChildren)&&const DeepCollectionEquality().equals(other.pageChildren, pageChildren));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CurrentMiddleware&&(identical(other.middlewareItem, middlewareItem) || other.middlewareItem == middlewareItem)&&const DeepCollectionEquality().equals(other.historyMiddlewareIDs, historyMiddlewareIDs)&&(identical(other.slideMiddlewareID, slideMiddlewareID) || other.slideMiddlewareID == slideMiddlewareID));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(path),name,icon,const DeepCollectionEquality().hash(middlewareChildren),const DeepCollectionEquality().hash(pageChildren));
+int get hashCode => Object.hash(runtimeType,middlewareItem,const DeepCollectionEquality().hash(historyMiddlewareIDs),slideMiddlewareID);
 
 @override
 String toString() {
-  return 'CurrentMiddleware(id: $id, path: $path, name: $name, icon: $icon, middlewareChildren: $middlewareChildren, pageChildren: $pageChildren)';
+  return 'CurrentMiddleware(middlewareItem: $middlewareItem, historyMiddlewareIDs: $historyMiddlewareIDs, slideMiddlewareID: $slideMiddlewareID)';
 }
 
 
@@ -314,7 +314,7 @@ abstract mixin class $CurrentMiddlewareCopyWith<$Res>  {
   factory $CurrentMiddlewareCopyWith(CurrentMiddleware value, $Res Function(CurrentMiddleware) _then) = _$CurrentMiddlewareCopyWithImpl;
 @useResult
 $Res call({
- String id, List<String> path, String name, String icon, List<String>? middlewareChildren, List<String>? pageChildren
+ MiddlewareItem middlewareItem, List<String> historyMiddlewareIDs, String slideMiddlewareID
 });
 
 
@@ -331,15 +331,12 @@ class _$CurrentMiddlewareCopyWithImpl<$Res>
 
 /// Create a copy of CurrentMiddleware
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? path = null,Object? name = null,Object? icon = null,Object? middlewareChildren = freezed,Object? pageChildren = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? middlewareItem = null,Object? historyMiddlewareIDs = null,Object? slideMiddlewareID = null,}) {
   return _then(_self.copyWith(
-id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
-as List<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
-as String,middlewareChildren: freezed == middlewareChildren ? _self.middlewareChildren : middlewareChildren // ignore: cast_nullable_to_non_nullable
-as List<String>?,pageChildren: freezed == pageChildren ? _self.pageChildren : pageChildren // ignore: cast_nullable_to_non_nullable
-as List<String>?,
+middlewareItem: null == middlewareItem ? _self.middlewareItem : middlewareItem // ignore: cast_nullable_to_non_nullable
+as MiddlewareItem,historyMiddlewareIDs: null == historyMiddlewareIDs ? _self.historyMiddlewareIDs : historyMiddlewareIDs // ignore: cast_nullable_to_non_nullable
+as List<String>,slideMiddlewareID: null == slideMiddlewareID ? _self.slideMiddlewareID : slideMiddlewareID // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -424,10 +421,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  List<String> path,  String name,  String icon,  List<String>? middlewareChildren,  List<String>? pageChildren)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MiddlewareItem middlewareItem,  List<String> historyMiddlewareIDs,  String slideMiddlewareID)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CurrentMiddleware() when $default != null:
-return $default(_that.id,_that.path,_that.name,_that.icon,_that.middlewareChildren,_that.pageChildren);case _:
+return $default(_that.middlewareItem,_that.historyMiddlewareIDs,_that.slideMiddlewareID);case _:
   return orElse();
 
 }
@@ -445,10 +442,10 @@ return $default(_that.id,_that.path,_that.name,_that.icon,_that.middlewareChildr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  List<String> path,  String name,  String icon,  List<String>? middlewareChildren,  List<String>? pageChildren)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MiddlewareItem middlewareItem,  List<String> historyMiddlewareIDs,  String slideMiddlewareID)  $default,) {final _that = this;
 switch (_that) {
 case _CurrentMiddleware():
-return $default(_that.id,_that.path,_that.name,_that.icon,_that.middlewareChildren,_that.pageChildren);case _:
+return $default(_that.middlewareItem,_that.historyMiddlewareIDs,_that.slideMiddlewareID);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -465,10 +462,10 @@ return $default(_that.id,_that.path,_that.name,_that.icon,_that.middlewareChildr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  List<String> path,  String name,  String icon,  List<String>? middlewareChildren,  List<String>? pageChildren)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MiddlewareItem middlewareItem,  List<String> historyMiddlewareIDs,  String slideMiddlewareID)?  $default,) {final _that = this;
 switch (_that) {
 case _CurrentMiddleware() when $default != null:
-return $default(_that.id,_that.path,_that.name,_that.icon,_that.middlewareChildren,_that.pageChildren);case _:
+return $default(_that.middlewareItem,_that.historyMiddlewareIDs,_that.slideMiddlewareID);case _:
   return null;
 
 }
@@ -480,37 +477,18 @@ return $default(_that.id,_that.path,_that.name,_that.icon,_that.middlewareChildr
 @JsonSerializable()
 
 class _CurrentMiddleware implements CurrentMiddleware {
-  const _CurrentMiddleware({required this.id, required final  List<String> path, required this.name, required this.icon, final  List<String>? middlewareChildren, final  List<String>? pageChildren}): _path = path,_middlewareChildren = middlewareChildren,_pageChildren = pageChildren;
+  const _CurrentMiddleware({required this.middlewareItem, required final  List<String> historyMiddlewareIDs, required this.slideMiddlewareID}): _historyMiddlewareIDs = historyMiddlewareIDs;
   factory _CurrentMiddleware.fromJson(Map<String, dynamic> json) => _$CurrentMiddlewareFromJson(json);
 
-@override final  String id;
- final  List<String> _path;
-@override List<String> get path {
-  if (_path is EqualUnmodifiableListView) return _path;
+@override final  MiddlewareItem middlewareItem;
+ final  List<String> _historyMiddlewareIDs;
+@override List<String> get historyMiddlewareIDs {
+  if (_historyMiddlewareIDs is EqualUnmodifiableListView) return _historyMiddlewareIDs;
   // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_path);
+  return EqualUnmodifiableListView(_historyMiddlewareIDs);
 }
 
-@override final  String name;
-@override final  String icon;
- final  List<String>? _middlewareChildren;
-@override List<String>? get middlewareChildren {
-  final value = _middlewareChildren;
-  if (value == null) return null;
-  if (_middlewareChildren is EqualUnmodifiableListView) return _middlewareChildren;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(value);
-}
-
- final  List<String>? _pageChildren;
-@override List<String>? get pageChildren {
-  final value = _pageChildren;
-  if (value == null) return null;
-  if (_pageChildren is EqualUnmodifiableListView) return _pageChildren;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(value);
-}
-
+@override final  String slideMiddlewareID;
 
 /// Create a copy of CurrentMiddleware
 /// with the given fields replaced by the non-null parameter values.
@@ -525,16 +503,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CurrentMiddleware&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other._path, _path)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&const DeepCollectionEquality().equals(other._middlewareChildren, _middlewareChildren)&&const DeepCollectionEquality().equals(other._pageChildren, _pageChildren));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CurrentMiddleware&&(identical(other.middlewareItem, middlewareItem) || other.middlewareItem == middlewareItem)&&const DeepCollectionEquality().equals(other._historyMiddlewareIDs, _historyMiddlewareIDs)&&(identical(other.slideMiddlewareID, slideMiddlewareID) || other.slideMiddlewareID == slideMiddlewareID));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(_path),name,icon,const DeepCollectionEquality().hash(_middlewareChildren),const DeepCollectionEquality().hash(_pageChildren));
+int get hashCode => Object.hash(runtimeType,middlewareItem,const DeepCollectionEquality().hash(_historyMiddlewareIDs),slideMiddlewareID);
 
 @override
 String toString() {
-  return 'CurrentMiddleware(id: $id, path: $path, name: $name, icon: $icon, middlewareChildren: $middlewareChildren, pageChildren: $pageChildren)';
+  return 'CurrentMiddleware(middlewareItem: $middlewareItem, historyMiddlewareIDs: $historyMiddlewareIDs, slideMiddlewareID: $slideMiddlewareID)';
 }
 
 
@@ -545,7 +523,7 @@ abstract mixin class _$CurrentMiddlewareCopyWith<$Res> implements $CurrentMiddle
   factory _$CurrentMiddlewareCopyWith(_CurrentMiddleware value, $Res Function(_CurrentMiddleware) _then) = __$CurrentMiddlewareCopyWithImpl;
 @override @useResult
 $Res call({
- String id, List<String> path, String name, String icon, List<String>? middlewareChildren, List<String>? pageChildren
+ MiddlewareItem middlewareItem, List<String> historyMiddlewareIDs, String slideMiddlewareID
 });
 
 
@@ -562,15 +540,12 @@ class __$CurrentMiddlewareCopyWithImpl<$Res>
 
 /// Create a copy of CurrentMiddleware
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? path = null,Object? name = null,Object? icon = null,Object? middlewareChildren = freezed,Object? pageChildren = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? middlewareItem = null,Object? historyMiddlewareIDs = null,Object? slideMiddlewareID = null,}) {
   return _then(_CurrentMiddleware(
-id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,path: null == path ? _self._path : path // ignore: cast_nullable_to_non_nullable
-as List<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
-as String,middlewareChildren: freezed == middlewareChildren ? _self._middlewareChildren : middlewareChildren // ignore: cast_nullable_to_non_nullable
-as List<String>?,pageChildren: freezed == pageChildren ? _self._pageChildren : pageChildren // ignore: cast_nullable_to_non_nullable
-as List<String>?,
+middlewareItem: null == middlewareItem ? _self.middlewareItem : middlewareItem // ignore: cast_nullable_to_non_nullable
+as MiddlewareItem,historyMiddlewareIDs: null == historyMiddlewareIDs ? _self._historyMiddlewareIDs : historyMiddlewareIDs // ignore: cast_nullable_to_non_nullable
+as List<String>,slideMiddlewareID: null == slideMiddlewareID ? _self.slideMiddlewareID : slideMiddlewareID // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

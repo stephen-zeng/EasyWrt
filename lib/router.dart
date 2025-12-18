@@ -4,9 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'main_scaffold.dart';
 
 import 'modules/router/router_split_wrapper.dart';
-import 'modules/setting/middlewares/setting_root_middleware.dart';
-import 'modules/setting/pages/router_management_page.dart';
-import 'modules/setting/pages/theme_page.dart';
+import 'modules/setting/setting_split_wrapper.dart';
 
 /// routerProvider
 /// routerProvider
@@ -37,23 +35,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           // 路径: /router?mid=...&pid=...
           GoRoute(
             path: '/router',
-            builder: (context, state) {
-              return RouterSplitWrapper(state: state);
-            },
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: RouterSplitWrapper(state: state),
+            ),
           ),
           GoRoute(
             path: '/setting',
-            builder: (context, state) => const SettingRootMiddleware(),
-            routes: [
-              GoRoute(
-                path: 'router_manager',
-                builder: (context, state) => const RouterManagementPage(),
-              ),
-              GoRoute(
-                path: 'theme',
-                builder: (context, state) => const ThemePage(),
-              ),
-            ],
+            pageBuilder: (context, state) => NoTransitionPage(
+              child: SettingSplitWrapper(state: state),
+            ),
           ),
         ],
       ),

@@ -48,19 +48,22 @@ class RouterPageView extends ConsumerWidget {
           appBar: AppBar(
             automaticallyImplyLeading: !isLandscape, // Hide back button in landscape
             leading: !isLandscape 
-                ? IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      // In Portrait, back clears the PID selection to return to Middleware
-                      final state = GoRouterState.of(context);
-                      final currentMid = state.uri.queryParameters['mid'] ?? 'router_root';
-                      context.go(Uri(
-                        path: '/router',
-                        queryParameters: {'mid': currentMid}, // Clear PID
-                      ).toString());
-                    },
-                  ) 
-                : null,
+              ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  // In Portrait, back clears the PID selection to return to Middleware
+                  final state = GoRouterState.of(context);
+                  final currentMid = state.uri.queryParameters['mid'] ?? 'router_root';
+                  context.go(Uri(
+                    path: '/router',
+                    queryParameters: {
+                      'mid': currentMid,
+                      'animateType': 'fromLeft',
+                    }, // Clear PID
+                  ).toString());
+                },
+              )
+              : null,
             title: Text(page.name),
             actions: [
               IconButton(

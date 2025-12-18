@@ -1,29 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import '../../../beam/macos_safe.dart';
 import '../../../db/models/hierarchy_items.dart';
-import '../../../beam/history_menu.dart'; // Keep if needed, or replace with standard back
+import '../router_controller.dart';
 
 /// MiddlewareView
 /// MiddlewareView
 /// 
 /// Function: Renders a middleware (menu list) and its children.
 /// Function: 渲染中间件（菜单列表）及其子项。
-/// Inputs: 
-/// Inputs: 
-///   - [middlewareId]: ID of the middleware to display.
-///   - [middlewareId]: 要显示的中间件 ID。
-/// Outputs: 
-/// Outputs: 
-///   - [Widget]: List view of children.
-///   - [Widget]: 子项的列表视图。
-class MiddlewareView extends StatelessWidget {
+class MiddlewareView extends ConsumerWidget {
   final String middlewareId;
 
   const MiddlewareView({super.key, required this.middlewareId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return ValueListenableBuilder(
       valueListenable: Hive.box<MiddlewareItem>('middlewares').listenable(),
       builder: (context, Box<MiddlewareItem> box, _) {
@@ -33,21 +27,38 @@ class MiddlewareView extends StatelessWidget {
           return const Center(child: Text('Middleware not found'));
         }
 
-        // Calculate Parent for Back Button
-        final parentId = _findParentMiddlewareId(middlewareId);
+        // Sync Provider with current URL/ID
+        final currentMw = ref.watch(currentMiddlewareProvider);
+        if (currentMw == null || currentMw.middlewareItem.id != middlewareId) {
+             Future.microtask(() {
+                 ref.read(currentMiddlewareProvider.notifier).init(middleware);
+             });
+        }
+        
+        // Check History for AppBar visibility
+        final hasHistory = currentMw != null && currentMw.historyMiddlewareIDs.isNotEmpty;
 
         return Scaffold(
-          appBar: AppBar(
-            leading: parentId != null 
-                ? IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () {
-                      _navigate(context, mid: parentId);
-                    },
-                  ) 
-                : null, // No back button at root
+          appBar:  AppBar(
+            leading: hasHistory ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                 // History Back Logic: Jump to the last middleware in history
+                 // This corresponds to returning to the previous level (parent)
+                 final notifier = ref.read(currentMiddlewareProvider.notifier);
+                 final prevId = notifier.pop();
+                 if (prevId != null) {
+                     final prevItem = box.get(prevId);
+                     if (prevItem != null) {
+                         notifier.replaceCurrent(prevItem);
+                         notifier.saveSlideMiddlewareID(middlewareId);
+                         _go(context, mid: prevId);
+                     }
+                 }
+              },
+            ): null,
             title: Text(middleware.name),
-          ),
+          ), // Hide AppBar if no history
           body: ListView(
             children: [
               if (middleware.children != null)
@@ -60,7 +71,10 @@ class MiddlewareView extends StatelessWidget {
                           leading: Icon(getIconData(childMiddleware.icon)),
                           title: Text(childMiddleware.name),
                           onTap: () {
-                            _navigate(context, mid: childId);
+                            // Push History and Navigate
+                            ref.read(currentMiddlewareProvider.notifier).push(childMiddleware);
+                            ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID(childMiddleware.id);
+                            _go(context, mid: childId);
                           },
                         );
                       }
@@ -71,13 +85,13 @@ class MiddlewareView extends StatelessWidget {
                           leading: Icon(getIconData(childPage.icon)),
                           title: Text(childPage.name),
                           onTap: () {
-                            _navigate(context, pid: childId);
+                            _go(context, pid: childId);
+                            ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID('');
                           },
                         );
                       }
-
                       return const SizedBox.shrink(); 
-                    }
+                    },
                   ),
             ],
           ),
@@ -86,19 +100,11 @@ class MiddlewareView extends StatelessWidget {
     );
   }
 
-  void _navigate(BuildContext context, {String? mid, String? pid}) {
+  void _go(BuildContext context, {String? mid, String? pid}) {
     final state = GoRouterState.of(context);
     final currentMid = state.uri.queryParameters['mid'] ?? 'router_root';
     final currentPid = state.uri.queryParameters['pid'];
 
-    // If mid is provided, update mid. If not provided, keep current mid.
-    // If pid is provided, update pid. If not provided, keep current pid UNLESS mid changed?
-    // User requirement: "Right pane stay still" on Back.
-    // Standard behavior on "Forward" (Drill down): usually clears selection.
-    // Let's adopt: 
-    // - Change MID: Keep PID (Independence).
-    // - Change PID: Keep MID.
-    
     final targetMid = mid ?? currentMid;
     final targetPid = pid ?? currentPid;
 
@@ -109,16 +115,6 @@ class MiddlewareView extends StatelessWidget {
         if (targetPid != null) 'pid': targetPid,
       },
     ).toString());
-  }
-
-  String? _findParentMiddlewareId(String childId) {
-    final box = Hive.box<MiddlewareItem>('middlewares');
-    for (final middleware in box.values) {
-      if (middleware.middlewareChildren != null && middleware.middlewareChildren!.contains(childId)) {
-        return middleware.id;
-      }
-    }
-    return null;
   }
 
   IconData getIconData(String iconName) {
