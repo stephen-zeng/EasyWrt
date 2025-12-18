@@ -29,6 +29,7 @@ class RouterSplitWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final mid = state.uri.queryParameters['mid'] ?? 'router_root';
     final pid = state.uri.queryParameters['pid'];
+    debugPrint('RouterSplitWrapper: mid=$mid, pid=$pid');
 
     // Slide Transition Builder
     // 滑动过渡构建器
@@ -72,7 +73,7 @@ class RouterSplitWrapper extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 400,
+          width: 300,
           child: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             transitionBuilder: slideTransition, // Slide for Left Pane too

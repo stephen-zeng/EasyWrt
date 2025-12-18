@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import '../../../db/models/app_setting_item.dart';
+import 'package:easywrt/db/models/transient_models.dart';
 import '../../router/router_controller.dart';
-import '../items/router_dialog.dart';
 import '../theme_provider.dart';
+import '../items/router_dialog.dart';
 
 /// RouterManagementPage
 /// RouterManagementPage
-/// 
+///
 /// Function: Displays a list of managed routers and allows CRUD operations.
 /// Function: 显示受管路由器列表并允许 CRUD 操作。
 /// Inputs: None
 /// Inputs: 无
-/// Outputs: 
-/// Outputs: 
+/// Outputs:
+/// Outputs:
 ///   - [Widget]: List view of routers.
 ///   - [Widget]: 路由器列表视图。
 class RouterManagementPage extends ConsumerWidget {
@@ -24,7 +23,6 @@ class RouterManagementPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routers = ref.watch(routerListProvider);
-    final isConnecting = ref.watch(connectionLoadingProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -39,13 +37,10 @@ class RouterManagementPage extends ConsumerWidget {
         },
         child: const Icon(Icons.add),
       ),
-      body: isConnecting 
-        ? const Center(child: CircularProgressIndicator())
-        : ValueListenableBuilder<Box<AppSettingItem>>(
-            valueListenable: Hive.box<AppSettingItem>('app_settings').listenable(),
-            builder: (context, box, _) {
-              final settings = box.get('default');
-              final selectedId = settings?.lastConnectedRouterId;
+      body: Builder(
+            builder: (context) {
+              final currentRouter = ref.watch(currentRouterProvider);
+              final selectedId = currentRouter?.routerItem.id;
 
               return ListView.builder(
                 itemCount: routers.length,
@@ -57,21 +52,11 @@ class RouterManagementPage extends ConsumerWidget {
                       groupValue: selectedId,
                       onChanged: (value) async {
                         if (value != null) {
-                          final success = await ref.read(routerConnectionProvider).connect(router);
-                          if (success) {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Connected successfully')),
-                              );
-                              context.go('/router');
-                            }
-                          } else {
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Failed to connect to router')),
-                              );
-                            }
-                          }
+                          await ref.read(routerConnectionProvider).selectRouter(router);
+                          // Explicitly save last connected router ID
+                          await ref.read(themeRepositoryProvider).updateLastConnectedRouter(router.id);
+                          // Connect immediately
+                          await ref.read(routerConnectionProvider).connect(router);
                         }
                       },
                     ),
@@ -98,21 +83,11 @@ class RouterManagementPage extends ConsumerWidget {
                       ],
                     ),
                     onTap: () async {
-                      final success = await ref.read(routerConnectionProvider).connect(router);
-                      if (success) {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Connected successfully')),
-                          );
-                          context.go('/router');
-                        }
-                      } else {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Failed to connect to router')),
-                          );
-                        }
-                      }
+                      await ref.read(routerConnectionProvider).selectRouter(router);
+                      // Explicitly save last connected router ID
+                      await ref.read(themeRepositoryProvider).updateLastConnectedRouter(router.id);
+                      // Connect immediately
+                      await ref.read(routerConnectionProvider).connect(router);
                     },
                   );
                 },

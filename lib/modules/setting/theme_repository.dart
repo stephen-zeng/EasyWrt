@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
 import '../../db/models/app_setting_item.dart';
 
@@ -34,11 +35,7 @@ class ThemeRepository {
       language: 'en',
     );
     
-    final newSettings = AppSettingItem(
-      themeMode: mode,
-      themeColor: current.themeColor,
-      language: current.language,
-    );
+    final newSettings = current.copyWith(themeMode: mode);
     
     await saveSettings(newSettings);
   }
@@ -50,12 +47,14 @@ class ThemeRepository {
       language: 'en',
     );
 
+    // Manually construct to allow setting lastConnectedRouterId to null
     final newSettings = AppSettingItem(
       themeMode: current.themeMode,
       themeColor: current.themeColor,
       language: current.language,
       lastConnectedRouterId: routerId,
     );
+    debugPrint('Updating lastConnectedRouterId to: $routerId');
 
     await saveSettings(newSettings);
   }

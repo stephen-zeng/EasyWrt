@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CurrentRouter {
 
- String get id; String get name; String get host; int get port; String get username; String get password; bool get isHttps;
+ RouterItem get routerItem; String? get token;
 /// Create a copy of CurrentRouter
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $CurrentRouterCopyWith<CurrentRouter> get copyWith => _$CurrentRouterCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CurrentRouter&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.host, host) || other.host == host)&&(identical(other.port, port) || other.port == port)&&(identical(other.username, username) || other.username == username)&&(identical(other.password, password) || other.password == password)&&(identical(other.isHttps, isHttps) || other.isHttps == isHttps));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CurrentRouter&&(identical(other.routerItem, routerItem) || other.routerItem == routerItem)&&(identical(other.token, token) || other.token == token));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,host,port,username,password,isHttps);
+int get hashCode => Object.hash(runtimeType,routerItem,token);
 
 @override
 String toString() {
-  return 'CurrentRouter(id: $id, name: $name, host: $host, port: $port, username: $username, password: $password, isHttps: $isHttps)';
+  return 'CurrentRouter(routerItem: $routerItem, token: $token)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $CurrentRouterCopyWith<$Res>  {
   factory $CurrentRouterCopyWith(CurrentRouter value, $Res Function(CurrentRouter) _then) = _$CurrentRouterCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String host, int port, String username, String password, bool isHttps
+ RouterItem routerItem, String? token
 });
 
 
@@ -65,16 +65,11 @@ class _$CurrentRouterCopyWithImpl<$Res>
 
 /// Create a copy of CurrentRouter
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? host = null,Object? port = null,Object? username = null,Object? password = null,Object? isHttps = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? routerItem = null,Object? token = freezed,}) {
   return _then(_self.copyWith(
-id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,host: null == host ? _self.host : host // ignore: cast_nullable_to_non_nullable
-as String,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
-as int,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
-as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,isHttps: null == isHttps ? _self.isHttps : isHttps // ignore: cast_nullable_to_non_nullable
-as bool,
+routerItem: null == routerItem ? _self.routerItem : routerItem // ignore: cast_nullable_to_non_nullable
+as RouterItem,token: freezed == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -159,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String host,  int port,  String username,  String password,  bool isHttps)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( RouterItem routerItem,  String? token)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CurrentRouter() when $default != null:
-return $default(_that.id,_that.name,_that.host,_that.port,_that.username,_that.password,_that.isHttps);case _:
+return $default(_that.routerItem,_that.token);case _:
   return orElse();
 
 }
@@ -180,10 +175,10 @@ return $default(_that.id,_that.name,_that.host,_that.port,_that.username,_that.p
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String host,  int port,  String username,  String password,  bool isHttps)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( RouterItem routerItem,  String? token)  $default,) {final _that = this;
 switch (_that) {
 case _CurrentRouter():
-return $default(_that.id,_that.name,_that.host,_that.port,_that.username,_that.password,_that.isHttps);case _:
+return $default(_that.routerItem,_that.token);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +195,10 @@ return $default(_that.id,_that.name,_that.host,_that.port,_that.username,_that.p
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String host,  int port,  String username,  String password,  bool isHttps)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( RouterItem routerItem,  String? token)?  $default,) {final _that = this;
 switch (_that) {
 case _CurrentRouter() when $default != null:
-return $default(_that.id,_that.name,_that.host,_that.port,_that.username,_that.password,_that.isHttps);case _:
+return $default(_that.routerItem,_that.token);case _:
   return null;
 
 }
@@ -215,16 +210,11 @@ return $default(_that.id,_that.name,_that.host,_that.port,_that.username,_that.p
 @JsonSerializable()
 
 class _CurrentRouter implements CurrentRouter {
-  const _CurrentRouter({required this.id, required this.name, required this.host, required this.port, required this.username, required this.password, required this.isHttps});
+  const _CurrentRouter({required this.routerItem, this.token});
   factory _CurrentRouter.fromJson(Map<String, dynamic> json) => _$CurrentRouterFromJson(json);
 
-@override final  String id;
-@override final  String name;
-@override final  String host;
-@override final  int port;
-@override final  String username;
-@override final  String password;
-@override final  bool isHttps;
+@override final  RouterItem routerItem;
+@override final  String? token;
 
 /// Create a copy of CurrentRouter
 /// with the given fields replaced by the non-null parameter values.
@@ -239,16 +229,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CurrentRouter&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.host, host) || other.host == host)&&(identical(other.port, port) || other.port == port)&&(identical(other.username, username) || other.username == username)&&(identical(other.password, password) || other.password == password)&&(identical(other.isHttps, isHttps) || other.isHttps == isHttps));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CurrentRouter&&(identical(other.routerItem, routerItem) || other.routerItem == routerItem)&&(identical(other.token, token) || other.token == token));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,host,port,username,password,isHttps);
+int get hashCode => Object.hash(runtimeType,routerItem,token);
 
 @override
 String toString() {
-  return 'CurrentRouter(id: $id, name: $name, host: $host, port: $port, username: $username, password: $password, isHttps: $isHttps)';
+  return 'CurrentRouter(routerItem: $routerItem, token: $token)';
 }
 
 
@@ -259,7 +249,7 @@ abstract mixin class _$CurrentRouterCopyWith<$Res> implements $CurrentRouterCopy
   factory _$CurrentRouterCopyWith(_CurrentRouter value, $Res Function(_CurrentRouter) _then) = __$CurrentRouterCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String host, int port, String username, String password, bool isHttps
+ RouterItem routerItem, String? token
 });
 
 
@@ -276,16 +266,11 @@ class __$CurrentRouterCopyWithImpl<$Res>
 
 /// Create a copy of CurrentRouter
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? host = null,Object? port = null,Object? username = null,Object? password = null,Object? isHttps = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? routerItem = null,Object? token = freezed,}) {
   return _then(_CurrentRouter(
-id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,host: null == host ? _self.host : host // ignore: cast_nullable_to_non_nullable
-as String,port: null == port ? _self.port : port // ignore: cast_nullable_to_non_nullable
-as int,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
-as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
-as String,isHttps: null == isHttps ? _self.isHttps : isHttps // ignore: cast_nullable_to_non_nullable
-as bool,
+routerItem: null == routerItem ? _self.routerItem : routerItem // ignore: cast_nullable_to_non_nullable
+as RouterItem,token: freezed == token ? _self.token : token // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../db/models/transient_models.dart';
 import '../modules/router/router_controller.dart';
 import '../modules/router/router_repository.dart';
 import '../modules/setting/theme_provider.dart';
@@ -19,7 +21,6 @@ class RpcPollingNotifier extends StateNotifier<AsyncValue<dynamic>> {
   final SystemInfoService _service;
   final Ref _ref;
   final RpcRequest _request;
-  Timer? _timer;
   bool _isLoggingIn = false;
 
   RpcPollingNotifier(this._service, this._ref, this._request)
@@ -27,38 +28,46 @@ class RpcPollingNotifier extends StateNotifier<AsyncValue<dynamic>> {
     _startPolling();
   }
 
-  void _startPolling() {
-    _fetchData();
-    _timer = Timer.periodic(const Duration(seconds: AppMeta.defaultPollingIntervalSeconds), (_) => _fetchData());
+  Future<void> _startPolling() async {
+    while (mounted) {
+      await _fetchData();
+      if (!mounted) break;
+      await Future.delayed(const Duration(seconds: AppMeta.defaultPollingIntervalSeconds));
+    }
   }
 
   Future<void> _fetchData() async {
+    debugPrint('RPC Polling: ${_request.namespace}.${_request.method}');
     // If currently logging in, skip this poll cycle
     if (_isLoggingIn) return;
 
-    var session = _ref.read(currentSessionProvider);
-    var router = _ref.read(currentRouterProvider);
+    CurrentRouter? router = _ref.read<CurrentRouter?>(currentRouterProvider);
+    debugPrint('Current Router: ${router?.routerItem.host ?? "None"}, Current Port: ${router?.routerItem.port ?? "N/A"}, Current HTTPS: ${router?.routerItem.isHttps == true ? "Yes" : "No"}');
+    debugPrint('Current Token: ${router?.token != null && router!.token!.isNotEmpty ? "Present" : "Absent"}');
 
-    // If no session, attempt to restore connection
-    if (session == null || router == null) {
+    // If no router selected, nothing to poll
+    if (router == null) return;
+
+    // Check if token is valid (present)
+    if (router.token == null || router.token!.isEmpty) {
       final success = await _attemptAutoLogin();
+      debugPrint('Auto-login attempt: ${success ? "Success" : "Failure"}');
       if (!success) {
         if (mounted) state = const AsyncValue.error('Not connected', StackTrace.empty);
         return;
       }
       // Refresh local vars after login
-      session = _ref.read(currentSessionProvider);
-      router = _ref.read(currentRouterProvider);
+      router = _ref.read<CurrentRouter?>(currentRouterProvider);
     }
 
-    if (session == null || router == null) return;
+    if (router == null || router.token == null) return;
 
     try {
       final result = await _service.call(
-        router.host,
-        router.port,
-        session,
-        router.isHttps,
+        router.routerItem.host,
+        router.routerItem.port,
+        router.token!,
+        router.routerItem.isHttps,
         _request.namespace,
         _request.method,
         _request.params,
@@ -69,11 +78,6 @@ class RpcPollingNotifier extends StateNotifier<AsyncValue<dynamic>> {
           state = AsyncValue.data(result);
         } else {
           // If result is null, it could be auth failure or other error.
-          // For now, we assume it might be valid empty data or temporary error.
-          // To be more robust, we could try to re-login if we suspect token expiry.
-          // But strict "check login" usually implies handling the 403/Permission Denied specifically.
-          // Since SystemService returns null on error, we can't distinguish easily without changing it.
-          // We'll keep it simple: just report null data.
           state = const AsyncValue.data(null);
         }
       }
@@ -85,47 +89,20 @@ class RpcPollingNotifier extends StateNotifier<AsyncValue<dynamic>> {
   Future<bool> _attemptAutoLogin() async {
     _isLoggingIn = true;
     try {
-      final themeRepo = _ref.read(themeRepositoryProvider);
-      final settings = themeRepo.getSettings();
-      final lastRouterId = settings?.lastConnectedRouterId;
+      final currentRouter = _ref.read<CurrentRouter?>(currentRouterProvider);
+      if (currentRouter == null) return false;
 
-      if (lastRouterId == null) return false;
-
-      final routerRepo = _ref.read(routerRepositoryProvider);
-      final router = routerRepo.getRouter(lastRouterId);
-
-      if (router == null) return false;
-
-      // Use the connection logic from router_controller essentially, but inline or via provider
-      // Reusing RouterConnectionNotifier.connect would be cleanest but it's designed for UI feedback (loading state etc)
-      // We can use it, but we should be careful about side effects if multiple widgets poll.
-      // Actually, _isLoggingIn flag protects *this* notifier instance.
-      // But if 5 widgets are mounted, 5 notifiers might try to login simultaneously.
+      // No need to fetch RouterItem from repo as connect now takes CurrentRouter
+      debugPrint("Attempting auto-login for router: ${currentRouter.routerItem.host}");
       
-      // To prevent stampede, we should check if session appeared while we were waiting?
-      // Or relies on RouterConnectionNotifier to handle concurrency? It doesn't really.
-      
-      // Better: Check if already connecting?
-      // connectionLoadingProvider is global.
-      if (_ref.read(connectionLoadingProvider)) {
-        // Someone else is connecting. Wait? or just return false and try next poll?
-        return false; 
-      }
-
       final connectionNotifier = _ref.read(routerConnectionProvider);
-      return await connectionNotifier.connect(router);
+      return await connectionNotifier.connect(currentRouter.routerItem);
       
     } catch (e) {
       return false;
     } finally {
       _isLoggingIn = false;
     }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
   }
 }
 

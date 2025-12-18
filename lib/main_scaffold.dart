@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'beam/responsive_layout.dart';
 import 'beam/macos_safe.dart'; // Import the macos_safe.dart
+import 'modules/router/router_controller.dart';
 
 /// MainScaffold
 /// MainScaffold
@@ -24,6 +25,9 @@ class MainScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Handle startup logic (e.g. auto-connect)
+    ref.watch(appStartupProvider);
+
     // Determine current index based on route
     // 根据路由确定当前索引
     final String location = GoRouterState.of(context).uri.toString();

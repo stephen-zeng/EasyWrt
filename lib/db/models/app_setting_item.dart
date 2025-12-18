@@ -59,4 +59,18 @@ class AppSettingItem extends HiveObject {
       _$AppSettingItemFromJson(json);
 
   Map<String, dynamic> toJson() => _$AppSettingItemToJson(this);
+
+  AppSettingItem copyWith({
+    ThemeModeEnum? themeMode,
+    int? themeColor,
+    String? language,
+    String? lastConnectedRouterId,
+  }) {
+    return AppSettingItem(
+      themeMode: themeMode ?? this.themeMode,
+      themeColor: themeColor ?? this.themeColor,
+      language: language ?? this.language,
+      lastConnectedRouterId: lastConnectedRouterId ?? this.lastConnectedRouterId,
+    );
+  }
 }

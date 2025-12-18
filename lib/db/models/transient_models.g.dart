@@ -8,24 +8,16 @@ part of 'transient_models.dart';
 
 _CurrentRouter _$CurrentRouterFromJson(Map<String, dynamic> json) =>
     _CurrentRouter(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      host: json['host'] as String,
-      port: (json['port'] as num).toInt(),
-      username: json['username'] as String,
-      password: json['password'] as String,
-      isHttps: json['isHttps'] as bool,
+      routerItem: RouterItem.fromJson(
+        json['routerItem'] as Map<String, dynamic>,
+      ),
+      token: json['token'] as String?,
     );
 
 Map<String, dynamic> _$CurrentRouterToJson(_CurrentRouter instance) =>
     <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'host': instance.host,
-      'port': instance.port,
-      'username': instance.username,
-      'password': instance.password,
-      'isHttps': instance.isHttps,
+      'routerItem': instance.routerItem,
+      'token': instance.token,
     };
 
 _CurrentMiddleware _$CurrentMiddlewareFromJson(Map<String, dynamic> json) =>

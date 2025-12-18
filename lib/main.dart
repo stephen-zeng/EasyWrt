@@ -19,7 +19,7 @@ void main() async {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
       size: Size(800, 600),
-      minimumSize: Size(800, 600),
+      minimumSize: Size(400, 300),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
@@ -31,6 +31,7 @@ void main() async {
     });
   }
 
+  debugPrint('App started in main.dart');
   runApp(const ProviderScope(child: MyApp()));
 }
 

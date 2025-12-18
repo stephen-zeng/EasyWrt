@@ -26,14 +26,14 @@ class ResponsiveLayout extends StatelessWidget {
   });
 
   static bool isLandscape(BuildContext context) {
-    return MediaQuery.of(context).size.width > 872;
+    return MediaQuery.of(context).size.width > 772;
   }
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth > 872) {
+        if (constraints.maxWidth > 772) {
           return landscape;
         } else {
           return portrait;

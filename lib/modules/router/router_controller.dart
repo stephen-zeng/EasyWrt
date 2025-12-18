@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../db/models/router_item.dart';
+import '../../db/models/transient_models.dart';
 import '../../utils/system_service.dart';
 import 'router_repository.dart';
 import '../setting/theme_provider.dart';
@@ -28,8 +30,9 @@ final routerRepositoryProvider = Provider<RouterRepository>((ref) {
 ///   - [state]: List<RouterItem>。
 class RouterListNotifier extends StateNotifier<List<RouterItem>> {
   final RouterRepository _repository;
+  final Ref _ref;
 
-  RouterListNotifier(this._repository) : super([]) {
+  RouterListNotifier(this._repository, this._ref) : super([]) {
     _loadRouters();
   }
 
@@ -45,11 +48,27 @@ class RouterListNotifier extends StateNotifier<List<RouterItem>> {
   Future<void> updateRouter(RouterItem router) async {
     await _repository.updateRouter(router);
     _loadRouters();
+    
+    // Sync with CurrentRouter if it matches
+    final currentRouter = _ref.read(currentRouterProvider);
+    if (currentRouter != null && currentRouter.routerItem.id == router.id) {
+       _ref.read(currentRouterProvider.notifier).state = currentRouter.copyWith(
+         routerItem: router,
+       );
+    }
   }
 
   Future<void> deleteRouter(String id) async {
     await _repository.deleteRouter(id);
     _loadRouters();
+    
+    // If current router is deleted, clear selection
+    final currentRouter = _ref.read(currentRouterProvider);
+    if (currentRouter != null && currentRouter.routerItem.id == id) {
+       _ref.read(currentRouterProvider.notifier).state = null;
+       _ref.read(currentSessionProvider.notifier).state = null;
+       _ref.read(connectionStatusProvider.notifier).state = false;
+    }
   }
 }
 
@@ -60,18 +79,52 @@ class RouterListNotifier extends StateNotifier<List<RouterItem>> {
 /// Function: 提供路由器列表状态。
 final routerListProvider = StateNotifierProvider<RouterListNotifier, List<RouterItem>>((ref) {
   final repository = ref.watch(routerRepositoryProvider);
-  return RouterListNotifier(repository);
+  return RouterListNotifier(repository, ref);
 });
 
 // Connection State
 final currentSessionProvider = StateProvider<String?>((ref) => null);
 final connectionStatusProvider = StateProvider<bool>((ref) => false);
 final connectionLoadingProvider = StateProvider<bool>((ref) => false);
-final currentRouterProvider = StateProvider<RouterItem?>((ref) => null);
+final currentRouterProvider = StateProvider<CurrentRouter?>((ref) {
+  final themeRepo = ref.read(themeRepositoryProvider);
+  final settings = themeRepo.getSettings();
+  final lastId = settings?.lastConnectedRouterId;
+
+  if (lastId != null) {
+    final routerRepo = ref.read(routerRepositoryProvider);
+    final routers = routerRepo.getAllRouters();
+    try {
+      final routerItem = routers.firstWhere((element) => element.id == lastId);
+      return CurrentRouter(
+        routerItem: routerItem,
+        token: null,
+      );
+    } catch (e) {
+      // Router might have been deleted
+      return null;
+    }
+  }
+  return null;
+});
 final editModeProvider = StateProvider<bool>((ref) => false);
 
 final systemServiceProvider = Provider<SystemInfoService>((ref) {
   return SystemInfoService();
+});
+
+/// appStartupProvider
+/// appStartupProvider
+/// 
+/// Function: Handles one-time startup logic like auto-connecting to the last router.
+/// Function: 处理一次性启动逻辑，如自动连接到上一个路由器。
+final appStartupProvider = FutureProvider<void>((ref) async {
+  final currentRouter = ref.read(currentRouterProvider);
+  if (currentRouter != null) {
+    debugPrint("App startup: Auto-connecting to last router ${currentRouter.routerItem.host}");
+    await ref.read(routerConnectionProvider).connect(currentRouter.routerItem);
+    // Attention: Error: Providers are not allowed to modify other providers during their initialization.
+  }
 });
 
 /// RouterConnectionNotifier
@@ -89,22 +142,49 @@ final systemServiceProvider = Provider<SystemInfoService>((ref) {
 ///   - [Future<bool>]: 连接成功状态。
 class RouterConnectionNotifier {
   final Ref ref;
+  Future<bool>? _pendingConnection;
 
   RouterConnectionNotifier(this.ref);
 
-  Future<bool> connect(RouterItem router) async {
+  Future<void> selectRouter(RouterItem routerItem, {String? newToken}) async {
+    // Get existing CurrentRouter to preserve old token if not providing a new one
+    final oldCurrentRouter = ref.read(currentRouterProvider);
+    final String? tokenToUse = newToken ?? oldCurrentRouter?.token;
+
+    final updatedRouter = CurrentRouter(
+      routerItem: routerItem,
+      token: tokenToUse,
+    );
+    
+    ref.read(currentRouterProvider.notifier).state = updatedRouter;
+  }
+
+  Future<bool> connect(RouterItem routerItem) async {
+    if (_pendingConnection != null) {
+      return _pendingConnection!;
+    }
+
+    _pendingConnection = _connectInternal(routerItem);
+    try {
+      return await _pendingConnection!;
+    } finally {
+      _pendingConnection = null;
+    }
+  }
+
+  Future<bool> _connectInternal(RouterItem routerItem) async {
     ref.read(connectionLoadingProvider.notifier).state = true;
     try {
       final systemService = ref.read(systemServiceProvider);
       // Use 000... for session ID when logging in
       final result = await systemService.call(
-        router.host,
-        router.port,
+        routerItem.host,
+        routerItem.port,
         "00000000000000000000000000000000", 
-        router.isHttps,
+        routerItem.isHttps,
         "session",
         "login",
-        {"username": router.username, "password": router.password}
+        {"username": routerItem.username, "password": routerItem.password}
       );
 
       String? session;
@@ -115,11 +195,9 @@ class RouterConnectionNotifier {
       if (session != null) {
         ref.read(currentSessionProvider.notifier).state = session;
         ref.read(connectionStatusProvider.notifier).state = true;
-        ref.read(currentRouterProvider.notifier).state = router;
         
-        // Save last connected router ID
-        final themeRepo = ref.read(themeRepositoryProvider);
-        await themeRepo.updateLastConnectedRouter(router.id);
+        // Only connect writes the token back to CurrentRouter
+        await selectRouter(routerItem, newToken: session);
         
         return true;
       } else {
@@ -134,18 +212,18 @@ class RouterConnectionNotifier {
     }
   }
 
-  Future<bool> testConnection(RouterItem router) async {
+  Future<bool> testConnection(RouterItem routerItem) async {
     ref.read(connectionLoadingProvider.notifier).state = true;
     try {
       final systemService = ref.read(systemServiceProvider);
       final result = await systemService.call(
-        router.host,
-        router.port,
+        routerItem.host,
+        routerItem.port,
         "00000000000000000000000000000000", 
-        router.isHttps,
+        routerItem.isHttps,
         "session",
         "login",
-        {"username": router.username, "password": router.password}
+        {"username": routerItem.username, "password": routerItem.password}
       );
       
       if (result != null && result is Map && result['ubus_rpc_session'] != null) {
