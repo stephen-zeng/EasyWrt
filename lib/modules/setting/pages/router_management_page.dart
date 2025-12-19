@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easywrt/db/models/transient_models.dart';
-import '../../router/router_controller.dart';
-import '../theme_provider.dart';
-import '../items/router_dialog.dart';
-import '../../../beam/responsive_layout.dart';
+import 'package:easywrt/modules/setting/controller/router_list_controller.dart';
+import 'package:easywrt/modules/router/controllers/current_router_controller.dart';
+import 'package:easywrt/modules/router/controllers/connection_controller.dart';
+import 'package:easywrt/utils/theme/theme_provider.dart';
+import 'package:easywrt/modules/setting/items/router_dialog.dart';
+import 'package:easywrt/beam/responsive_layout.dart';
 
 /// RouterManagementPage
 /// RouterManagementPage
@@ -61,7 +63,7 @@ class RouterManagementPage extends ConsumerWidget {
                       groupValue: selectedId,
                       onChanged: (value) async {
                         if (value != null) {
-                          await ref.read(routerConnectionProvider).selectRouter(router);
+                          ref.read(currentRouterProvider.notifier).selectRouter(router);
                           // Explicitly save last connected router ID
                           await ref.read(themeRepositoryProvider).updateLastConnectedRouter(router.id);
                           // Connect immediately
@@ -92,7 +94,7 @@ class RouterManagementPage extends ConsumerWidget {
                       ],
                     ),
                     onTap: () async {
-                      await ref.read(routerConnectionProvider).selectRouter(router);
+                      ref.read(currentRouterProvider.notifier).selectRouter(router);
                       // Explicitly save last connected router ID
                       await ref.read(themeRepositoryProvider).updateLastConnectedRouter(router.id);
                       // Connect immediately

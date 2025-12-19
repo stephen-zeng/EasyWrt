@@ -1,29 +1,28 @@
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../db/models/transient_models.dart';
-import '../modules/router/router_controller.dart';
-import '../modules/router/router_repository.dart';
-import '../modules/setting/theme_provider.dart';
-import 'system_service.dart';
-import 'meta.dart';
-import 'rpc_types.dart';
+import 'package:easywrt/db/models/transient_models.dart';
+import 'current_router_controller.dart';
+import 'connection_controller.dart';
+import 'package:easywrt/utils/network/rpc_service.dart';
+import 'package:easywrt/utils/init/meta.dart';
+import 'package:easywrt/utils/network/rpc_types.dart';
 
-export 'rpc_types.dart';
+export 'package:easywrt/utils/network/rpc_types.dart';
 
 // Service Provider
-final systemServiceRpcProvider = Provider<SystemInfoService>((ref) {
-  return SystemInfoService();
+final systemServiceRpcProvider = Provider<RpcService>((ref) {
+  return RpcService();
 });
 
 // Generic Polling Notifier
-class RpcPollingNotifier extends StateNotifier<AsyncValue<dynamic>> {
-  final SystemInfoService _service;
+class RpcNotifier extends StateNotifier<AsyncValue<dynamic>> {
+  final RpcService _service;
   final Ref _ref;
   final RpcRequest _request;
   bool _isLoggingIn = false;
 
-  RpcPollingNotifier(this._service, this._ref, this._request)
+  RpcNotifier(this._service, this._ref, this._request)
       : super(const AsyncValue.loading()) {
     _startPolling();
   }
@@ -117,9 +116,9 @@ class RpcPollingNotifier extends StateNotifier<AsyncValue<dynamic>> {
 
 // The Family Provider
 final rpcPollingProvider = StateNotifierProvider.family.autoDispose<
-    RpcPollingNotifier,
+    RpcNotifier,
     AsyncValue<dynamic>,
     RpcRequest>((ref, request) {
   final service = ref.watch(systemServiceRpcProvider);
-  return RpcPollingNotifier(service, ref, request);
+  return RpcNotifier(service, ref, request);
 });

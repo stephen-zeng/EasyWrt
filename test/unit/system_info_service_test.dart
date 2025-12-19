@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-// import 'package:easywrt/utils/system_service.dart';
+// import 'package:easywrt/utils/rpc_service.dart';
 
 void main() {
   group('SystemInfoService Tests', () {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../db/models/app_setting_item.dart';
-import 'theme_repository.dart';
+import 'package:easywrt/db/models/app_setting_item.dart';
+import 'package:easywrt/db/hive/theme_repository.dart';
 
 /// themeRepositoryProvider
 /// themeRepositoryProvider

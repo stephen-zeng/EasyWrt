@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../utils/rpc_polling_service.dart';
-import '../../../utils/network_service.dart';
-import '../../../utils/meta.dart';
+import 'package:easywrt/modules/router/controllers/rpc_controller.dart';
+import 'network_traffic_service.dart';
+import 'package:easywrt/utils/init/meta.dart';
 
 class NetworkTrafficWidget extends ConsumerWidget {
   const NetworkTrafficWidget({super.key});

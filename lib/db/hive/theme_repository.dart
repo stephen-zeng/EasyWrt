@@ -1,22 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
-import '../../db/models/app_setting_item.dart';
+import 'package:easywrt/db/models/app_setting_item.dart';
 
-/// ThemeRepository
-/// ThemeRepository
-/// 
-/// Function: Handles persistence of theme settings using Hive.
-/// Function: 使用 Hive 处理主题设置的持久化。
-/// Inputs: 
-/// Inputs: 
-///   - [saveSettings]: AppSettingItem to save.
-///   - [saveSettings]: 要保存的 AppSettingItem。
-///   - [updateThemeMode]: New ThemeModeEnum to persist.
-///   - [updateThemeMode]: 要持久化的新 ThemeModeEnum。
-/// Outputs: 
-/// Outputs: 
-///   - [getSettings]: Returns persisted AppSettingItem or null.
-///   - [getSettings]: 返回持久化的 AppSettingItem 或 null。
 class ThemeRepository {
   final Box<AppSettingItem> _box = Hive.box<AppSettingItem>('app_settings');
 

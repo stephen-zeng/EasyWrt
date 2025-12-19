@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../../beam/responsive_layout.dart';
-import '../../../db/models/hierarchy_items.dart';
-import '../router_controller.dart'; // For editModeProvider
-import '../widgets/cpu_usage_widget.dart';
-import '../widgets/add_widget_dialog.dart';
-import '../widgets/memory_usage_widget.dart';
-import '../widgets/network_traffic_widget.dart';
+import 'package:easywrt/beam/responsive_layout.dart';
+import 'package:easywrt/db/models/hierarchy_items.dart';
+import 'package:easywrt/modules/router/controllers/current_page_controller.dart';
+import 'package:easywrt/modules/router/widgets/cpu_usage/cpu_usage_widget.dart';
+import 'package:easywrt/modules/router/widgets/add_widget_dialog.dart';
+import 'package:easywrt/modules/router/widgets/memory_usage/memory_usage_widget.dart';
+import 'package:easywrt/modules/router/widgets/network_traffic/network_traffic_widget.dart';
 
 /// RouterPageView
 /// RouterPageView
@@ -30,7 +30,6 @@ class RouterPageView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isEditMode = ref.watch(editModeProvider);
     final isLandscape = ResponsiveLayout.isLandscape(context);
 
     return ValueListenableBuilder(
@@ -41,6 +40,16 @@ class RouterPageView extends ConsumerWidget {
         if (page == null) {
           return const Center(child: Text('Page not found'));
         }
+
+        // Init/Sync CurrentPage
+        final currentPage = ref.watch(currentPageProvider);
+        if (currentPage == null || currentPage.id != pageId) {
+             Future.microtask(() {
+                 ref.read(currentPageProvider.notifier).init(page);
+             });
+        }
+        
+        final isEditMode = currentPage?.isEditMode ?? false;
 
         final widgets = page.widgetChildren ?? [];
 
@@ -69,7 +78,7 @@ class RouterPageView extends ConsumerWidget {
               IconButton(
                 icon: Icon(isEditMode ? Icons.done : Icons.edit),
                 onPressed: () {
-                  ref.read(editModeProvider.notifier).state = !isEditMode;
+                  ref.read(currentPageProvider.notifier).toggleEditMode();
                 },
               ),
               if (isEditMode)

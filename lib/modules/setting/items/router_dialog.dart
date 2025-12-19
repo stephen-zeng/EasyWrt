@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../../../db/models/router_item.dart';
-import '../../router/router_controller.dart';
+import 'package:easywrt/db/models/router_item.dart';
+import 'package:easywrt/modules/setting/controller/router_list_controller.dart';
 
 /// RouterDialog
 /// RouterDialog

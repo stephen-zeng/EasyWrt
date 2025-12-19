@@ -1,5 +1,5 @@
 import 'package:hive/hive.dart';
-import '../db/models/hierarchy_items.dart';
+import 'package:easywrt/db/models/hierarchy_items.dart';
 
 /// HierarchySeeder
 /// HierarchySeeder

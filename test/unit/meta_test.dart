@@ -1,4 +1,4 @@
-import 'package:easywrt/utils/meta.dart';
+import 'package:easywrt/utils/init/meta.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

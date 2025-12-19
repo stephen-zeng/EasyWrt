@@ -2,10 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../beam/responsive_layout.dart';
+import 'package:easywrt/beam/responsive_layout.dart';
 import 'middleware/middleware_view.dart';
 import 'page/page_view.dart';
-import 'router_controller.dart';
+import 'controllers/current_middleware_controller.dart';
 
 class RouterSplitWrapper extends ConsumerStatefulWidget {
   final GoRouterState state;

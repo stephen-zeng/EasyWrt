@@ -556,7 +556,7 @@ as String,
 /// @nodoc
 mixin _$CurrentPage {
 
- String get id; List<String> get path; String get name; String get icon; List<String>? get widgetChildren;
+ String get id; List<String> get path; String get name; String get icon; bool get isEditMode; List<String>? get widgetChildren;
 /// Create a copy of CurrentPage
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -569,16 +569,16 @@ $CurrentPageCopyWith<CurrentPage> get copyWith => _$CurrentPageCopyWithImpl<Curr
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CurrentPage&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.path, path)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&const DeepCollectionEquality().equals(other.widgetChildren, widgetChildren));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CurrentPage&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other.path, path)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.isEditMode, isEditMode) || other.isEditMode == isEditMode)&&const DeepCollectionEquality().equals(other.widgetChildren, widgetChildren));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(path),name,icon,const DeepCollectionEquality().hash(widgetChildren));
+int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(path),name,icon,isEditMode,const DeepCollectionEquality().hash(widgetChildren));
 
 @override
 String toString() {
-  return 'CurrentPage(id: $id, path: $path, name: $name, icon: $icon, widgetChildren: $widgetChildren)';
+  return 'CurrentPage(id: $id, path: $path, name: $name, icon: $icon, isEditMode: $isEditMode, widgetChildren: $widgetChildren)';
 }
 
 
@@ -589,7 +589,7 @@ abstract mixin class $CurrentPageCopyWith<$Res>  {
   factory $CurrentPageCopyWith(CurrentPage value, $Res Function(CurrentPage) _then) = _$CurrentPageCopyWithImpl;
 @useResult
 $Res call({
- String id, List<String> path, String name, String icon, List<String>? widgetChildren
+ String id, List<String> path, String name, String icon, bool isEditMode, List<String>? widgetChildren
 });
 
 
@@ -606,13 +606,14 @@ class _$CurrentPageCopyWithImpl<$Res>
 
 /// Create a copy of CurrentPage
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? path = null,Object? name = null,Object? icon = null,Object? widgetChildren = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? path = null,Object? name = null,Object? icon = null,Object? isEditMode = null,Object? widgetChildren = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,path: null == path ? _self.path : path // ignore: cast_nullable_to_non_nullable
 as List<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
-as String,widgetChildren: freezed == widgetChildren ? _self.widgetChildren : widgetChildren // ignore: cast_nullable_to_non_nullable
+as String,isEditMode: null == isEditMode ? _self.isEditMode : isEditMode // ignore: cast_nullable_to_non_nullable
+as bool,widgetChildren: freezed == widgetChildren ? _self.widgetChildren : widgetChildren // ignore: cast_nullable_to_non_nullable
 as List<String>?,
   ));
 }
@@ -698,10 +699,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  List<String> path,  String name,  String icon,  List<String>? widgetChildren)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  List<String> path,  String name,  String icon,  bool isEditMode,  List<String>? widgetChildren)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CurrentPage() when $default != null:
-return $default(_that.id,_that.path,_that.name,_that.icon,_that.widgetChildren);case _:
+return $default(_that.id,_that.path,_that.name,_that.icon,_that.isEditMode,_that.widgetChildren);case _:
   return orElse();
 
 }
@@ -719,10 +720,10 @@ return $default(_that.id,_that.path,_that.name,_that.icon,_that.widgetChildren);
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  List<String> path,  String name,  String icon,  List<String>? widgetChildren)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  List<String> path,  String name,  String icon,  bool isEditMode,  List<String>? widgetChildren)  $default,) {final _that = this;
 switch (_that) {
 case _CurrentPage():
-return $default(_that.id,_that.path,_that.name,_that.icon,_that.widgetChildren);case _:
+return $default(_that.id,_that.path,_that.name,_that.icon,_that.isEditMode,_that.widgetChildren);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -739,10 +740,10 @@ return $default(_that.id,_that.path,_that.name,_that.icon,_that.widgetChildren);
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  List<String> path,  String name,  String icon,  List<String>? widgetChildren)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  List<String> path,  String name,  String icon,  bool isEditMode,  List<String>? widgetChildren)?  $default,) {final _that = this;
 switch (_that) {
 case _CurrentPage() when $default != null:
-return $default(_that.id,_that.path,_that.name,_that.icon,_that.widgetChildren);case _:
+return $default(_that.id,_that.path,_that.name,_that.icon,_that.isEditMode,_that.widgetChildren);case _:
   return null;
 
 }
@@ -754,7 +755,7 @@ return $default(_that.id,_that.path,_that.name,_that.icon,_that.widgetChildren);
 @JsonSerializable()
 
 class _CurrentPage implements CurrentPage {
-  const _CurrentPage({required this.id, required final  List<String> path, required this.name, required this.icon, final  List<String>? widgetChildren}): _path = path,_widgetChildren = widgetChildren;
+  const _CurrentPage({required this.id, required final  List<String> path, required this.name, required this.icon, this.isEditMode = false, final  List<String>? widgetChildren}): _path = path,_widgetChildren = widgetChildren;
   factory _CurrentPage.fromJson(Map<String, dynamic> json) => _$CurrentPageFromJson(json);
 
 @override final  String id;
@@ -767,6 +768,7 @@ class _CurrentPage implements CurrentPage {
 
 @override final  String name;
 @override final  String icon;
+@override@JsonKey() final  bool isEditMode;
  final  List<String>? _widgetChildren;
 @override List<String>? get widgetChildren {
   final value = _widgetChildren;
@@ -790,16 +792,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CurrentPage&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other._path, _path)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&const DeepCollectionEquality().equals(other._widgetChildren, _widgetChildren));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CurrentPage&&(identical(other.id, id) || other.id == id)&&const DeepCollectionEquality().equals(other._path, _path)&&(identical(other.name, name) || other.name == name)&&(identical(other.icon, icon) || other.icon == icon)&&(identical(other.isEditMode, isEditMode) || other.isEditMode == isEditMode)&&const DeepCollectionEquality().equals(other._widgetChildren, _widgetChildren));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(_path),name,icon,const DeepCollectionEquality().hash(_widgetChildren));
+int get hashCode => Object.hash(runtimeType,id,const DeepCollectionEquality().hash(_path),name,icon,isEditMode,const DeepCollectionEquality().hash(_widgetChildren));
 
 @override
 String toString() {
-  return 'CurrentPage(id: $id, path: $path, name: $name, icon: $icon, widgetChildren: $widgetChildren)';
+  return 'CurrentPage(id: $id, path: $path, name: $name, icon: $icon, isEditMode: $isEditMode, widgetChildren: $widgetChildren)';
 }
 
 
@@ -810,7 +812,7 @@ abstract mixin class _$CurrentPageCopyWith<$Res> implements $CurrentPageCopyWith
   factory _$CurrentPageCopyWith(_CurrentPage value, $Res Function(_CurrentPage) _then) = __$CurrentPageCopyWithImpl;
 @override @useResult
 $Res call({
- String id, List<String> path, String name, String icon, List<String>? widgetChildren
+ String id, List<String> path, String name, String icon, bool isEditMode, List<String>? widgetChildren
 });
 
 
@@ -827,13 +829,14 @@ class __$CurrentPageCopyWithImpl<$Res>
 
 /// Create a copy of CurrentPage
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? path = null,Object? name = null,Object? icon = null,Object? widgetChildren = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? path = null,Object? name = null,Object? icon = null,Object? isEditMode = null,Object? widgetChildren = freezed,}) {
   return _then(_CurrentPage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,path: null == path ? _self._path : path // ignore: cast_nullable_to_non_nullable
 as List<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,icon: null == icon ? _self.icon : icon // ignore: cast_nullable_to_non_nullable
-as String,widgetChildren: freezed == widgetChildren ? _self._widgetChildren : widgetChildren // ignore: cast_nullable_to_non_nullable
+as String,isEditMode: null == isEditMode ? _self.isEditMode : isEditMode // ignore: cast_nullable_to_non_nullable
+as bool,widgetChildren: freezed == widgetChildren ? _self._widgetChildren : widgetChildren // ignore: cast_nullable_to_non_nullable
 as List<String>?,
   ));
 }

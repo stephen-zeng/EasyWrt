@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import '../../../beam/macos_safe.dart';
-import '../../../db/models/hierarchy_items.dart';
-import '../router_controller.dart';
+import 'package:easywrt/db/models/hierarchy_items.dart';
+import 'package:easywrt/modules/router/controllers/current_middleware_controller.dart';
 
 /// MiddlewareView
 /// MiddlewareView
@@ -28,6 +27,7 @@ class MiddlewareView extends ConsumerWidget {
         }
 
         // Sync Provider with current URL/ID
+        // Attention: sync currentMw with middlewareID from URL, is it optimized?
         final currentMw = ref.watch(currentMiddlewareProvider);
         if (currentMw == null || currentMw.middlewareItem.id != middlewareId) {
              Future.microtask(() {

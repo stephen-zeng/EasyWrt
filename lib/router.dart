@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'main_scaffold.dart';
 
-import 'modules/router/router_split_wrapper.dart';
-import 'modules/setting/setting_split_wrapper.dart';
+import 'package:easywrt/modules/router/router_split_wrapper.dart';
+import 'package:easywrt/modules/setting/setting_split_wrapper.dart';
 
 /// routerProvider
 /// routerProvider

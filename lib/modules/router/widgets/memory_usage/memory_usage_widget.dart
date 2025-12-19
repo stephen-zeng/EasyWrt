@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../utils/rpc_polling_service.dart';
-import '../../../utils/meta.dart';
+import 'package:easywrt/modules/router/controllers/rpc_controller.dart';
+import 'package:easywrt/utils/init/meta.dart';
+import 'memory_usage_service.dart';
 
 /// MemoryUsageWidget
 class MemoryUsageWidget extends ConsumerWidget {
@@ -16,7 +17,7 @@ class MemoryUsageWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Call utils function by passing params
-    final rpcState = ref.watch(rpcPollingProvider(_rpcRequest));
+    final rpcState = ref.watch(memoryUsageProvider(_rpcRequest));
 
     return Card(
       child: Padding(
@@ -30,19 +31,14 @@ class MemoryUsageWidget extends ConsumerWidget {
             ),
             const SizedBox(height: AppMeta.defaultPadding),
             rpcState.when(
-              data: (data) {
-                if (data != null && data is Map && data['memory'] != null) {
-                  final mem = data['memory'] as Map<String, dynamic>;
-                  final total = mem['total'] as num;
-                  final free = mem['free'] as num;
-                  final used = total - free;
-                  final percent = (used / total);
+              data: (usage) {
+                if (usage != null) {
                   return Column(
                     children: [
-                      LinearProgressIndicator(value: percent),
+                      LinearProgressIndicator(value: usage.percent),
                       const SizedBox(height: AppMeta.smallPadding),
-                      Text('${(percent * 100).toStringAsFixed(1)}% Used'),
-                      Text('${(used / AppMeta.bytesPerMegabyte).toStringAsFixed(1)}MB / ${(total / AppMeta.bytesPerMegabyte).toStringAsFixed(1)}MB'),
+                      Text('${(usage.percent * 100).toStringAsFixed(1)}% Used'),
+                      Text('${(usage.used / AppMeta.bytesPerMegabyte).toStringAsFixed(1)}MB / ${(usage.total / AppMeta.bytesPerMegabyte).toStringAsFixed(1)}MB'),
                     ],
                   );
                 }

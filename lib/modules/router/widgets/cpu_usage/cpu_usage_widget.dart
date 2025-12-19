@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../utils/rpc_polling_service.dart';
+import 'cpu_usage_service.dart';
+import 'package:easywrt/modules/router/controllers/rpc_controller.dart';
 
-import '../../../utils/meta.dart';
-
-/// CpuUsageWidget
 class CpuUsageWidget extends ConsumerWidget {
   const CpuUsageWidget({super.key});
 
@@ -17,11 +15,11 @@ class CpuUsageWidget extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Call utils function by passing params
-    final rpcState = ref.watch(rpcPollingProvider(_rpcRequest));
+    final rpcState = ref.watch(cpuLoadProvider(_rpcRequest));
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(AppMeta.defaultPadding),
+        padding: const EdgeInsets.all(16.0), // Hardcoded or AppMeta.defaultPadding
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -29,13 +27,10 @@ class CpuUsageWidget extends ConsumerWidget {
               'System Load',
               style: Theme.of(context).textTheme.titleMedium,
             ),
-            const SizedBox(height: AppMeta.defaultPadding),
+            const SizedBox(height: 16.0),
             rpcState.when(
-              data: (data) {
-                if (data != null && data is Map && data['load'] != null) {
-                  final load = (data['load'] as List)
-                      .map((e) => (e as num).toDouble() / AppMeta.cpuLoadDivisor)
-                      .toList();
+              data: (load) {
+                if (load.isNotEmpty) {
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [

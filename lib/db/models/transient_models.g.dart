@@ -43,6 +43,7 @@ _CurrentPage _$CurrentPageFromJson(Map<String, dynamic> json) => _CurrentPage(
   path: (json['path'] as List<dynamic>).map((e) => e as String).toList(),
   name: json['name'] as String,
   icon: json['icon'] as String,
+  isEditMode: json['isEditMode'] as bool? ?? false,
   widgetChildren: (json['widgetChildren'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
@@ -54,5 +55,6 @@ Map<String, dynamic> _$CurrentPageToJson(_CurrentPage instance) =>
       'path': instance.path,
       'name': instance.name,
       'icon': instance.icon,
+      'isEditMode': instance.isEditMode,
       'widgetChildren': instance.widgetChildren,
     };

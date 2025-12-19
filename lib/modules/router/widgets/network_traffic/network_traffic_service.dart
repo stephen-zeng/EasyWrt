@@ -1,5 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'rpc_polling_service.dart';
+import 'package:easywrt/modules/router/controllers/rpc_controller.dart';
+
+class NetworkTrafficNotifier extends StateNotifier<List<int>?> {
+  NetworkTrafficNotifier() : super(null);
+}
 
 // Model for Rate
 class NetworkRate {

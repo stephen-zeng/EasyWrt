@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'beam/responsive_layout.dart';
-import 'beam/macos_safe.dart'; // Import the macos_safe.dart
-import 'modules/router/router_controller.dart';
+import 'package:easywrt/beam/responsive_layout.dart';
+import 'package:easywrt/beam/macos_safe.dart'; // Import the macos_safe.dart
+import 'package:easywrt/modules/router/controllers/current_router_controller.dart';
+import 'package:easywrt/modules/router/controllers/connection_controller.dart';
 
 /// MainScaffold
 /// MainScaffold

@@ -1,8 +1,7 @@
 import 'package:hive_flutter/hive_flutter.dart';
-
-import '../models/app_setting_item.dart';
-import '../models/hierarchy_items.dart';
-import '../models/router_item.dart';
+import 'package:easywrt/db/models/app_setting_item.dart';
+import 'package:easywrt/db/models/hierarchy_items.dart';
+import 'package:easywrt/db/models/router_item.dart';
 import 'manual_adapters.dart';
 
 /// HiveInit
