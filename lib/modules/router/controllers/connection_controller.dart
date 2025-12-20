@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/utils/network/rpc_service.dart';
 import 'package:easywrt/db/models/router_item.dart';
-import 'package:easywrt/db/models/transient_models.dart';
 import 'current_router_controller.dart';
 
 final systemServiceProvider = Provider<RpcService>((ref) {

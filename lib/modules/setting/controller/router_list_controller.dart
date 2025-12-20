@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/db/models/router_item.dart';
-import 'package:easywrt/db/hive/router_repository.dart';
+import 'package:easywrt/db/interface/router_repository.dart';
 import 'package:easywrt/modules/router/controllers/current_router_controller.dart';
 import 'package:easywrt/modules/router/controllers/connection_controller.dart';
 

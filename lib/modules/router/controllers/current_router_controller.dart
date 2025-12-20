@@ -1,8 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/db/models/transient_models.dart';
-import 'package:easywrt/db/hive/theme_repository.dart';
-import 'package:easywrt/db/hive/router_repository.dart';
-import 'package:easywrt/utils/theme/theme_provider.dart';
+import 'package:easywrt/db/interface/router_repository.dart';
+import 'package:easywrt/modules/setting/theme/theme_provider.dart';
 import 'package:easywrt/db/models/router_item.dart';
 
 // Repository Provider

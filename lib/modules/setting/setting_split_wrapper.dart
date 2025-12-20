@@ -93,7 +93,7 @@ class SettingSplitWrapper extends StatelessWidget {
         const VerticalDivider(width: 1),
         Expanded(
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 100),
             transitionBuilder: (child, animation) {
               return FadeTransition(
                 opacity: animation,

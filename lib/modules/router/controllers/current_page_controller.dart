@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/db/models/transient_models.dart';
 

@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/modules/router/controllers/rpc_controller.dart';
-import 'package:easywrt/utils/init/meta.dart';
 
 class MemoryUsageNotifier extends StateNotifier<double?> {
   MemoryUsageNotifier() : super(null);

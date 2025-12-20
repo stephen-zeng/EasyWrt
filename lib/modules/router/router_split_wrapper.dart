@@ -93,7 +93,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
         const VerticalDivider(width: 1),
         Expanded(
           child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 100),
             transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
             child: KeyedSubtree(
               key: ValueKey('right_${pid ?? 'empty'}'),

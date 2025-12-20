@@ -21,7 +21,6 @@ class MiddlewareView extends ConsumerWidget {
       valueListenable: Hive.box<MiddlewareItem>('middlewares').listenable(),
       builder: (context, Box<MiddlewareItem> box, _) {
         final middleware = box.get(middlewareId);
-
         if (middleware == null) {
           return const Center(child: Text('Middleware not found'));
         }

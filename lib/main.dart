@@ -2,13 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:easywrt/db/hive/hive_init.dart';
+import 'package:easywrt/db/interface/hive_init.dart';
 import 'router.dart';
-import 'package:easywrt/utils/theme/theme.dart';
+import 'package:easywrt/modules/setting/theme/theme.dart';
 
 import 'package:easywrt/utils/init/hierarchy_seeder.dart';
 
-import 'package:easywrt/utils/theme/theme_provider.dart';
+import 'package:easywrt/modules/setting/theme/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

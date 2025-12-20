@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easywrt/db/models/transient_models.dart';
 import 'package:easywrt/modules/setting/controller/router_list_controller.dart';
 import 'package:easywrt/modules/router/controllers/current_router_controller.dart';
 import 'package:easywrt/modules/router/controllers/connection_controller.dart';
-import 'package:easywrt/utils/theme/theme_provider.dart';
+import 'package:easywrt/modules/setting/theme/theme_provider.dart';
 import 'package:easywrt/modules/setting/items/router_dialog.dart';
 import 'package:easywrt/beam/responsive_layout.dart';
 

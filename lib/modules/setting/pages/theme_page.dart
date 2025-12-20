@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easywrt/beam/responsive_layout.dart';
-import 'package:easywrt/utils/theme/theme_provider.dart';
+import 'package:easywrt/modules/setting/theme/theme_provider.dart';
 
 /// ThemePage
 /// ThemePage
