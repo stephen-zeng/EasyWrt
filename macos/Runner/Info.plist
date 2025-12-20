@@ -28,5 +28,8 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<!-- Add Local Network Privacy and Multicast Networking entitlements -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>easywrt needs to discover and connect to OpenWrt routers on your local network.</string>
 </dict>
 </plist>
