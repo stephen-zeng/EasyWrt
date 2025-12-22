@@ -123,3 +123,111 @@ As a network administrator, I want to add multiple OpenWRT routers to the app an
 
 ### User Story 3 - 能够完成主题的更改 (Priority: P2)
 用户通过Settings (Root) --> Theme (Page)导航至主题设置界面，然后选择不同的配色和亮暗主题，默认是绿色+跟随系统的亮暗主题。
+
+# Stage 2 - Customization
+## UI/UX *(mandatory)*
+### 项目中已经定义的页面框架
+项目中定义了Module, Middleware, Page和Widget这四层UI框架，可以参考`001-framework-design`和`lib`中的代码文件。
+- **Module**为程序的两个部分，分别是Router路由器管理部分和Setting应用程序设置部分。
+- **Middleware**用于引导用户进入到**Page**
+- **Page**是用户最终的目的地，上面可以展示**Widget**
+- **Widget**通过网络直接与路由器进行通信，上面显示路由器的信息，然后也可以操作路由器
+
+Customization部分对于Widget，Page和Middleware部分均有涉及，主要是Widget和Page，Middleware部分较少。
+
+### 量化尺寸
+将尺寸进行方格量化，方格之间的上下左右的间距为**1rem**，最终效果就是Widget之间的上下左右间距是**1rem**，长宽均为**Stripe**（后文有定义）的width在去除间距后的四分之一。
+
+### Widget
+#### BaseWidget基类
+为了方便后续Widget的扩展，需要写一个`BaseWidget`基类，所有的合法Widget都要继承这个基类
+
+#### 大小
+- `BaseWidget`允许Widget有**1x1**, **1x2**, **2x1**, **2x2**, **2x4**, **4x2**, **1x4**, **4x1**, **4x4**个方格这几种大小，未来会添加更多尺寸支持。Widget可以自由选择支持的尺寸，然后重载BaseWidget对应的函数。
+- 每一个Widget都必须有**1x1**和**4x4**两个大小档位，**1x1**默认为该Widget的图标，**4x4**为Widget的完整形态
+
+#### 通信
+每个Widget独立与路由器进行通信，确保Widget在网络层面上不受到影响。但是Widget之间可以在应用层面互相自由通信，比如通过其他Widget获取路由器信息或调整路由器的设置，以减小网络压力。
+
+#### 身份
+- 每一个Widget都需要一个icon和名字，作为静态数据存放在Widget类中。
+
+### Stripe
+**Stripe**是为了更好适配响应式布局而定义的渲染概念，每个Stripe都是独一无二的，不能被复用。
+#### 大小与布局
+- 每个Stripe的最小宽度为**19rem**，最大宽度为**35rem**
+- 每个Stripe的大小为**4xN**，N取决于该Stripe上Widget的排布。
+- Stripe之间的上下左右间距也是**1rem**，最终效果是Widget之间的上下左右间距是**1rem**
+- 一个Page能平行展示Stripe的列数由Page的width决定，当宽度足够的时候就平行展示，不够的时候就居中以最大宽度展示能展示的最多列数
+
+#### 与其他具体框架的关系
+- Widget直接放在Stripe上，有固定布局，每个Stripe可拥有的Widget数量不限。
+- 一个Widget可以被多个不同Page的Stripe拥有，一个Page不能拥有重复的Widget。
+- 每个Page里面可以有无限多个Stripe，且顺序固定。
+
+### Page
+#### 自定义
+- 每一个系统内置的Page都有一个默认的Stripe和Widget排布，保存在数据库PageItem中
+- 不是每一个Page都可以被编辑，页面是否可编辑应保存在数据库的PageItem中
+- 进入Page编辑页面之后用户可以自由添加Widget，调整其位置和大小。
+- Widget可以自由在不同Stripe的不同位置拖动，但是在一个Stripe中不能出现一个行完全空的方格
+- 将Widget在Stripe中的大小以及绝对位置进行持久化，保存在数据库的PageItem中。
+
+#### 编辑模式
+- 进入编辑模式后，如果该区域上没有Widget，那么该区域的每个方格尺寸都以半透明的灰色圆形可视化，否则只显示Widget。每个Stripe都被一圈半透明的灰色虚线包围作为可视化。
+- 在编辑模式下，已有的Stripe的高度需要比在非编辑模式下多一列方格区域，用于添加新的Widget
+- 在编辑模式下，除了已有的Stripe，还需多显示一个Stripe，用于将Widget添加到新的Stripe上。
+- Stripe的布局与在非编辑模式的布局一直，参考UI/UX，响应Page的宽度
+
+### Middleware
+#### 自定义
+- Middleware增加自定义列表顺序的功能，用户在进入Middleware的编辑页面之后可以自由拖动里面列表项的顺序，以及添加Middleware和Page，但是不能添加自己。
+- 编辑完成后将列表进行持久化，保存在数据库的MiddlewareItem中。
+- Middleware中的项如果是一个middleware，那么就在最右端增加一个"chevron_right"的icon，暗示可以进入下一级Middleware。
+
+#### 编辑模式
+- 进入编辑模式后，列表中每一项都可以被拖动，在每一项的最右端添加一个menu图标暗示可以拖动
+- 在menu图标的左侧，多一个红色的“close”按钮，是删除按钮，点击后该项从列表中消失
+
+## User Scenarios & Testing *(mandatory)*
+
+### User Story 1.1 - 竖屏模式进入Page编辑模式
+ - 在竖屏模式的时候，用户进入一个Page，点击Appbar最右侧的menu按钮，弹出菜单中包含“编辑页面”的项。若Page可以被编辑，那么这个项将可用，否则为灰色不可用。
+ - 点击菜单中的“编辑页面”的项，进入编辑模式
+ - 进入编辑模式的时候，appbar的右端的按钮由“menu”变为"check"，表示保存。同时appbar左边的"back"变为"close"，表示放弃。，然后Page右下角出现一个FloatingActionButton，为"add"，作为添加Widget的入口
+
+### User Story 1.2 - 横屏模式进入Page编辑模式
+- 在横屏模式的时候，用户在Right Pane中进入一个Page，点击Right Pane的Appbar最右侧的menu按钮，弹出菜单中包含“编辑页面”的项。若Page可以被编辑，那么这个项将可用，否则为灰色不可用。
+- 点击菜单中的“编辑页面”的项，进入编辑模式
+- 进入编辑模式的时候，Right Pane的appbar的右端的按钮由“menu”变为"close"和"check"，分别代表放弃和保存，然后Right Pane的右下角出现一个FloatingActionButton，icon为"add"，作为添加Widget的入口
+
+### User Story 2 - 添加Widget到Page的Stripe中
+- 进入编辑模式后，点击Page右下角的“添加”FloatingActionButton，弹出一个添加的dialog
+- 在dialog内，展示**该页面没有的**Widget的Icon和名称列表，用户从中选择。注意，用户点击Page以内，dialog以外的区域的时候，表示不选择任何Widget，应关闭dialog。
+- 用户在点击Widget时候，Dialog关闭，该Widget以**1x1**的尺寸出现在可视范围内的第一个Stripe的新的一列（编辑模式下多显示的一列）的第一个方格中，同时改方格的半透明圆形消失。
+
+### User Story 3 - 调整Widget的位置和大小
+- 添加完成Widget后，用户可以看到Widget的右下角有一个指向正西南方向的小箭头，暗示可以调整大小
+- 用户可以拖动箭头，以调整大小。被调整的Widget需要实时更新样式，用户松手的时候，如果没有足够的连续区域放下改大小，则Widget缩回原来的尺寸。若拖动到Stripe的最后一列，该Stripe需要及时增加新的一列空行，因此当Widget在倒数第二行的时候（最后一行应始终没有Widget），若这一行在横向没有其他Widget挡住，始终可以被调整到用户需要的大小。注意，所有Widget和Stripe的运动、大小变换都必须是连贯的，带动画的
+- 用户可以通过拖动Widget来调整位置，在拖动的时候，若被拖动目标位置不够，则Widget回到原位。每个位置都有空位置的磁性吸附力，方便用户在不完全对齐的情况下也能拖到指定位置。
+- Widget可以自由拖动到其他Stripe中，包括新的Stripe。当用户将Widget拖入到新的Stripe的时候，应当马上再展示一个新的Stripe的位置。
+
+### User Story 4 - 竖屏进入Middleware编辑模式
+- 用户来到想要编辑的Middleware之后，点击appbar右边的menu按钮，弹出一个菜单
+- 弹出的菜单中包含“编辑Middleware”这一项，用户单击之后进入Middleware编辑模式
+- 如果用户此时不在Middleware而在Page中，则菜单中的“编辑Middleware”这一项不可用
+- 进入编辑模式的时候，appbar的右端的按钮由“menu”变为"check"，表示保存。同时appbar左边的"back"变为"close"，表示放弃。然后Middleware右下角出现一个FloatingActionButton，为"add"，作为添加下一级Middleware或Page的入口
+
+### User Story 5 - 横屏进入Middleware编辑模式
+- 用户在Left Pane来到想要编辑的Middleware之后，点击Right Pane的appbar右边的menu按钮，弹出一个菜单
+- 弹出的菜单中包含“编辑Middleware”这一项，用户单击之后进入Middleware编辑模式
+- 进入编辑模式的时候，Left Pane的appbar的左端的按钮由“back”变为"close"和"check"，分别代表放弃和保存，然后Left Pane左下角出现一个FloatingActionButton，icon为"add"，作为添加下一级Middleware或Page的入口
+
+### User Story 6 - 添加和调整Middleware内的项
+- 用户点击FloatingActionButton之后，弹出浏览所欲可用Middleware和Page的一个dialog，其中不包含被编辑的Middleware自己以及已经添加到Middleware中的项目
+- 用户点击dialog中的项目，该项目就会被添加到被编辑的Middleware的末尾，同时关闭dialog
+- 用户单击Middleware显示区域之内，dialog之外的区域，则为取消添加，此时应直接关闭dialog
+
+### User Story 7 - 保存或放弃
+- 用户在完成Page或Middleware的编辑之后，若点击对应appbar上的“check”保存按钮之后，从编辑模式退出，保留用户的更改，将布局存储在数据库中。
+- - 用户在完成Page或Middleware的编辑之后，若点击对应appbar上的“close”放弃按钮之后，从编辑模式退出，回到数据库中存储的布局，放弃用户的更改。
