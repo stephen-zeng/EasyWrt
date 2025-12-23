@@ -3,7 +3,15 @@
 **Feature Branch**: `002-customization`
 **Created**: 2025-12-20  
 **Status**: Draft  
-**Input**: User description: "现在需要在原有项目的基础上进行page和widget的进一步完善，要求将每个page分为方格区域，然后编写一个widget基类，要求所有的widget继承这个基类，提供1x1, 2x1, 1x2, 2x2, 2x4, 4x2, 4x4这七中大小，然后选择可以实现的UI进行实现，并在数据库widgetItem中记录已经实现的大小。然后用户在一些page中可以进行添加，调整widget的相对位置等。数据库pageItem要记录下该page所包含的widget及其大小，位置信息。现在已经有写好的cpu_usage，memory_usage以及network_traffic三个测试widget用于测试"
+**Input**: User description: "现在需要在原有项目的基础上进行page和widget的进一步完善，要求将每个page分为方格区域，然后编写一个widget基类，要求所有的widget继承 this 基类，提供1x1, 2x1, 1x2, 2x2, 2x4, 4x2, 4x4这七中大小，然后选择可以实现的UI进行实现，并在数据库widgetItem中记录已经实现的大小。然后用户在一些page中可以进行添加，调整widgets的相对位置等。数据库pageItem要记录下该page所包含s的widgets及其大小，位置信息。现在已经有写好的cpu_usage，memory_usage以及network_traffic三个测试widget用于测试"
+
+## Clarifications
+### Session 2025-12-23
+- Q: Collision Handling during drag/resize? → A: Option A - Strict Mode (Fit or Fail).
+- Q: When should empty rows in a Stripe be collapsed? → A: Option A - Auto-Collapse on Save (remains during session).
+- Q: Multi-Stripe Drag behavior? → A: Option A - Detach on Drag Start (removes from source model immediately).
+- Q: Middleware/Page Entity Sharing? → A: Option A - Shared Entities (canonical updates apply to all references).
+- Q: REM to Pixel Mapping? → A: Option A - Base-16 Mapping (1rem = 16 logical pixels).
 
 ## UI/UX *(Mandatory)*
 
@@ -18,7 +26,7 @@ The project defines a four-layer UI framework consisting of **Module**, **Middle
 Customization primarily involves the **Widget** and **Page** layers, with limited involvement in the **Middleware** layer.
 
 ### Dimensional Quantization (Grid System)
-Dimensions are quantized into a grid system. The spacing (top, bottom, left, right) between grid cells is **1rem**. Consequently, the visual spacing between Widgets is **1rem**. The length and width of a grid cell are calculated as one-quarter of a **Stripe's** (defined below) width after deducting the spacing.
+Dimensions are quantized into a grid system. The spacing (top, bottom, left, right) between grid cells is **1rem** (defined as **16 logical pixels**). Consequently, the visual spacing between Widgets is **1rem**. The length and width of a grid cell are calculated as one-quarter of a **Stripe's** (defined below) width after deducting the spacing.
 
 ### Widget
 #### BaseWidget Class
@@ -131,11 +139,12 @@ Users can resize and move widgets within and across Stripes.
 
 1.  **Given** a Widget in edit mode, **Then** a small arrow pointing Southeast appears in the bottom right corner of the Widget.
 2.  **Given** the user drags the resize arrow, **When** the size changes, **Then** the Widget style updates in real-time.
-3.  **Given** the user releases the resize drag, **If** there is insufficient continuous space for the new size, **Then** the Widget snaps back to its original size.
+3.  **Given** the user releases the resize drag, **If** there is insufficient continuous space for the new size, **Then** the Widget snaps back to its original size (Strict Mode: Fit or Fail).
 4.  **Given** the user drags a Widget to the last row of a Stripe, **Then** the Stripe dynamically adds a new empty row to accommodate resizing (unless blocked horizontally).
-5.  **Given** the user drags a Widget to move it, **When** hovering over a new position, **Then** the Widget magnetically snaps to empty positions. **If** the target position is insufficient/invalid upon release, **Then** the Widget returns to its original position.
+5.  **Given** the user drags a Widget to move it, **When** hovering over a new position, **Then** the Widget magnetically snaps to empty positions. **If** the target position is insufficient/invalid (e.g., overlaps another widget) upon release, **Then** the Widget returns to its original position (Strict Mode: Fit or Fail).
 6.  **Given** the user drags a Widget to a new Stripe, **Then** a new empty Stripe placeholder is immediately displayed to allow further expansion.
 7.  **Given** any movement or resizing, **Then** the animations must be smooth and continuous.
+8.  **Given** a widget drag starts, **Then** it is detached from its source Stripe data model immediately, but a visual placeholder remains in the source until the drop is finalized to prevent sudden layout reflow (Detach on Drag Start).
 
 ### User Story 4 - Enter Middleware Edit Mode (Portrait) (Priority: P2)
 
@@ -161,7 +170,7 @@ Users can customize Middleware lists while using the split-pane view in landscap
 
 **Acceptance Scenarios**:
 
-1.  **Given** the user is viewing a Middleware in the Left Pane, **When** they click the "menu" button on the **Right Pane's** Appbar, **Then** the "Edit Middleware" option is available.
+1.  **Given** the user is viewing a Middleware in the Left Pane, **When** they click the **Left Pane's** Appbar menu (if available) or context action, **Then** the "Edit Middleware" option is available.
 2.  **Given** the user clicks "Edit Middleware", **Then** the **Left Pane's** Appbar left button changes from "back" to "close" and "check", and an "add" FloatingActionButton appears in the bottom left of the Left Pane.
 
 ### User Story 6 - Add and Modify Middleware Items (Priority: P2)
@@ -178,7 +187,7 @@ Users can add new navigation items (Middleware/Pages) and reorder or delete exis
 2.  **Given** the user selects an item, **Then** it is added to the end of the Middleware list and the dialog closes.
 3.  **Given** the user clicks outside the dialog, **Then** the action is cancelled and the dialog closes.
 4.  **Given** the list in edit mode, **When** the user drags an item by the menu handle, **Then** the order updates.
-5.  **Given** the list in edit mode, **When** the user clicks the red "close" button on an item, **Then** the item is removed from the list.
+5.  **Given** the user clicks the red "close" button on an item, **Then** the item is removed from the list.
 
 ### User Story 7 - Save or Discard Changes (Priority: P1)
 
@@ -225,6 +234,7 @@ Users can finalize their edits or revert to the previous state.
     - **FR-002.2**: `BaseWidget` MUST enforce implementation of at least two size tiers: **1x1** (Icon) and **4x4** (Full).
     - **FR-002.3**: `BaseWidget` MUST allow optional implementation of intermediate sizes: **1x2, 2x1, 2x2, 2x4, 4x2, 1x4, 4x1**.
 - **FR-003**: The system MUST implement a **Grid System** with a mandatory **1rem** spacing between grid cells, stripes, and widgets.
+    - **FR-003.1**: The system MUST map `1rem` to **16 logical pixels** for all layout calculations (Base-16 Mapping).
 - **FR-004**: The system MUST support **Page Edit Mode**.
     - **FR-004.1**: Users MUST be able to enter Edit Mode via the Appbar menu (Portrait) or Right Pane Appbar (Landscape).
     - **FR-004.2**: In Edit Mode, the system MUST visualize empty grid areas as semi-transparent gray circles and Stripes as dashed gray borders.
@@ -233,6 +243,7 @@ Users can finalize their edits or revert to the previous state.
     - **FR-005.1**: Changes made in Edit Mode MUST NOT be persisted until the user clicks "Save".
     - **FR-005.2**: Clicking "Discard" or the system Back button (interrupted by confirmation) MUST revert the layout to its pre-edit state.
     - **FR-005.3**: Screen rotation during Edit Mode MUST trigger an auto-save and exit Edit Mode (EC-06).
+    - **FR-005.4**: Empty rows in a Stripe MUST NOT be removed during an active edit session; they MUST be collapsed only upon successful "Save" (Auto-Collapse on Save).
 
 ### Functional Requirements - Middleware
 
@@ -242,17 +253,24 @@ Users can finalize their edits or revert to the previous state.
     - **FR-006.3**: Users MUST be able to delete items from the list.
 - **FR-007**: The system MUST prevent recursive navigation loops (EC-02).
     - **FR-007.1**: When adding items, the system MUST filter out the current Middleware and its ancestors from the selection list.
+- **FR-007.2**: The system MUST implement a shared entity model for Middleware and Pages. Editing a common Middleware or Page's canonical layout MUST update all instances and references across different navigation paths (Shared Entities).
 
 ### Functional Requirements - Data & Interaction
 
-- **FR-008**: The system MUST manage Widget persistence.
-    - **FR-008.1**: Widget definitions (metadata, supported sizes) MUST be stored in `WidgetItem`.
-    - **FR-008.2**: Widget instances (position, size, parent Stripe) MUST be stored in `PageItem`.
-    - **FR-008.3**: If a loaded Widget ID does not exist in the codebase, the system MUST render a fallback "Unknown Widget" (locked 1x1) (EC-03).
+- **FR-008**: The system MUST manage Widget persistence and structure.
+    - **FR-008.1**: Widget definitions (metadata, supported sizes) MUST be defined directly in concrete `BaseWidget` implementations.
+    - **FR-008.2**: Each Widget MUST be organized in its own directory under `lib/modules/router/widgets/` containing:
+        - `{name}_service.dart`: Logic, data fetching, and parsing.
+        - `{name}_widget.dart`: The UI class inheriting from `BaseWidget`.
+    - **FR-008.3**: Widget instances (position, size, parent Stripe) MUST be stored in `PageItem`.
+    - **FR-008.4**: If a loaded Widget ID does not exist in the codebase, the system MUST render a fallback "Unknown Widget" (locked 1x1).
+    - **FR-008.5**: The system MUST implement a `WidgetFactory` to instantiate concrete `BaseWidget` implementations based on the `typeKey`.
 - **FR-009**: The system MUST implement Drag-and-Drop interactions.
     - **FR-009.1**: Widgets MUST snap to the nearest valid grid position during drag.
     - **FR-009.2**: Moving a Widget to the last row of a Stripe MUST dynamically expand the Stripe (if space allows).
     - **FR-009.3**: Moving the last Widget out of a Stripe MUST leave a "ghost" placeholder until the session is saved (EC-05).
+    - **FR-009.4**: (Strict Mode) Drag or resize actions resulting in an overlap with existing widgets MUST fail and snap the widget back to its original state.
+    - **FR-009.5**: The system MUST detach a widget from its source Stripe data model immediately upon starting a drag action to allow cross-stripe movement without interfering with source layout constraints (Detach on Drag Start).
 
 ### Key Entities
 
@@ -273,3 +291,8 @@ Users can finalize their edits or revert to the previous state.
 - **SC-005**: On a generic mobile screen (Portrait), Stripes stack vertically; on a wide Desktop screen, Stripes arrange in parallel columns.
 - **SC-006**: Loading a layout with a deleted widget ID displays a 1x1 placeholder instead of crashing the app.
 - **SC-007**: Rotating the device while editing a Page automatically saves changes and returns to View Mode.
+- **SC-008**: Attempting to drag a widget onto an occupied slot (Strict Mode) results in the widget returning to its starting position.
+- **SC-009**: Deleting all widgets in Row 2 of a Stripe during edit mode does NOT cause Row 3 to shift up until "Save" is clicked.
+- **SC-010**: A widget dragged from Stripe A to Stripe B is successfully persisted in Stripe B's record in `PageItem` after clicking "Save".
+- **SC-011**: Modifying the order of Middleware B via Section X automatically reflects the same new order when Middleware B is accessed via Section Y (Shared Entities).
+- **SC-012**: The total width of a 4-column Stripe in a 35rem viewport is exactly `35 * 16 = 560` logical pixels (Base-16 Mapping).
