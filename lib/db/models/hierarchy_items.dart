@@ -65,6 +65,10 @@ class MiddlewareItem extends HiveObject {
 ///   - [id], [name], [icon]: 基本信息。
 ///   - [widgetChildren]: List of widget IDs to display.
 ///   - [widgetChildren]: 要显示的组件 ID 列表。
+///   - [isEditable]: Whether the user can edit this page.
+///   - [isEditable]: 用户是否可以编辑此页面。
+///   - [stripes]: Ordered list of stripes (layout configuration).
+///   - [stripes]: 条带的有序列表（布局配置）。
 /// Outputs: 
 /// Outputs: 
 ///   - [PageItem]: The entity instance.
@@ -84,15 +88,93 @@ class PageItem extends HiveObject {
   @HiveField(3)
   final List<String>? widgetChildren;
 
+  @HiveField(4, defaultValue: false)
+  final bool isEditable;
+
+  @HiveField(5)
+  final List<StripeItem>? stripes;
+
   PageItem({
     required this.id,
     required this.name,
     required this.icon,
     this.widgetChildren,
+    this.isEditable = false,
+    this.stripes,
   });
 
   factory PageItem.fromJson(Map<String, dynamic> json) =>
       _$PageItemFromJson(json);
 
   Map<String, dynamic> toJson() => _$PageItemToJson(this);
+}
+
+/// StripeItem
+/// StripeItem
+/// 
+/// Function: Represents one horizontal section (stripe) within a page.
+/// Function: 代表页面中的一个水平部分（stripe）。
+@HiveType(typeId: 5)
+@JsonSerializable()
+class StripeItem extends HiveObject {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final List<WidgetInstance> widgets;
+
+  StripeItem({
+    required this.id,
+    required this.widgets,
+  });
+
+  factory StripeItem.fromJson(Map<String, dynamic> json) =>
+      _$StripeItemFromJson(json);
+
+  Map<String, dynamic> toJson() => _$StripeItemToJson(this);
+}
+
+/// WidgetInstance
+/// WidgetInstance
+/// 
+/// Function: Represents a specific instance of a widget placed on the grid.
+/// Function: 代表放置在网格上的组件的具体实例。
+@HiveType(typeId: 6)
+@JsonSerializable()
+class WidgetInstance extends HiveObject {
+  @HiveField(0)
+  final String id;
+
+  @HiveField(1)
+  final String widgetTypeKey;
+
+  @HiveField(2)
+  final int x;
+
+  @HiveField(3)
+  final int y;
+
+  @HiveField(4)
+  final int width;
+
+  @HiveField(5)
+  final int height;
+
+  @HiveField(6)
+  final Map<String, dynamic>? configuration;
+
+  WidgetInstance({
+    required this.id,
+    required this.widgetTypeKey,
+    required this.x,
+    required this.y,
+    required this.width,
+    required this.height,
+    this.configuration,
+  });
+
+  factory WidgetInstance.fromJson(Map<String, dynamic> json) =>
+      _$WidgetInstanceFromJson(json);
+
+  Map<String, dynamic> toJson() => _$WidgetInstanceToJson(this);
 }

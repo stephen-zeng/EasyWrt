@@ -1,20 +1,9 @@
 import 'package:flutter/material.dart';
 
 /// ResponsiveLayout
-/// ResponsiveLayout
 /// 
-/// Function: Builds different widgets based on screen width (Portrait vs Landscape).
-/// Function: 根据屏幕宽度构建不同的组件（纵向 vs 横向）。
-/// Inputs: 
-/// Inputs: 
-///   - [portrait]: Widget to show in portrait mode (<872px).
-///   - [portrait]: 在纵向模式 (<872px) 下显示的组件。
-///   - [landscape]: Widget to show in landscape mode (>872px).
-///   - [landscape]: 在横向模式 (>872px) 下显示的组件。
-/// Outputs: 
-/// Outputs: 
-///   - [Widget]: The selected layout widget.
-///   - [Widget]: 选定的布局组件。
+/// Function: Switches between portrait and landscape widgets based on orientation.
+/// Also provides utilities for the responsive grid system.
 class ResponsiveLayout extends StatelessWidget {
   final Widget portrait;
   final Widget landscape;
@@ -25,15 +14,42 @@ class ResponsiveLayout extends StatelessWidget {
     required this.landscape,
   });
 
+  // --- Grid System Utils ---
+  static const double rem = 16.0;
+  static const double minStripeWidthRem = 19.0;
+  static const double maxStripeWidthRem = 35.0;
+
+  static const double minStripeWidthPx = minStripeWidthRem * rem; // 304.0
+  static const double maxStripeWidthPx = maxStripeWidthRem * rem; // 560.0
+
+  /// Calculates the width of a single grid cell (1x1) given the stripe width.
+  static double calculateCellWidth(double stripeWidthPx) {
+    const double gapPx = rem;
+    if (stripeWidthPx < (3 * gapPx)) return 0;
+    return (stripeWidthPx - (3 * gapPx)) / 4;
+  }
+
+  /// Calculates the pixel dimensions for a widget spanning [w] x [h] grid units.
+  static Size calculateWidgetSize(double stripeWidthPx, int w, int h) {
+    final cellWidth = calculateCellWidth(stripeWidthPx);
+    final cellHeight = cellWidth;
+    
+    final widthPx = (w * cellWidth) + ((w - 1) * rem);
+    final heightPx = (h * cellHeight) + ((h - 1) * rem);
+    
+    return Size(widthPx, heightPx);
+  }
+
+  /// Helper to check if context is landscape.
   static bool isLandscape(BuildContext context) {
-    return MediaQuery.of(context).size.width > 772;
+    return MediaQuery.of(context).orientation == Orientation.landscape;
   }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth > 772) {
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        if (orientation == Orientation.landscape) {
           return landscape;
         } else {
           return portrait;
