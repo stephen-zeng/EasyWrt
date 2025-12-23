@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/modules/router/controllers/current_middleware_controller.dart';
+import 'package:easywrt/utils/init/meta.dart';
 
 /// MiddlewareView
 /// MiddlewareView
@@ -67,7 +68,7 @@ class MiddlewareView extends ConsumerWidget {
                       final childMiddleware = Hive.box<MiddlewareItem>('middlewares').get(childId);
                       if (childMiddleware != null) {
                         return ListTile(
-                          leading: Icon(getIconData(childMiddleware.icon)),
+                          leading: Icon(AppMeta.getIconData(childMiddleware.icon)),
                           title: Text(childMiddleware.name),
                           onTap: () {
                             // Push History and Navigate
@@ -81,7 +82,7 @@ class MiddlewareView extends ConsumerWidget {
                       final childPage = Hive.box<PageItem>('pages').get(childId);
                       if (childPage != null) {
                         return ListTile(
-                          leading: Icon(getIconData(childPage.icon)),
+                          leading: Icon(AppMeta.getIconData(childPage.icon)),
                           title: Text(childPage.name),
                           onTap: () {
                             _go(context, pid: childId);
@@ -114,17 +115,5 @@ class MiddlewareView extends ConsumerWidget {
         if (targetPid != null) 'pid': targetPid,
       },
     ).toString());
-  }
-
-  IconData getIconData(String iconName) {
-    switch (iconName) {
-      case 'router': return Icons.router;
-      case 'bar_chart': return Icons.bar_chart;
-      case 'hardware': return Icons.hardware;
-      case 'hard_drive': return Icons.storage;
-      case 'settings': return Icons.settings;
-      case 'colors': return Icons.color_lens;
-      default: return Icons.help_outline;
-    }
   }
 }

@@ -54,12 +54,12 @@
 
 ## Technology Stack Summary
 
-| Component | Choice | Version Constraint |
-|-----------|--------|--------------------|
-| UI Framework | Flutter | Latest Stable |
-| Language | Dart | Latest Stable |
-| State Management | Riverpod | ^2.0.0 |
-| Navigation | go_router | ^10.0.0 |
-| Network | Dio | ^5.0.0 |
-| Local DB | Hive | ^2.2.0 |
-| Theme | Material 3 | Built-in |
+| Component        | Choice     | Version Constraint |
+|------------------|------------|--------------------|
+| UI Framework     | Flutter    | Latest Stable      |
+| Language         | Dart       | Latest Stable      |
+| State Management | Riverpod   | ^2.0.0             |
+| Navigation       | go_router  | ^10.0.0            |
+| Network          | Dio        | ^5.0.0             |
+| Local DB         | Hive       | ^2.2.0             |
+| Theme            | Material 3 | Built-in           |

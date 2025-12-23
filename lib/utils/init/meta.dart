@@ -1,3 +1,6 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
 /// App Meta Constants
 /// App Meta Constants
 ///
@@ -30,4 +33,17 @@ class AppMeta {
 
   // Private constructor to prevent instantiation
   AppMeta._();
+
+  // Icon data getter
+  static IconData getIconData(String iconName) {
+    switch (iconName) {
+      case 'router': return Icons.router;
+      case 'bar_chart': return Icons.bar_chart;
+      case 'hardware': return Icons.hardware;
+      case 'hard_drive': return Icons.storage;
+      case 'settings': return Icons.settings;
+      case 'colors': return Icons.color_lens;
+      default: return Icons.help_outline;
+    }
+  }
 }
