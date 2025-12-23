@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/modules/router/controllers/rpc_controller.dart';
-import 'network_traffic_service.dart';
 import 'package:easywrt/utils/init/meta.dart';
+import 'package:easywrt/modules/router/widgets/base_widget.dart';
+import 'network_traffic_service.dart';
 
-class NetworkTrafficWidget extends ConsumerWidget {
+class NetworkTrafficWidget extends BaseWidget {
   const NetworkTrafficWidget({super.key});
+
+  @override
+  String get typeKey => 'network_traffic';
+  @override
+  String get name => 'Network Traffic';
+  @override
+  String get description => 'Real-time upload and download speeds.';
+  @override
+  int get iconCode => 0xe405; // network_check
+  @override
+  List<String> get supportedSizes => const ['2x1', '2x2', '4x4'];
 
   // Widget stores its own params
   static const _rpcRequest = RpcRequest(
@@ -35,43 +47,47 @@ class NetworkTrafficWidget extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Network Traffic',
+              name,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: AppMeta.defaultPadding),
-            trafficState.when(
-              data: (rates) {
-                if (rates.isEmpty) {
-                  return const Text('Measuring...');
-                }
-                final sortedKeys = rates.keys.toList()..sort();
+            Expanded(
+              child: SingleChildScrollView(
+                child: trafficState.when(
+                  data: (rates) {
+                    if (rates.isEmpty) {
+                      return const Text('Measuring...');
+                    }
+                    final sortedKeys = rates.keys.toList()..sort();
+                    
+                    return Column(
+                      children: sortedKeys.map((key) {
+                        final rate = rates[key]!;
+                        if (rate.rxRate < 1 && rate.txRate < 1) return const SizedBox.shrink();
                 
-                return Column(
-                  children: sortedKeys.map((key) {
-                    final rate = rates[key]!;
-                    if (rate.rxRate < 1 && rate.txRate < 1) return const SizedBox.shrink();
-
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: AppMeta.tinyPadding),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(child: Text(key, style: const TextStyle(fontWeight: FontWeight.bold))),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: AppMeta.tinyPadding),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('↓ ${_formatRate(rate.rxRate)}', style: const TextStyle(color: Colors.green)),
-                              Text('↑ ${_formatRate(rate.txRate)}', style: const TextStyle(color: Colors.blue)),
+                              Expanded(child: Text(key, style: const TextStyle(fontWeight: FontWeight.bold))),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text('↓ ${_formatRate(rate.rxRate)}', style: const TextStyle(color: Colors.green)),
+                                  Text('↑ ${_formatRate(rate.txRate)}', style: const TextStyle(color: Colors.blue)),
+                                ],
+                              ),
                             ],
                           ),
-                        ],
-                      ),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
-                );
-              },
-              error: (err, stack) => Text('Error: $err'),
-              loading: () => const Center(child: CircularProgressIndicator()),
+                  },
+                  error: (err, stack) => Text('Error: $err'),
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                ),
+              ),
             ),
           ],
         ),
