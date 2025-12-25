@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:easywrt/utils/init/meta.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
@@ -19,7 +20,7 @@ void main() async {
     await windowManager.ensureInitialized();
     WindowOptions windowOptions = const WindowOptions(
       size: Size(800, 600),
-      minimumSize: Size(400, 300),
+      minimumSize: Size(21 * AppMeta.rem, 300),
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,

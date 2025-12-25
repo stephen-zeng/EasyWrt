@@ -23,7 +23,7 @@ class WidgetFactory {
   }
 }
 
-class UnknownWidget extends BaseWidget {
+class UnknownWidget extends BaseWidget<void> {
   @override
   final String typeKey;
 
@@ -37,6 +37,11 @@ class UnknownWidget extends BaseWidget {
   int get iconCode => 0xe000; // error
   @override
   List<String> get supportedSizes => const ['1x1'];
+
+  @override
+  AsyncValue<void> watchData(WidgetRef ref) {
+    return const AsyncValue.data(null);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

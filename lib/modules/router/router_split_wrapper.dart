@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easywrt/beam/responsive_layout.dart';
+import 'package:easywrt/utils/init/meta.dart';
 import 'middleware/middleware_view.dart';
 import 'page/page_view.dart';
 import 'controllers/current_middleware_controller.dart';
@@ -77,37 +78,63 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     }
 
     // Landscape Mode
-    return Row(
-      children: [
-        SizedBox(
-          width: 300,
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) => slideTransition(child, animation),
-            child: KeyedSubtree(
-              key: ValueKey('left_$mid'),
-              child: MiddlewareView(middlewareId: mid),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Left Pane: 300, Divider: 1
+        // Right Pane Min: minStripeWidth (304) + padding (32) = 336
+        const double leftPaneWidth = 300.0;
+        const double dividerWidth = 1.0;
+        const double rightPanePadding = 32.0;
+        final double rightPaneMinWidth = AppMeta.minStripeWidthPx + rightPanePadding;
+        final double totalMinWidth = leftPaneWidth + dividerWidth + rightPaneMinWidth;
+
+        final bool overflow = constraints.maxWidth < totalMinWidth;
+
+        Widget body = Row(
+          children: [
+            SizedBox(
+              width: leftPaneWidth,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                transitionBuilder: (child, animation) => slideTransition(child, animation),
+                child: KeyedSubtree(
+                  key: ValueKey('left_$mid'),
+                  child: MiddlewareView(middlewareId: mid),
+                ),
+              ),
             ),
-          ),
-        ),
-        const VerticalDivider(width: 1),
-        Expanded(
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 100),
-            transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-            child: KeyedSubtree(
-              key: ValueKey('right_${pid ?? 'empty'}'),
-              child: pid != null 
-                  ? RouterPageView(pageId: pid)
-                  : const Scaffold(
-                      body: Center(
-                        child: Text('Select a page from the left menu'),
-                      ),
-                    ),
+            const VerticalDivider(width: dividerWidth),
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 100),
+                transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                child: KeyedSubtree(
+                  key: ValueKey('right_${pid ?? 'empty'}'),
+                  child: pid != null
+                      ? RouterPageView(pageId: pid)
+                      : const Scaffold(
+                          body: Center(
+                            child: Text('Select a page from the left menu'),
+                          ),
+                        ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ],
+          ],
+        );
+
+        if (overflow) {
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SizedBox(
+              width: totalMinWidth,
+              height: constraints.maxHeight,
+              child: body,
+            ),
+          );
+        }
+        return body;
+      },
     );
   }
 }

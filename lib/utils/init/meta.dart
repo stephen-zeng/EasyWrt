@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 /// App Meta Constants
@@ -8,6 +7,34 @@ import 'package:flutter/material.dart';
 /// 包含了应用程序中使用的所有硬编码值。
 
 class AppMeta {
+  // Grid System Utils
+  static const double rem = 16.0;
+  static const double minStripeWidthRem = 19.0;
+  static const double maxStripeWidthRem = 35.0;
+
+  static const double minStripeWidthPx = minStripeWidthRem * rem; // 304.0
+  static const double maxStripeWidthPx = maxStripeWidthRem * rem; // 560.0
+
+  /// Calculates the width of a single grid cell (1x1) given the stripe width.
+  static double calculateCellWidth(double stripeWidthPx) {
+    const double gapPx = rem;
+    // Account for 1rem padding on each side (total 2rem)
+    final gridWidth = stripeWidthPx - (2 * gapPx);
+    if (gridWidth < (3 * gapPx)) return 0;
+    return (gridWidth - (3 * gapPx)) / 4;
+  }
+
+  /// Calculates the pixel dimensions for a widget spanning [w] x [h] grid units.
+  static Size calculateWidgetSize(double stripeWidthPx, int w, int h) {
+    final cellWidth = calculateCellWidth(stripeWidthPx);
+    final cellHeight = cellWidth;
+    
+    final widthPx = (w * cellWidth) + ((w - 1) * rem);
+    final heightPx = (h * cellHeight) + ((h - 1) * rem);
+    
+    return Size(widthPx, heightPx);
+  }
+
   // Network & Polling
   static const int defaultPollingIntervalSeconds = 1;
   static const int rpcTimeoutSeconds = 10;

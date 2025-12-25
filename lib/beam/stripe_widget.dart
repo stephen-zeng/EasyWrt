@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/beam/responsive_layout.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
+import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/modules/router/controllers/edit_controller.dart';
 import 'package:easywrt/modules/router/widgets/widget_factory.dart';
+import 'package:easywrt/beam/grid_size_scope.dart';
+import 'package:easywrt/beam/resize_handle.dart';
 
 class StripeWidget extends ConsumerWidget {
   final StripeItem stripe;
@@ -30,21 +33,24 @@ class StripeWidget extends ConsumerWidget {
     }
     if (maxRow == 0) maxRow = 1; // Minimum 1 row
 
-    final cellWidth = ResponsiveLayout.calculateCellWidth(width);
+    final cellWidth = AppMeta.calculateCellWidth(width);
     final rowHeight = cellWidth; // Square cells
-    final gap = ResponsiveLayout.rem;
+    final gap = AppMeta.rem;
     
-    final totalHeight = (maxRow * rowHeight) + ((maxRow - 1) * gap);
+    // Height includes grid rows, gaps between rows, and 1rem padding on top and bottom
+    final totalHeight = (maxRow * rowHeight) + ((maxRow - 1) * gap) + (2 * gap);
 
     return Container(
       width: width,
-      height: totalHeight > 0 ? totalHeight : 100, // Fallback
+      height: totalHeight > (2 * gap) ? totalHeight : 100, // Fallback
+      padding: EdgeInsets.all(gap),
       decoration: isEditing
           ? BoxDecoration(
               border: Border.all(color: Colors.grey.withOpacity(0.5), style: BorderStyle.solid),
             )
           : null,
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           if (isEditing) ..._buildGridPlaceholders(context, ref, maxRow, cellWidth, gap),
           ...stripe.widgets.map((w) => _buildWidget(context, ref, w, cellWidth, gap)),
@@ -66,16 +72,14 @@ class StripeWidget extends ConsumerWidget {
           width: cellWidth,
           height: cellWidth,
           child: DragTarget<String>(
-            onWillAccept: (data) => true,
-            onAccept: (data) {
+            onWillAcceptWithDetails: (details) => true,
+            onAcceptWithDetails: (details) {
+              final data = details.data;
               final parts = data.split('/');
               if (parts.length == 2) {
                 final sourceStripeId = parts[0];
                 final widgetId = parts[1];
-                // For now, support only same stripe move
-                if (sourceStripeId == stripe.id) {
-                   ref.read(editManagerProvider.notifier).moveWidget(stripe.id, widgetId, x, y);
-                }
+                ref.read(editManagerProvider.notifier).moveWidget(stripe.id, sourceStripeId, widgetId, x, y);
               }
             },
             builder: (context, candidateData, rejectedData) {
@@ -96,12 +100,17 @@ class StripeWidget extends ConsumerWidget {
   Widget _buildWidget(BuildContext context, WidgetRef ref, WidgetInstance w, double cellWidth, double gap) {
     final left = (w.x * cellWidth) + (w.x * gap);
     final top = (w.y * cellWidth) + (w.y * gap);
-    final size = ResponsiveLayout.calculateWidgetSize(width, w.width, w.height);
+    final size = AppMeta.calculateWidgetSize(width, w.width, w.height);
     
+    // Wrap Widget in GridSizeScope
     final child = SizedBox(
       width: size.width,
       height: size.height,
-      child: WidgetFactory.create(w.widgetTypeKey),
+      child: GridSizeScope(
+        width: w.width,
+        height: w.height,
+        child: WidgetFactory.create(w.widgetTypeKey),
+      ),
     );
 
     Widget content = child;
@@ -115,18 +124,36 @@ class StripeWidget extends ConsumerWidget {
            ),
            childWhenDragging: Opacity(opacity: 0.3, child: child), // Ghost
            child: Stack(
+             clipBehavior: Clip.none,
              children: [
                child,
                Positioned(
-                 right: 0,
-                 bottom: 0,
-                 child: GestureDetector(
-                   onPanUpdate: (details) {
-                     // Calculate resize
-                     // Need current size + delta
-                     // logic...
+                 right: -8,
+                 bottom: -8,
+                 child: ResizeHandle(
+                   cellWidth: cellWidth,
+                   onResize: (dx, dy) {
+                     final newW = w.width + dx;
+                     final newH = w.height + dy;
+                     ref.read(editManagerProvider.notifier).resizeWidget(stripe.id, w.id, newW, newH);
                    },
-                   child: const Icon(Icons.arrow_outward, size: 24, color: Colors.blue), // Resize handle
+                 ),
+               ),
+               Positioned(
+                 left: -8,
+                 top: -8,
+                 child: GestureDetector(
+                   onTap: () {
+                     ref.read(editManagerProvider.notifier).deleteWidget(stripe.id, w.id);
+                   },
+                   child: Container(
+                     decoration: const BoxDecoration(
+                       color: Colors.red,
+                       shape: BoxShape.circle,
+                     ),
+                     padding: const EdgeInsets.all(4),
+                     child: const Icon(Icons.remove, size: 16, color: Colors.white),
+                   ),
                  ),
                ),
              ],
@@ -134,10 +161,8 @@ class StripeWidget extends ConsumerWidget {
        );
     }
 
-    return AnimatedPositioned(
+    return Positioned(
       key: ValueKey(w.id),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
       left: left,
       top: top,
       width: size.width,

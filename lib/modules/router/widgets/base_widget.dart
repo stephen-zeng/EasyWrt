@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easywrt/beam/grid_size_scope.dart';
+import 'package:easywrt/beam/widget_edit_scope.dart';
+import 'package:easywrt/modules/router/controllers/edit_controller.dart';
 
 /// Abstract base class for all dashboard widgets.
-///
-/// Hierarchy:
-/// ConsumerWidget <- BaseWidget <- ConcreteWidget
-///
-/// Principles:
-/// - I. Code Quality: Enforces standard structure for all widgets.
-/// - V. Interoperability: Provides a common contract for the layout engine.
-abstract class BaseWidget extends ConsumerWidget {
+/// Handles data fetching, state (loading/error), and layout dispatch.
+abstract class BaseWidget<T> extends ConsumerWidget {
   const BaseWidget({super.key});
 
   /// Unique key identifying this widget type (e.g. 'cpu_usage').
@@ -31,8 +28,100 @@ abstract class BaseWidget extends ConsumerWidget {
   /// Default size when first added to a dashboard.
   String get defaultSize => '1x1';
 
+  /// The data stream to watch.
+  AsyncValue<T> watchData(WidgetRef ref);
+
   /// Standard build method for ConsumerWidget.
-  /// Subclasses must override this to provide the UI.
+  /// Dispatches to specific render methods based on [GridSizeScope] and handles state.
   @override
-  Widget build(BuildContext context, WidgetRef ref);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scope = GridSizeScope.maybeOf(context);
+    final sizeStr = scope?.sizeString ?? defaultSize;
+
+    // Handle Edit Mode / Delete Button
+    final editScope = WidgetEditScope.maybeOf(context);
+    final isEditing = editScope != null && editScope.isEditing && editScope.stripeId != null && editScope.widgetId != null;
+
+    final asyncValue = watchData(ref);
+    
+    final content = asyncValue.when(
+      data: (data) {
+        switch (sizeStr) {
+          case '1x1': return render1x1(context, data, ref);
+          case '1x2': return render1x2(context, data, ref);
+          case '2x1': return render2x1(context, data, ref);
+          case '2x2': return render2x2(context, data, ref);
+          case '2x4': return render2x4(context, data, ref);
+          case '4x2': return render4x2(context, data, ref);
+          case '4x4': return render4x4(context, data, ref);
+          default: return renderDefault(context, data, ref);
+        }
+      },
+      error: (err, stack) => buildError(context, err),
+      loading: () => buildLoading(context),
+    );
+
+    if (isEditing) {
+      return Stack(
+        clipBehavior: Clip.none,
+        children: [
+          content,
+          Positioned(
+            left: -8,
+            top: -8,
+            child: GestureDetector(
+              onTap: () {
+                ref.read(editManagerProvider.notifier).deleteWidget(editScope.stripeId!, editScope.widgetId!);
+              },
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                padding: const EdgeInsets.all(4),
+                child: const Icon(Icons.remove, size: 16, color: Colors.white),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return content;
+  }
+
+  // --- State Rendering Helpers ---
+
+  Widget buildLoading(BuildContext context) {
+    return const Center(child: CircularProgressIndicator());
+  }
+
+  Widget buildError(BuildContext context, Object error) {
+    return const Center(child: Icon(Icons.error_outline, color: Colors.red));
+  }
+
+  // --- Render methods to be implemented/overridden by subclasses ---
+  
+  Widget renderDefault(BuildContext context, T data, WidgetRef ref) => const Center(child: Text('Not implemented'));
+
+  /// Default implementation for 1x1 size: displays the widget's icon.
+  Widget render1x1(BuildContext context, T data, WidgetRef ref) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Center(
+        child: Icon(
+          IconData(iconCode, fontFamily: 'MaterialIcons'),
+          size: 24,
+          color: Theme.of(context).primaryColor,
+        ),
+      ),
+    );
+  }
+  
+  Widget render1x2(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render2x1(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render2x2(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render2x4(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render4x2(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render4x4(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
 }
