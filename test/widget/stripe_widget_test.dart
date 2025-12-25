@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:easywrt/beam/stripe_widget.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
@@ -13,17 +14,19 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StripeWidget(
-            stripe: stripe,
-            width: 400, // 400px width
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: StripeWidget(
+              stripe: stripe,
+              width: 400, // 400px width
+            ),
           ),
         ),
       ),
     );
 
-    expect(find.text('cpu'), findsOneWidget);
+    expect(find.text('Unknown: cpu'), findsOneWidget);
   });
 
   testWidgets('StripeWidget renders placeholders in edit mode', (WidgetTester tester) async {
@@ -33,12 +36,14 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: StripeWidget(
-            stripe: stripe,
-            isEditing: true,
-            width: 400,
+      ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: StripeWidget(
+              stripe: stripe,
+              isEditing: true,
+              width: 400,
+            ),
           ),
         ),
       ),

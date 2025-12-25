@@ -4,7 +4,7 @@ import 'package:easywrt/modules/router/widgets/base_widget.dart';
 import 'cpu_usage_service.dart';
 import 'package:easywrt/modules/router/controllers/rpc_controller.dart';
 
-class CpuUsageWidget extends BaseWidget {
+class CpuUsageWidget extends BaseWidget<List<double>> {
   const CpuUsageWidget({super.key});
 
   @override
@@ -28,51 +28,87 @@ class CpuUsageWidget extends BaseWidget {
   );
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final rpcState = ref.watch(cpuLoadProvider(_rpcRequest));
+  AsyncValue<List<double>> watchData(WidgetRef ref) {
+    return ref.watch(cpuLoadProvider(_rpcRequest));
+  }
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              name,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 16.0),
-            Expanded(
-              child: rpcState.when(
-                data: (load) {
-                  if (load.isNotEmpty) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildLoadItem(context, '1 min', load.isNotEmpty ? load[0] : 0),
-                        _buildLoadItem(context, '5 min', load.length > 1 ? load[1] : 0),
-                        _buildLoadItem(context, '15 min', load.length > 2 ? load[2] : 0),
-                      ],
-                    );
-                  }
-                  return const Text('No Data');
-                },
-                error: (err, stack) => Text('Error: $err'),
-                loading: () => const Center(child: CircularProgressIndicator()),
-              ),
-            ),
-          ],
-        ),
+  @override
+  Widget render2x1(BuildContext context, List<double> load, WidgetRef ref) {
+    return _buildCard(
+      context,
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildLoadItem(context, '1m', load.isNotEmpty ? load[0] : 0, small: true),
+          _buildLoadItem(context, '5m', load.length > 1 ? load[1] : 0, small: true),
+          _buildLoadItem(context, '15m', load.length > 2 ? load[2] : 0, small: true),
+        ],
       ),
     );
   }
 
-  Widget _buildLoadItem(BuildContext context, String label, double value) {
+  @override
+  Widget render2x2(BuildContext context, List<double> load, WidgetRef ref) {
+    return _buildCard(
+      context,
+      Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(name, style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 8),
+          Column(
+            children: [
+              _buildLoadItem(context, '1 min', load.isNotEmpty ? load[0] : 0),
+              const SizedBox(height: 4),
+              _buildLoadItem(context, '5 min', load.length > 1 ? load[1] : 0),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget render4x2(BuildContext context, List<double> load, WidgetRef ref) {
+    return _buildCard(
+      context,
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(name, style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 16),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildLoadItem(context, '1 minute', load.isNotEmpty ? load[0] : 0),
+                _buildLoadItem(context, '5 minutes', load.length > 1 ? load[1] : 0),
+                _buildLoadItem(context, '15 minutes', load.length > 2 ? load[2] : 0),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard(BuildContext context, Widget child) {
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: child,
+      ),
+    );
+  }
+
+  Widget _buildLoadItem(BuildContext context, String label, double value, {bool small = false}) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           value.toStringAsFixed(2),
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: small ? Theme.of(context).textTheme.titleMedium : Theme.of(context).textTheme.headlineSmall,
         ),
         Text(
           label,
