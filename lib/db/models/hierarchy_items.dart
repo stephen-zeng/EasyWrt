@@ -163,7 +163,7 @@ class WidgetInstance extends HiveObject {
   @HiveField(6)
   final Map<String, dynamic>? configuration;
 
-  @HiveField(7)
+  @HiveField(7, defaultValue: const <String>[])
   final List<String> supportedSizes;
 
   WidgetInstance({

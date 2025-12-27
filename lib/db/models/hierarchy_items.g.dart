@@ -159,7 +159,8 @@ class WidgetInstanceAdapter extends TypeAdapter<WidgetInstance> {
       width: fields[4] as int,
       height: fields[5] as int,
       configuration: (fields[6] as Map?)?.cast<String, dynamic>(),
-      supportedSizes: (fields[7] as List).cast<String>(),
+      supportedSizes:
+          fields[7] == null ? [] : (fields[7] as List).cast<String>(),
     );
   }
 
