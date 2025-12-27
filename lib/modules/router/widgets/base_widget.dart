@@ -18,8 +18,8 @@ abstract class BaseWidget<T> extends ConsumerWidget {
   /// Brief description of the widget.
   String get description;
 
-  /// Icon code point (mapped to IconData).
-  int get iconCode;
+  /// Icon for the widget.
+  IconData get icon;
 
   /// List of supported grid sizes.
   /// Example: ['1x1', '4x4']
@@ -110,7 +110,7 @@ abstract class BaseWidget<T> extends ConsumerWidget {
       margin: EdgeInsets.zero,
       child: Center(
         child: Icon(
-          IconData(iconCode, fontFamily: 'MaterialIcons'),
+          icon,
           size: 24,
           color: Theme.of(context).primaryColor,
         ),

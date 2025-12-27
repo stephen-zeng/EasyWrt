@@ -31,7 +31,7 @@ class AddWidgetDialog extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final widget = catalog[index];
                 return ListTile(
-                  leading: Icon(IconData(widget.iconCode, fontFamily: 'MaterialIcons')),
+                  leading: Icon(widget.icon),
                   title: Text(widget.name),
                   subtitle: Text(widget.description),
                   onTap: () {

@@ -34,7 +34,7 @@ class UnknownWidget extends BaseWidget<void> {
   @override
   String get description => 'This widget type is not recognized.';
   @override
-  int get iconCode => 0xe000; // error
+  IconData get icon => Icons.error_outline;
   @override
   List<String> get supportedSizes => const ['1x1'];
 

@@ -13,11 +13,13 @@ class NetworkTrafficWidget extends BaseWidget<Map<String, NetworkRate>> {
   @override
   String get name => 'Network Traffic';
   @override
-  String get description => 'Real-time upload and download speeds.';
+  String get description => 'Shows real-time network traffic rates.';
+  
   @override
-  int get iconCode => 0xe405; // network_check
+  IconData get icon => Icons.compare_arrows;
+  
   @override
-  List<String> get supportedSizes => const ['2x1', '2x2', '4x4'];
+  List<String> get supportedSizes => const ['1x1', '1x2', '2x1', '2x2', '2x4', '4x2', '4x4'];
 
   static const _rpcRequest = RpcRequest(
     namespace: 'network.device',

@@ -14,13 +14,13 @@ class MemoryUsageWidget extends BaseWidget<MemoryUsage?> {
   @override
   String get name => 'Memory Usage';
   @override
-  String get description => 'Real-time memory consumption.';
+  String get description => 'Shows total memory usage.';
+  
   @override
-  int get iconCode => 0xe5d2; // memory icon
+  IconData get icon => Icons.memory;
+  
   @override
-  List<String> get supportedSizes => const ['2x1', '2x2', '4x2', '4x4'];
-  @override
-  String get defaultSize => '2x1';
+  List<String> get supportedSizes => const ['1x1', '1x2', '2x1', '2x2', '2x4', '4x2', '4x4'];
 
   static const _rpcRequest = RpcRequest(
     namespace: 'system',
