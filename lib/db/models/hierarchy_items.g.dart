@@ -159,13 +159,15 @@ class WidgetInstanceAdapter extends TypeAdapter<WidgetInstance> {
       width: fields[4] as int,
       height: fields[5] as int,
       configuration: (fields[6] as Map?)?.cast<String, dynamic>(),
+      supportedSizes:
+          fields[7] == null ? [] : (fields[7] as List).cast<String>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, WidgetInstance obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -179,7 +181,9 @@ class WidgetInstanceAdapter extends TypeAdapter<WidgetInstance> {
       ..writeByte(5)
       ..write(obj.height)
       ..writeByte(6)
-      ..write(obj.configuration);
+      ..write(obj.configuration)
+      ..writeByte(7)
+      ..write(obj.supportedSizes);
   }
 
   @override
@@ -267,6 +271,10 @@ WidgetInstance _$WidgetInstanceFromJson(Map<String, dynamic> json) =>
       width: (json['width'] as num).toInt(),
       height: (json['height'] as num).toInt(),
       configuration: json['configuration'] as Map<String, dynamic>?,
+      supportedSizes: (json['supportedSizes'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$WidgetInstanceToJson(WidgetInstance instance) =>
@@ -278,4 +286,5 @@ Map<String, dynamic> _$WidgetInstanceToJson(WidgetInstance instance) =>
       'width': instance.width,
       'height': instance.height,
       'configuration': instance.configuration,
+      'supportedSizes': instance.supportedSizes,
     };

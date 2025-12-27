@@ -163,6 +163,9 @@ class WidgetInstance extends HiveObject {
   @HiveField(6)
   final Map<String, dynamic>? configuration;
 
+  @HiveField(7, defaultValue: const <String>[])
+  final List<String> supportedSizes;
+
   WidgetInstance({
     required this.id,
     required this.widgetTypeKey,
@@ -171,6 +174,7 @@ class WidgetInstance extends HiveObject {
     required this.width,
     required this.height,
     this.configuration,
+    this.supportedSizes = const [],
   });
 
   factory WidgetInstance.fromJson(Map<String, dynamic> json) =>

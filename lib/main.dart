@@ -12,28 +12,39 @@ import 'package:easywrt/utils/init/hierarchy_seeder.dart';
 import 'package:easywrt/modules/setting/theme/theme_provider.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await HiveInit.init();
-  await HierarchySeeder.seedDefaultHierarchy();
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await HiveInit.init();
+    await HierarchySeeder.seedDefaultHierarchy();
 
-  if (Platform.isMacOS) {
-    await windowManager.ensureInitialized();
-    WindowOptions windowOptions = const WindowOptions(
-      size: Size(800, 600),
-      minimumSize: Size(21 * AppMeta.rem, 300),
-      center: true,
-      backgroundColor: Colors.transparent,
-      skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden, // Hides title bar, keeps traffic lights
-    );
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.show();
-      await windowManager.focus();
-    });
+    if (Platform.isMacOS) {
+      await windowManager.ensureInitialized();
+      WindowOptions windowOptions = const WindowOptions(
+        size: Size(800, 600),
+        minimumSize: Size(21 * AppMeta.rem, 300),
+        center: true,
+        backgroundColor: Colors.transparent,
+        skipTaskbar: false,
+        titleBarStyle: TitleBarStyle.hidden, // Hides title bar, keeps traffic lights
+      );
+      windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.show();
+        await windowManager.focus();
+      });
+    }
+
+    debugPrint('App started in main.dart');
+    runApp(const ProviderScope(child: MyApp()));
+  } catch (e, stack) {
+    debugPrint('Initialization failed: $e\n$stack');
+    runApp(MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Text('Initialization failed:\n$e', textAlign: TextAlign.center),
+        ),
+      ),
+    ));
   }
-
-  debugPrint('App started in main.dart');
-  runApp(const ProviderScope(child: MyApp()));
 }
 
 /// MyApp

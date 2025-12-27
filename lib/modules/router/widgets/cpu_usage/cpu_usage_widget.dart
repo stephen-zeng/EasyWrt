@@ -17,10 +17,10 @@ class CpuUsageWidget extends BaseWidget<List<double>> {
   String get description => 'Shows system load averages (1m, 5m, 15m).';
   
   @override
-  int get iconCode => 0xe1d0; // speed icon
+  IconData get icon => Icons.speed;
   
   @override
-  List<String> get supportedSizes => const ['2x1', '2x2', '4x2'];
+  List<String> get supportedSizes => const ['1x1', '1x2', '2x1', '2x2', '2x4', '4x2', '4x4'];
 
   static const _rpcRequest = RpcRequest(
     namespace: 'system',

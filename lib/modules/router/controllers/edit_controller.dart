@@ -38,7 +38,7 @@ class EditState {
 /// Manages the edit session for a page layout.
 class EditController extends StateNotifier<EditState> {
   EditController() : super(const EditState());
-  
+
   @visibleForTesting
   EditState get debugState => state;
 
@@ -73,10 +73,10 @@ class EditController extends StateNotifier<EditState> {
   Future<void> save() async {
     final workingPage = state.workingPage;
     if (workingPage == null) return;
-    
+
     var box = Hive.box<PageItem>('pages');
     await box.put(workingPage.id, workingPage);
-    
+
     exitEditMode();
   }
 
@@ -102,17 +102,15 @@ class EditController extends StateNotifier<EditState> {
         y: 0,
         width: w,
         height: h,
+        supportedSizes: prototype.supportedSizes,
       );
 
-      final newStripe = StripeItem(
-        id: const Uuid().v4(),
-        widgets: [newWidget],
-      );
+      final newStripe = StripeItem(id: const Uuid().v4(), widgets: [newWidget]);
       newStripes = [newStripe];
     } else {
       // Case 2: Add to last existing stripe
       final lastStripe = stripes.last;
-      
+
       // Calculate next Y position
       int nextY = 0;
       for (var widget in lastStripe.widgets) {
@@ -128,11 +126,13 @@ class EditController extends StateNotifier<EditState> {
         y: nextY,
         width: w,
         height: h,
+        supportedSizes: prototype.supportedSizes,
       );
 
-      final newWidgets = List<WidgetInstance>.from(lastStripe.widgets)..add(newWidget);
+      final newWidgets = List<WidgetInstance>.from(lastStripe.widgets)
+        ..add(newWidget);
       final newStripe = StripeItem(id: lastStripe.id, widgets: newWidgets);
-      
+
       newStripes = List<StripeItem>.from(stripes);
       newStripes[newStripes.length - 1] = newStripe;
     }
@@ -151,59 +151,80 @@ class EditController extends StateNotifier<EditState> {
 
   /// Resizes a widget.
   void resizeWidget(String stripeId, String widgetId, int newW, int newH) {
-    if (newW < 1 || newH < 1 || newW > 4) return; // Strict limits
+    if (newW < 1 || newH < 1 || newH > 4 || newW > 4) return; // Strict limits
 
     final page = state.workingPage;
     if (page == null) return;
-    
+
     // Find stripe and widget
     final stripeIndex = page.stripes?.indexWhere((s) => s.id == stripeId) ?? -1;
     if (stripeIndex == -1) return;
     final stripe = page.stripes![stripeIndex];
-    
+
     final widgetIndex = stripe.widgets.indexWhere((w) => w.id == widgetId);
     if (widgetIndex == -1) return;
     final widget = stripe.widgets[widgetIndex];
-    
+
     if (widget.width == newW && widget.height == newH) return; // No change
 
-    // Check collision with new size at same position
+    // Check if the widget supports this size
+    final sizeKey = '${newW}x${newH}';
+    // Use instance supportedSizes if available, otherwise fallback to Factory
+    List<String> supported = widget.supportedSizes;
+    if (supported.isEmpty) {
+       supported = WidgetFactory.create(widget.widgetTypeKey).supportedSizes;
+    }
+    
+    if (!supported.contains(sizeKey)) {
+      return; 
+    }
+
+    // Strict validation: Check collision immediately
     if (_isValidPlacement(stripe, widgetId, widget.x, widget.y, newW, newH)) {
-       final newWidget = WidgetInstance(
-         id: widget.id,
-         widgetTypeKey: widget.widgetTypeKey,
-         x: widget.x,
-         y: widget.y,
-         width: newW,
-         height: newH,
-         configuration: widget.configuration,
-       );
-       
-       // Replace
-       final newWidgets = List<WidgetInstance>.from(stripe.widgets);
-       newWidgets[widgetIndex] = newWidget;
-       
-       final newStripe = StripeItem(id: stripe.id, widgets: newWidgets);
-       final newStripes = List<StripeItem>.from(page.stripes!);
-       newStripes[stripeIndex] = newStripe;
-       
-       final newPage = PageItem(
-          id: page.id,
-          name: page.name,
-          icon: page.icon,
-          isEditable: page.isEditable,
-          widgetChildren: page.widgetChildren,
-          stripes: newStripes,
-       );
-       
-       state = state.copyWith(workingPage: newPage);
+      final newWidget = WidgetInstance(
+        id: widget.id,
+        widgetTypeKey: widget.widgetTypeKey,
+        x: widget.x,
+        y: widget.y,
+        width: newW,
+        height: newH,
+        configuration: widget.configuration,
+        supportedSizes: widget.supportedSizes,
+      );
+
+      // Replace
+      final newWidgets = List<WidgetInstance>.from(stripe.widgets);
+      newWidgets[widgetIndex] = newWidget;
+
+      final newStripe = StripeItem(id: stripe.id, widgets: newWidgets);
+      final newStripes = List<StripeItem>.from(page.stripes!);
+      newStripes[stripeIndex] = newStripe;
+
+      final newPage = PageItem(
+        id: page.id,
+        name: page.name,
+        icon: page.icon,
+        isEditable: page.isEditable,
+        widgetChildren: page.widgetChildren,
+        stripes: newStripes,
+      );
+
+      state = state.copyWith(workingPage: newPage);
     }
   }
 
   /// Checks if a widget placement is valid (no overlap).
-  bool _isValidPlacement(StripeItem stripe, String widgetId, int x, int y, int w, int h) {
-// ...
-    if (x < 0 || y < 0 || x + w > 4) return false; // Out of bounds
+  bool _isValidPlacement(
+    StripeItem stripe,
+    String widgetId,
+    int x,
+    int y,
+    int w,
+    int h,
+  ) {
+    if (x < 0 || y < 0 || x + w > 4) {
+      return false; // Out of bounds
+    }
 
     for (final other in stripe.widgets) {
       if (other.id == widgetId) continue; // Skip self
@@ -222,7 +243,9 @@ class EditController extends StateNotifier<EditState> {
       bool overlapX = thisLeft < otherRight && thisRight > otherLeft;
       bool overlapY = thisTop < otherBottom && thisBottom > otherTop;
 
-      if (overlapX && overlapY) return false;
+      if (overlapX && overlapY) {
+        return false;
+      }
     }
     return true;
   }
@@ -230,21 +253,33 @@ class EditController extends StateNotifier<EditState> {
   /// Moves a widget to a new position if valid.
   /// Can move between stripes.
   /// Returns true if successful.
-  bool moveWidget(String targetStripeId, String sourceStripeId, String widgetId, int newX, int newY) {
+  bool moveWidget(
+    String targetStripeId,
+    String sourceStripeId,
+    String widgetId,
+    int newX,
+    int newY,
+  ) {
     final page = state.workingPage;
     if (page == null || page.stripes == null) return false;
 
     // 1. Find Source Stripe & Widget
-    final sourceStripeIndex = page.stripes!.indexWhere((s) => s.id == sourceStripeId);
+    final sourceStripeIndex = page.stripes!.indexWhere(
+      (s) => s.id == sourceStripeId,
+    );
     if (sourceStripeIndex == -1) return false;
     final sourceStripe = page.stripes![sourceStripeIndex];
-    
-    final widgetIndex = sourceStripe.widgets.indexWhere((w) => w.id == widgetId);
+
+    final widgetIndex = sourceStripe.widgets.indexWhere(
+      (w) => w.id == widgetId,
+    );
     if (widgetIndex == -1) return false;
     final widget = sourceStripe.widgets[widgetIndex];
 
     // 2. Find Target Stripe
-    final targetStripeIndex = page.stripes!.indexWhere((s) => s.id == targetStripeId);
+    final targetStripeIndex = page.stripes!.indexWhere(
+      (s) => s.id == targetStripeId,
+    );
     if (targetStripeIndex == -1) return false;
     final targetStripe = page.stripes![targetStripeIndex];
 
@@ -254,74 +289,99 @@ class EditController extends StateNotifier<EditState> {
     // We can reuse _isValidPlacement but need to handle "skip self" logic.
     // _isValidPlacement currently skips checking against widgetId.
     // If moving to a different stripe, widgetId won't exist in targetStripe, so it won't be skipped (correct).
-    
-    if (_isValidPlacement(targetStripe, widgetId, newX, newY, widget.width, widget.height)) {
-       // Create new widget instance with updated position
-       final newWidget = WidgetInstance(
-         id: widget.id,
-         widgetTypeKey: widget.widgetTypeKey,
-         x: newX,
-         y: newY,
-         width: widget.width,
-         height: widget.height,
-         configuration: widget.configuration,
-       );
 
-       // Prepare new stripes list
-       final newStripes = List<StripeItem>.from(page.stripes!);
+    if (_isValidPlacement(
+      targetStripe,
+      widgetId,
+      newX,
+      newY,
+      widget.width,
+      widget.height,
+    )) {
+      // Create new widget instance with updated position
+      final newWidget = WidgetInstance(
+        id: widget.id,
+        widgetTypeKey: widget.widgetTypeKey,
+        x: newX,
+        y: newY,
+        width: widget.width,
+        height: widget.height,
+        configuration: widget.configuration,
+        supportedSizes: widget.supportedSizes,
+      );
 
-       if (sourceStripeId == targetStripeId) {
-         // Same Stripe Move
-         final newWidgets = List<WidgetInstance>.from(sourceStripe.widgets);
-         newWidgets[widgetIndex] = newWidget;
-         newStripes[sourceStripeIndex] = StripeItem(id: sourceStripe.id, widgets: newWidgets);
-       } else {
-         // Cross Stripe Move
-         
-         // Remove from source
-         final newSourceWidgets = List<WidgetInstance>.from(sourceStripe.widgets)..removeAt(widgetIndex);
-         newStripes[sourceStripeIndex] = StripeItem(id: sourceStripe.id, widgets: newSourceWidgets);
-         
-         // Add to target
-         final newTargetWidgets = List<WidgetInstance>.from(targetStripe.widgets)..add(newWidget);
-         newStripes[targetStripeIndex] = StripeItem(id: targetStripe.id, widgets: newTargetWidgets);
-       }
+      // Prepare new stripes list
+      final newStripes = List<StripeItem>.from(page.stripes!);
 
-       // Cleanup empty stripes
-       newStripes.removeWhere((s) => s.widgets.isEmpty);
-       
-       // Create new page object
-       final newPage = PageItem(
-          id: page.id,
-          name: page.name,
-          icon: page.icon,
-          isEditable: page.isEditable,
-          widgetChildren: page.widgetChildren,
-          stripes: newStripes,
-       );
-       
-       state = state.copyWith(workingPage: newPage);
+      if (sourceStripeId == targetStripeId) {
+        // Same Stripe Move
+        final newWidgets = List<WidgetInstance>.from(sourceStripe.widgets);
+        newWidgets[widgetIndex] = newWidget;
+        newStripes[sourceStripeIndex] = StripeItem(
+          id: sourceStripe.id,
+          widgets: newWidgets,
+        );
+      } else {
+        // Cross Stripe Move
+
+        // Remove from source
+        final newSourceWidgets = List<WidgetInstance>.from(sourceStripe.widgets)
+          ..removeAt(widgetIndex);
+        newStripes[sourceStripeIndex] = StripeItem(
+          id: sourceStripe.id,
+          widgets: newSourceWidgets,
+        );
+
+        // Add to target
+        final newTargetWidgets = List<WidgetInstance>.from(targetStripe.widgets)
+          ..add(newWidget);
+        newStripes[targetStripeIndex] = StripeItem(
+          id: targetStripe.id,
+          widgets: newTargetWidgets,
+        );
+      }
+
+      // Cleanup empty stripes
+      newStripes.removeWhere((s) => s.widgets.isEmpty);
+
+      // Create new page object
+      final newPage = PageItem(
+        id: page.id,
+        name: page.name,
+        icon: page.icon,
+        isEditable: page.isEditable,
+        widgetChildren: page.widgetChildren,
+        stripes: newStripes,
+      );
+
+      state = state.copyWith(workingPage: newPage);
       return true;
     }
     return false;
   }
+
   /// Moves a widget to a new stripe at the end of the page.
   void moveWidgetToNewStripe(String sourceStripeId, String widgetId) {
     final page = state.workingPage;
     if (page == null || page.stripes == null) return;
 
     // 1. Find and Remove from Source Stripe
-    final sourceStripeIndex = page.stripes!.indexWhere((s) => s.id == sourceStripeId);
+    final sourceStripeIndex = page.stripes!.indexWhere(
+      (s) => s.id == sourceStripeId,
+    );
     if (sourceStripeIndex == -1) return;
-    
+
     final sourceStripe = page.stripes![sourceStripeIndex];
-    final widgetIndex = sourceStripe.widgets.indexWhere((w) => w.id == widgetId);
+    final widgetIndex = sourceStripe.widgets.indexWhere(
+      (w) => w.id == widgetId,
+    );
     if (widgetIndex == -1) return;
-    
+
     final widget = sourceStripe.widgets[widgetIndex];
-    
-    final newSourceWidgets = List<WidgetInstance>.from(sourceStripe.widgets)..removeAt(widgetIndex);
-    
+
+    final newSourceWidgets = List<WidgetInstance>.from(sourceStripe.widgets)
+      ..removeAt(widgetIndex);
+
     // 2. Create New Stripe with the Widget (reset x,y to 0,0)
     final newWidget = WidgetInstance(
       id: widget.id,
@@ -331,24 +391,25 @@ class EditController extends StateNotifier<EditState> {
       width: widget.width,
       height: widget.height,
       configuration: widget.configuration,
+      supportedSizes: widget.supportedSizes,
     );
-    
-    final newStripe = StripeItem(
-      id: const Uuid().v4(),
-      widgets: [newWidget],
-    );
+
+    final newStripe = StripeItem(id: const Uuid().v4(), widgets: [newWidget]);
 
     // 3. Construct New Page
     final newStripes = List<StripeItem>.from(page.stripes!);
-    
+
     // Update source stripe
-    newStripes[sourceStripeIndex] = StripeItem(id: sourceStripe.id, widgets: newSourceWidgets);
-    
+    newStripes[sourceStripeIndex] = StripeItem(
+      id: sourceStripe.id,
+      widgets: newSourceWidgets,
+    );
+
     newStripes.add(newStripe);
-    
+
     // Cleanup empty stripes
     newStripes.removeWhere((s) => s.widgets.isEmpty);
-    
+
     final newPage = PageItem(
       id: page.id,
       name: page.name,
@@ -369,18 +430,19 @@ class EditController extends StateNotifier<EditState> {
     final stripeIndex = page.stripes!.indexWhere((s) => s.id == stripeId);
     if (stripeIndex == -1) return;
     final stripe = page.stripes![stripeIndex];
-    
+
     final widgetIndex = stripe.widgets.indexWhere((w) => w.id == widgetId);
     if (widgetIndex == -1) return;
-    
-    final newWidgets = List<WidgetInstance>.from(stripe.widgets)..removeAt(widgetIndex);
-    
+
+    final newWidgets = List<WidgetInstance>.from(stripe.widgets)
+      ..removeAt(widgetIndex);
+
     final newStripes = List<StripeItem>.from(page.stripes!);
     newStripes[stripeIndex] = StripeItem(id: stripe.id, widgets: newWidgets);
-    
+
     // Cleanup empty stripes
     newStripes.removeWhere((s) => s.widgets.isEmpty);
-    
+
     final newPage = PageItem(
       id: page.id,
       name: page.name,
@@ -394,6 +456,8 @@ class EditController extends StateNotifier<EditState> {
   }
 }
 
-final editManagerProvider = StateNotifierProvider<EditController, EditState>((ref) {
+final editManagerProvider = StateNotifierProvider<EditController, EditState>((
+  ref,
+) {
   return EditController();
 });
