@@ -48,8 +48,8 @@ class EditController extends StateNotifier<EditState> {
 
     // Deep copy using JSON
     final jsonMap = page.toJson();
-    final workingCopy = PageItem.fromJson(json.decode(json.encode(jsonMap)));
-    final snapshot = PageItem.fromJson(json.decode(json.encode(jsonMap)));
+    final workingCopy = PageItem.fromJson(json.decode(json.encode(jsonMap)) as Map<String, dynamic>);
+    final snapshot = PageItem.fromJson(json.decode(json.encode(jsonMap)) as Map<String, dynamic>);
 
     state = EditState(
       isEditing: true,
@@ -74,7 +74,7 @@ class EditController extends StateNotifier<EditState> {
     final workingPage = state.workingPage;
     if (workingPage == null) return;
 
-    var box = Hive.box<PageItem>('pages');
+    final box = Hive.box<PageItem>('pages');
     await box.put(workingPage.id, workingPage);
 
     exitEditMode();
@@ -87,7 +87,7 @@ class EditController extends StateNotifier<EditState> {
 
     final prototype = WidgetFactory.create(widgetTypeKey);
     final parts = prototype.defaultSize.split('x');
-    final w = parts.length > 0 ? int.tryParse(parts[0]) ?? 1 : 1;
+    final w = parts.isNotEmpty ? int.tryParse(parts[0]) ?? 1 : 1;
     final h = parts.length > 1 ? int.tryParse(parts[1]) ?? 1 : 1;
 
     final stripes = page.stripes ?? [];
@@ -168,7 +168,7 @@ class EditController extends StateNotifier<EditState> {
     if (widget.width == newW && widget.height == newH) return; // No change
 
     // Check if the widget supports this size
-    final sizeKey = '${newW}x${newH}';
+    final sizeKey = '${newW}x$newH';
     // Use instance supportedSizes if available, otherwise fallback to Factory
     List<String> supported = widget.supportedSizes;
     if (supported.isEmpty) {
@@ -240,8 +240,8 @@ class EditController extends StateNotifier<EditState> {
       final thisTop = y;
       final thisBottom = y + h;
 
-      bool overlapX = thisLeft < otherRight && thisRight > otherLeft;
-      bool overlapY = thisTop < otherBottom && thisBottom > otherTop;
+      final bool overlapX = thisLeft < otherRight && thisRight > otherLeft;
+      final bool overlapY = thisTop < otherBottom && thisBottom > otherTop;
 
       if (overlapX && overlapY) {
         return false;

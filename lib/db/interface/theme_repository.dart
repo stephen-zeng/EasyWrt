@@ -39,7 +39,7 @@ class ThemeRepository {
       language: current.language,
       lastConnectedRouterId: routerId,
     );
-    debugPrint('Updating lastConnectedRouterId to: $routerId');
+    // debugPrint('Updating lastConnectedRouterId to: $routerId');
 
     await saveSettings(newSettings);
   }

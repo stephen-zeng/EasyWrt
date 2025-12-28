@@ -17,14 +17,16 @@ class ResponsiveLayout extends StatelessWidget {
 
   /// Helper to check if context is landscape.
   static bool isLandscape(BuildContext context) {
-    return MediaQuery.of(context).size.width >= (2 * 21 * AppMeta.rem + 70);
+    return MediaQuery.of(context).size.width >= (2 * 21 * AppMeta.rem + 72);
   }
 
   @override
   Widget build(BuildContext context) {
+    // debugPrint('Width: ${MediaQuery.of(context).size.width}, Height: ${MediaQuery.of(context).size.height}');
     return OrientationBuilder(
       builder: (context, orientation) {
-        if (orientation == Orientation.landscape) {
+        if (orientation == Orientation.landscape &&
+            MediaQuery.of(context).size.width >= 28 * AppMeta.rem) {
           return landscape;
         } else {
           return portrait;

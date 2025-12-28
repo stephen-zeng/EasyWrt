@@ -34,7 +34,7 @@ class SettingSplitWrapper extends StatelessWidget {
     // Cupertino Transition
     Widget cupertinoTransition(Widget child, Animation<double> animation) {
       final key = child.key;
-      debugPrint("Transitioning to key: ${key.toString()}");
+      // debugPrint("Transitioning to key: ${key.toString()}");
       if (key is ValueKey<String> && key.value.startsWith('page_')) {
         return CupertinoPageTransition(
           primaryRouteAnimation: animation,

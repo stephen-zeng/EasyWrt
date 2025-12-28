@@ -20,7 +20,7 @@ class CpuUsageWidget extends BaseWidget<List<double>> {
   IconData get icon => Icons.speed;
   
   @override
-  List<String> get supportedSizes => const ['1x1', '1x2', '2x1', '2x2', '2x4', '4x2', '4x4'];
+  List<String> get supportedSizes => const ['1x1', '2x1', '2x2', '4x2'];
 
   static const _rpcRequest = RpcRequest(
     namespace: 'system',

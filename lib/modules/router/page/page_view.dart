@@ -214,7 +214,7 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
       onAcceptWithDetails: (details) {
          final data = details.data;
          final parts = data.split('/');
-         if (parts.length == 2) {
+         if (parts.length >= 2) {
            final sourceStripeId = parts[0];
            final widgetId = parts[1];
            ref.read(editManagerProvider.notifier).moveWidgetToNewStripe(sourceStripeId, widgetId);
@@ -226,11 +226,11 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
           width: width,
           decoration: BoxDecoration(
             border: Border.all(
-              color: candidateData.isNotEmpty ? Colors.blue : Colors.grey.withOpacity(0.5), 
+              color: candidateData.isNotEmpty ? Colors.blue : Colors.grey.withValues(alpha: 0.5), 
               style: BorderStyle.solid
             ),
             borderRadius: BorderRadius.circular(8),
-            color: candidateData.isNotEmpty ? Colors.blue.withOpacity(0.1) : null,
+            color: candidateData.isNotEmpty ? Colors.blue.withValues(alpha: 0.1) : null,
           ),
           child: const Center(
             child: Text('Drag widget here to create new stripe', style: TextStyle(color: Colors.grey)),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/utils/init/meta.dart';
@@ -7,6 +8,8 @@ import 'package:easywrt/modules/router/widgets/widget_factory.dart';
 import 'package:easywrt/beam/grid_size_scope.dart';
 import 'package:easywrt/beam/resize_handle.dart';
 import 'package:easywrt/beam/resize_shadow.dart';
+
+final dragAnchorOffsetProvider = StateProvider<Offset>((ref) => Offset.zero);
 
 class StripeWidget extends ConsumerStatefulWidget {
   final StripeItem stripe;
@@ -26,6 +29,9 @@ class StripeWidget extends ConsumerStatefulWidget {
 
 class _StripeWidgetState extends ConsumerState<StripeWidget> {
   final Map<String, ValueNotifier<Size>> _shadowNotifiers = {};
+  Size? _draggedWidgetGridSize;
+  Rect? _shadowRect;
+  Point<int>? _dropTargetGridPos;
 
   @override
   void dispose() {
@@ -36,7 +42,8 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
   }
 
   ValueNotifier<Size> _getNotifier(String widgetId) {
-    return _shadowNotifiers.putIfAbsent(widgetId, () => ValueNotifier(Size.zero));
+    return _shadowNotifiers.putIfAbsent(
+        widgetId, () => ValueNotifier(Size.zero));
   }
 
   @override
@@ -53,12 +60,14 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     if (maxRow == 0) maxRow = 1; // Minimum 1 row
 
     final cellWidth = AppMeta.calculateCellWidth(widget.width);
-    final rowHeight = cellWidth; // Square cells
+    final cellHeight = cellWidth; // Square cells
     final gap = AppMeta.rem;
 
     // Height includes grid rows, gaps between rows, and 1rem padding on top and bottom
-    final totalHeight = (maxRow * rowHeight) + ((maxRow - 1) * gap) + (2 * gap);
+    final totalHeight =
+        (maxRow * cellHeight) + ((maxRow - 1) * gap) + (2 * gap);
 
+    // Concept: render layers
     List<Widget> stackChildren = [];
 
     // 0. Shadows (Bottom-most layer)
@@ -89,7 +98,29 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
       }
     }
 
-    return Container(
+    // 4. Active Drop Shadow (Calculated from Drag)
+    // 4. 拖动时的阴影 (根据拖动位置计算)
+    // This renders the shadow indicating where the widget will be dropped.
+    // 这部分渲染指示 widget 将被放置位置的阴影。
+    if (widget.isEditing && // 是否为编辑模式
+        _shadowRect != null && // 阴影矩形已计算
+        _draggedWidgetGridSize != null) { // 拖动的 widget 大小已知
+      stackChildren.add(
+        Positioned(
+          left: _shadowRect!.left,
+          top: _shadowRect!.top,
+          width: _shadowRect!.width,
+          height: _shadowRect!.height,
+          child: ResizeShadow(
+            cellWidth: cellWidth,
+            width: _draggedWidgetGridSize!.width,
+            height: _draggedWidgetGridSize!.height,
+          ),
+        ),
+      );
+    }
+
+    Widget container = Container(
       width: widget.width,
       height: totalHeight > (2 * gap) ? totalHeight : 100, // Fallback
       // padding: EdgeInsets.all(gap), // REMOVED
@@ -102,6 +133,109 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
             )
           : null,
       child: Stack(clipBehavior: Clip.none, children: stackChildren),
+    );
+
+    if (!widget.isEditing) return container;
+
+    return DragTarget<String>(
+      onWillAcceptWithDetails: (_) => true,
+      onMove: (details) {
+        final data = details.data;
+        final parts = data.split('/');
+        if (parts.length >= 4) {
+          final w = int.tryParse(parts[2]) ?? 1;
+          final h = int.tryParse(parts[3]) ?? 1;
+
+          final renderBox = context.findRenderObject() as RenderBox?;
+          if (renderBox == null) return;
+          final widgetTopLeft = renderBox.globalToLocal(details.offset);
+
+          // Find the nearest GridPlaceholder to use as candidate top-left
+          int bestX = -1;
+          int bestY = -1;
+          double minDistSq = double.infinity;
+
+          for (int r = 0; r < maxRow; r++) {
+            for (int c = 0; c < 4; c++) {
+              final px = (c * cellWidth) + (c * gap) + gap;
+              final py = (r * cellWidth) + (r * gap) + gap;
+
+              final dx = widgetTopLeft.dx - px;
+              final dy = widgetTopLeft.dy - py;
+              final dSq = dx * dx + dy * dy;
+
+              if (dSq < minDistSq) {
+                minDistSq = dSq;
+                bestX = c;
+                bestY = r;
+              }
+            }
+          }
+
+          if (bestX != -1) {
+            if (bestX + w > 4) {
+              bestX = max(0, 4 - w);
+            }
+          }
+
+          final x = bestX;
+          final y = bestY;
+
+          if (x != -1 && y != -1) {
+            final targetLeft = (x * cellWidth) + (x * gap) + gap;
+            final targetTop = (y * cellWidth) + (y * gap) + gap;
+            final targetPixelSize =
+                AppMeta.calculateWidgetSize(widget.width, w, h);
+            final targetRect = Rect.fromLTWH(targetLeft, targetTop,
+                targetPixelSize.width, targetPixelSize.height);
+
+            if (targetRect != _shadowRect) {
+              setState(() {
+                // Update shadow position and drop target grid position
+                // 更新阴影位置和放置目标的网格位置
+                _shadowRect = targetRect;
+                _dropTargetGridPos = Point(x, y);
+                _draggedWidgetGridSize = Size(w.toDouble(), h.toDouble());
+              });
+            }
+          } else {
+            if (_shadowRect != null) {
+              setState(() {
+                _shadowRect = null;
+                _dropTargetGridPos = null;
+              });
+            }
+          }
+        }
+      },
+      onLeave: (_) {
+        setState(() {
+          _shadowRect = null;
+          _dropTargetGridPos = null;
+        });
+      },
+      onAcceptWithDetails: (details) {
+        if (_dropTargetGridPos != null) {
+          final parts = details.data.split('/');
+          if (parts.length >= 2) {
+            final sourceStripeId = parts[0];
+            final widgetId = parts[1];
+            ref.read(editManagerProvider.notifier).moveWidget(
+                widget.stripe.id,
+                sourceStripeId,
+                widgetId,
+                _dropTargetGridPos!.x,
+                _dropTargetGridPos!.y);
+          }
+        }
+        setState(() {
+          _shadowRect = null;
+          _dropTargetGridPos = null;
+        });
+      },
+      builder: (context, candidateData, rejectedData) {
+        return container;
+      },
     );
   }
 
@@ -118,15 +252,6 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     return Positioned(
       left: left,
       top: top,
-      // Size is handled by ResizeShadow painting, but Positioned needs constraints?
-      // No, ResizeShadow paints relative to (0,0) of this Positioned.
-      // But Positioned usually requires width/height or right/bottom?
-      // If child has intrinsic size, Positioned(left, top) works.
-      // ResizeShadow returns CustomPaint which expands if size not given.
-      // We should probably give it a safe large size or let it paint without bounds?
-      // Or pass constraints.
-      // CustomPaint size is Size.zero by default.
-      // We will let CustomPaint handle it.
       child: ValueListenableBuilder<Size>(
         valueListenable: notifier,
         builder: (context, size, _) {
@@ -158,29 +283,11 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
             top: top,
             width: cellWidth,
             height: cellWidth,
-            child: DragTarget<String>(
-              onWillAcceptWithDetails: (details) => true,
-              onAcceptWithDetails: (details) {
-                final data = details.data;
-                final parts = data.split('/');
-                if (parts.length == 2) {
-                  final sourceStripeId = parts[0];
-                  final widgetId = parts[1];
-                  ref
-                      .read(editManagerProvider.notifier)
-                      .moveWidget(widget.stripe.id, sourceStripeId, widgetId, x, y);
-                }
-              },
-              builder: (context, candidateData, rejectedData) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: candidateData.isNotEmpty
-                        ? Colors.blue.withValues(alpha: 0.3)
-                        : Colors.grey.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                );
-              },
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
             ),
           ),
         );
@@ -213,21 +320,27 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     Widget content = child;
 
     if (widget.isEditing) {
-      content = Draggable<String>(
-        data: '${widget.stripe.id}/${w.id}',
-        feedback: Material(
-          color: Colors.transparent,
-          child: Opacity(
-            opacity: 0.7,
-            child: SizedBox(
-              width: size.width,
-              height: size.height,
-              child: child,
+      content = Listener(
+        onPointerDown: (event) {
+          ref.read(dragAnchorOffsetProvider.notifier).state =
+              event.localPosition;
+        },
+        child: Draggable<String>(
+          data: '${widget.stripe.id}/${w.id}/${w.width}/${w.height}',
+          feedback: Material(
+            color: Colors.transparent,
+            child: Opacity(
+              opacity: 1.0,
+              child: SizedBox(
+                width: size.width,
+                height: size.height,
+                child: child,
+              ),
             ),
           ),
+          childWhenDragging: const IgnorePointer(child: SizedBox.shrink()),
+          child: child,
         ),
-        childWhenDragging: Opacity(opacity: 0.3, child: child), // Ghost
-        child: child, 
       );
     }
 

@@ -20,7 +20,7 @@ class MemoryUsageWidget extends BaseWidget<MemoryUsage?> {
   IconData get icon => Icons.memory;
   
   @override
-  List<String> get supportedSizes => const ['1x1', '1x2', '2x1', '2x2', '2x4', '4x2', '4x4'];
+  List<String> get supportedSizes => const ['1x1', '2x1', '2x2', '4x2', '4x4'];
 
   static const _rpcRequest = RpcRequest(
     namespace: 'system',
@@ -87,34 +87,47 @@ class MemoryUsageWidget extends BaseWidget<MemoryUsage?> {
             Text(name, style: Theme.of(context).textTheme.titleLarge),
             Expanded(
               child: usage != null ? Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  SizedBox(
-                    height: 120,
-                    width: 120,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        CircularProgressIndicator(
-                          value: usage.percent,
-                          strokeWidth: 12,
-                          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          strokeCap: StrokeCap.round,
-                        ),
-                        Center(
-                          child: Text(
-                            '${(usage.percent * 100).toStringAsFixed(0)}%',
-                            style: Theme.of(context).textTheme.headlineMedium,
+                  Expanded(
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 160, maxWidth: 160),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              CircularProgressIndicator(
+                                value: usage.percent,
+                                strokeWidth: 12,
+                                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                strokeCap: StrokeCap.round,
+                              ),
+                              Center(
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  child: Text(
+                                    '${(usage.percent * 100).toStringAsFixed(0)}%',
+                                    style: Theme.of(context).textTheme.headlineMedium,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: AppMeta.defaultPadding),
-                  _buildDetailRow(context, 'Used', usage.used),
-                  _buildDetailRow(context, 'Free', usage.free),
-                  const Divider(),
-                  _buildDetailRow(context, 'Total', usage.total, isTotal: true),
+                  const SizedBox(height: AppMeta.smallPadding),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildDetailRow(context, 'Used', usage.used),
+                      _buildDetailRow(context, 'Free', usage.free),
+                      const Divider(),
+                      _buildDetailRow(context, 'Total', usage.total, isTotal: true),
+                    ],
+                  ),
                 ],
               ) : const Center(child: Text('No Data')),
             ),
@@ -128,7 +141,7 @@ class MemoryUsageWidget extends BaseWidget<MemoryUsage?> {
     final mb = (bytes / AppMeta.bytesPerMegabyte).toStringAsFixed(1);
     final style = isTotal ? Theme.of(context).textTheme.titleSmall : Theme.of(context).textTheme.bodyMedium;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 1),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

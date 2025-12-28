@@ -24,7 +24,7 @@ class RpcNotifier extends StateNotifier<AsyncValue<dynamic>> {
 
   RpcNotifier(this._service, this._ref, this._request)
       : super(const AsyncValue.loading()) {
-    _startPolling();
+    Future.microtask(() => _startPolling());
   }
 
   Future<void> _startPolling() async {

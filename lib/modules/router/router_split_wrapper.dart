@@ -31,7 +31,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     final key = child.key;
     final currentMw = ref.read(currentMiddlewareProvider);
     final slideId = currentMw?.slideMiddlewareID;
-    debugPrint("Slide Transition Key: $key, SlideID: $slideId");
+    // debugPrint("Slide Transition Key: $key, SlideID: $slideId");
 
     if (key is ValueKey<String> &&
         (key.value.startsWith('page_') ||
