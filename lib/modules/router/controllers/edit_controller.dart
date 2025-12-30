@@ -108,33 +108,52 @@ class EditController extends StateNotifier<EditState> {
       final newStripe = StripeItem(id: const Uuid().v4(), widgets: [newWidget]);
       newStripes = [newStripe];
     } else {
-      // Case 2: Add to last existing stripe
-      final lastStripe = stripes.last;
+      // Case 2: Add to first existing stripe, finding first available spot
+      final targetStripeIndex = 0;
+      final targetStripe = stripes[targetStripeIndex];
 
-      // Calculate next Y position
-      int nextY = 0;
-      for (var widget in lastStripe.widgets) {
-        if (widget.y + widget.height > nextY) {
-          nextY = widget.y + widget.height;
+      int foundX = 0;
+      int foundY = 0;
+      bool found = false;
+
+      // Calculate max Y to determine search bounds
+      int maxY = 0;
+      for (var widget in targetStripe.widgets) {
+        if (widget.y + widget.height > maxY) {
+          maxY = widget.y + widget.height;
         }
+      }
+
+      // Search for first valid placement (Gap filling or Append)
+      // We search up to maxY which ensures we check empty space at the bottom.
+      for (int y = 0; y <= maxY; y++) {
+        for (int x = 0; x <= 4 - w; x++) {
+          if (_isValidPlacement(targetStripe, '', x, y, w, h)) {
+            foundX = x;
+            foundY = y;
+            found = true;
+            break;
+          }
+        }
+        if (found) break;
       }
 
       final newWidget = WidgetInstance(
         id: const Uuid().v4(),
         widgetTypeKey: widgetTypeKey,
-        x: 0,
-        y: nextY,
+        x: foundX,
+        y: foundY,
         width: w,
         height: h,
         supportedSizes: prototype.supportedSizes,
       );
 
-      final newWidgets = List<WidgetInstance>.from(lastStripe.widgets)
+      final newWidgets = List<WidgetInstance>.from(targetStripe.widgets)
         ..add(newWidget);
-      final newStripe = StripeItem(id: lastStripe.id, widgets: newWidgets);
+      final newStripe = StripeItem(id: targetStripe.id, widgets: newWidgets);
 
       newStripes = List<StripeItem>.from(stripes);
-      newStripes[newStripes.length - 1] = newStripe;
+      newStripes[targetStripeIndex] = newStripe;
     }
 
     final newPage = PageItem(

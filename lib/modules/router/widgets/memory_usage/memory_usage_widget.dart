@@ -50,9 +50,20 @@ class MemoryUsageWidget extends BaseWidget<MemoryUsage?> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('RAM', style: Theme.of(context).textTheme.labelMedium),
-                      Text('${(usage.percent * 100).toStringAsFixed(1)}%',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
+                      Flexible(
+                        child: Text(
+                          'RAM',
+                          style: Theme.of(context).textTheme.labelMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          '${(usage.percent * 100).toStringAsFixed(1)}%',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 4),

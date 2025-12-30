@@ -57,8 +57,20 @@ abstract class BaseWidget<T> extends ConsumerWidget {
           default: return renderDefault(context, data, ref);
         }
       },
-      error: (err, stack) => buildError(context, err),
-      loading: () => buildLoading(context),
+      error: (err, stack) {
+        if (sizeStr == '1x1') {
+          return render1x1(context, null, ref);
+        } else {
+          return buildError(context, err);
+        }
+      },
+      loading: () {
+        if (sizeStr == '1x1') {
+          return render1x1(context, null, ref);
+        } else {
+          return buildLoading(context);
+        }
+      },
     );
 
     if (isEditing) {
@@ -93,11 +105,17 @@ abstract class BaseWidget<T> extends ConsumerWidget {
   // --- State Rendering Helpers ---
 
   Widget buildLoading(BuildContext context) {
-    return const Center(child: CircularProgressIndicator());
+    return Card(
+      margin: EdgeInsets.zero,
+      child: const Center(child: CircularProgressIndicator()),
+    );
   }
 
   Widget buildError(BuildContext context, Object error) {
-    return const Center(child: Icon(Icons.error_outline, color: Colors.red));
+    return Card(
+      margin: EdgeInsets.zero,
+      child: Center(child: Icon(Icons.error_outline, color: Colors.red)),
+    );
   }
 
   // --- Render methods to be implemented/overridden by subclasses ---
@@ -105,14 +123,15 @@ abstract class BaseWidget<T> extends ConsumerWidget {
   Widget renderDefault(BuildContext context, T data, WidgetRef ref) => const Center(child: Text('Not implemented'));
 
   /// Default implementation for 1x1 size: displays the widget's icon.
-  Widget render1x1(BuildContext context, T data, WidgetRef ref) {
+  Widget render1x1(BuildContext context, T? data, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Card(
       margin: EdgeInsets.zero,
       child: Center(
         child: Icon(
           icon,
           size: 24,
-          color: Theme.of(context).primaryColor,
+          color: isDark ? Theme.of(context).colorScheme.onSurface : Theme.of(context).primaryColor,
         ),
       ),
     );

@@ -51,9 +51,9 @@ class AddMiddlewareItemDialog extends StatelessWidget {
             child: ListView(
               children: [
                 if (availableMiddlewares.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text('Middlewares', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text('Middlewares', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).hintColor)),
                   ),
                   ...availableMiddlewares.map((m) => ListTile(
                     leading: Icon(AppMeta.getIconData(m.icon)),
@@ -65,9 +65,9 @@ class AddMiddlewareItemDialog extends StatelessWidget {
                   )),
                 ],
                 if (availablePages.isNotEmpty) ...[
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text('Pages', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text('Pages', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).hintColor)),
                   ),
                   ...availablePages.map((p) => ListTile(
                     leading: Icon(AppMeta.getIconData(p.icon)),

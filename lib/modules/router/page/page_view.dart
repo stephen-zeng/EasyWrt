@@ -68,11 +68,17 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
               // Responsive Logic
               final minWidth = AppMeta.minStripeWidthPx;
               final maxStripeWidth = AppMeta.maxStripeWidthPx;
-              final gap = AppMeta.rem;
-              final padding = 32.0; // 16 * 2
-              final availW = constraints.maxWidth - padding;
+              
+              final contentPaddingValue = isEditing ? AppMeta.rem : AppMeta.rem / 2;
+              final gap = isEditing ? AppMeta.rem : 0.0;
+              final horizontalPadding = contentPaddingValue * 2;
+              final availW = constraints.maxWidth - horizontalPadding;
+              
               final int itemCount = stripes.length + (isEditing ? 1 : 0);
 
+              // Note: When !isEditing, gap is 0, so calculation needs to be careful not to divide by zero if minWidth is small (it's not).
+              // Actually the formula (availW + gap) / (minWidth + gap) handles gap=0 fine.
+              
               int cols = ((availW + gap) / (minWidth + gap)).floor();
               // If we have fewer items than space allows, limit cols to itemCount
               // to prevent items from being too narrow/aligned left unnecessarily.
@@ -105,7 +111,7 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
               ];
 
               Widget content = SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(contentPaddingValue),
                 child: Center(
                   child: Wrap(
                     spacing: gap,
@@ -120,7 +126,7 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
                 content = SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: minWidth + padding),
+                    constraints: BoxConstraints(minWidth: minWidth + horizontalPadding),
                     child: content,
                   ),
                 );
@@ -191,19 +197,12 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
     } else {
       // Menu
       return [
-        PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'edit') {
+        IconButton(
+            onPressed: () {
               controller.enterEditMode(page);
-            }
-          },
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'edit',
-              child: Text('Edit Page'),
-            ),
-          ],
-        ),
+            },
+            icon: const Icon(Icons.edit)
+        )
       ];
     }
   }
@@ -221,19 +220,25 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
          }
       },
       builder: (context, candidateData, rejectedData) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final baseColor = isDark ? Colors.white54 : Colors.grey;
+        
         return Container(
           height: 100,
           width: width,
           decoration: BoxDecoration(
             border: Border.all(
-              color: candidateData.isNotEmpty ? Colors.blue : Colors.grey.withValues(alpha: 0.5), 
+              color: candidateData.isNotEmpty ? Theme.of(context).primaryColor : baseColor.withValues(alpha: 0.5), 
               style: BorderStyle.solid
             ),
             borderRadius: BorderRadius.circular(8),
-            color: candidateData.isNotEmpty ? Colors.blue.withValues(alpha: 0.1) : null,
+            color: candidateData.isNotEmpty ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : null,
           ),
-          child: const Center(
-            child: Text('Drag widget here to create new stripe', style: TextStyle(color: Colors.grey)),
+          child: Center(
+            child: Text(
+              'Drag widget here to create new stripe', 
+              style: TextStyle(color: baseColor)
+            ),
           ),
         );
       },

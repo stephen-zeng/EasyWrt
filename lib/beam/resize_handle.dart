@@ -161,9 +161,13 @@ class _ResizeHandleState extends State<ResizeHandle>
       child: AnimatedBuilder(
         animation: _scaleAnimation,
         builder: (context, child) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          final color = isDark ? Colors.white.withValues(alpha: 0.5) : Colors.grey.withValues(alpha: 0.5);
+          
           return CustomPaint(
             painter: _ResizeHandlePainter(
               scale: _scaleAnimation.value,
+              color: color,
             ),
             child: Container(
               width: 40,
@@ -179,15 +183,17 @@ class _ResizeHandleState extends State<ResizeHandle>
 
 class _ResizeHandlePainter extends CustomPainter {
   final double scale;
+  final Color color;
 
   _ResizeHandlePainter({
     required this.scale,
+    required this.color,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.grey.withValues(alpha: 0.5)
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4 * scale
       ..strokeCap = StrokeCap.round;

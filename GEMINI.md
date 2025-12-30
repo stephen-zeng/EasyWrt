@@ -28,4 +28,5 @@ Dart 3.x (Flutter 3.x): Follow standard conventions
 - 001-framework-design: Added Dart 3.x (Flutter 3.x)
 
 <!-- MANUAL ADDITIONS START -->
+- Fixed RenderFlex overflow in memory_usage_widget.dart by wrapping text in Flexible with ellipsis.
 <!-- MANUAL ADDITIONS END -->

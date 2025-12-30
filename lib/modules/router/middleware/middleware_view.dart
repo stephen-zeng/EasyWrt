@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -12,28 +13,31 @@ import 'package:easywrt/utils/init/meta.dart';
 /// 
 /// Function: Renders a middleware (menu list) and its children.
 /// Function: 渲染中间件（菜单列表）及其子项。
-class MiddlewareView extends ConsumerWidget {
+class MiddlewareView extends ConsumerStatefulWidget {
   final String middlewareId;
 
   const MiddlewareView({super.key, required this.middlewareId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Local state for edit mode
-    final isEditingProvider = StateProvider.autoDispose<bool>((ref) => false);
-    final isEditing = ref.watch(isEditingProvider);
+  ConsumerState<MiddlewareView> createState() => _MiddlewareViewState();
+}
 
+class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
+  bool _isEditing = false;
+
+  @override
+  Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: Hive.box<MiddlewareItem>('middlewares').listenable(),
       builder: (context, Box<MiddlewareItem> box, _) {
-        final middleware = box.get(middlewareId);
+        final middleware = box.get(widget.middlewareId);
         if (middleware == null) {
           return const Center(child: Text('Middleware not found'));
         }
 
         // Sync Provider with current URL/ID
         final currentMw = ref.watch(currentMiddlewareProvider);
-        if (currentMw == null || currentMw.middlewareItem.id != middlewareId) {
+        if (currentMw == null || currentMw.middlewareItem.id != widget.middlewareId) {
              Future.microtask(() {
                  ref.read(currentMiddlewareProvider.notifier).init(middleware);
              });
@@ -44,7 +48,7 @@ class MiddlewareView extends ConsumerWidget {
 
         return Scaffold(
           appBar: AppBar(
-            leading: hasHistory && !isEditing ? IconButton(
+            leading: hasHistory && !_isEditing ? IconButton(
               icon: const Icon(Icons.arrow_back),
               onPressed: () {
                  final notifier = ref.read(currentMiddlewareProvider.notifier);
@@ -53,7 +57,7 @@ class MiddlewareView extends ConsumerWidget {
                      final prevItem = box.get(prevId);
                      if (prevItem != null) {
                          notifier.replaceCurrent(prevItem);
-                         notifier.saveSlideMiddlewareID(middlewareId);
+                         notifier.saveSlideMiddlewareID(widget.middlewareId);
                          _go(context, mid: prevId);
                      }
                  }
@@ -62,39 +66,46 @@ class MiddlewareView extends ConsumerWidget {
             title: Text(middleware.name),
             actions: [
               IconButton(
-                icon: Icon(isEditing ? Icons.check : Icons.edit),
+                icon: Icon(_isEditing ? Icons.check : Icons.edit),
                 onPressed: () {
-                   ref.read(isEditingProvider.notifier).state = !isEditing;
+                   setState(() {
+                     _isEditing = !_isEditing;
+                   });
                 },
               ),
             ],
           ),
-          body: isEditing
+          body: _isEditing
               ? ReorderableListView(
                   onReorder: (oldIndex, newIndex) {
                     ref.read(currentMiddlewareProvider.notifier).reorderChildren(oldIndex, newIndex);
+                    HapticFeedback.mediumImpact();
                   },
+                  onReorderStart: (index) {
+                    HapticFeedback.mediumImpact();
+                  },
+                  buildDefaultDragHandles: false,
                   children: [
                     if (middleware.children != null)
                       for (int i=0; i < middleware.children!.length; i++)
-                         _buildListItem(context, ref, middleware.children![i], isEditing, Key('${middleware.children![i]}_$i')),
+                         _buildListItem(context, ref, middleware.children![i], _isEditing, i, Key('${middleware.children![i]}_$i')),
                   ],
                 )
               : ListView(
                   children: [
                     if (middleware.children != null)
                       for (final childId in middleware.children!)
-                        _buildListItem(context, ref, childId, isEditing, null),
+                        _buildListItem(context, ref, childId, _isEditing, 0, null),
                   ],
                 ),
-          floatingActionButton: isEditing 
+          floatingActionButton: _isEditing 
             ? FloatingActionButton(
                 child: const Icon(Icons.add),
                 onPressed: () {
-                   showModalBottomSheet(
+                   showModalBottomSheet<void>(
                       context: context,
                       builder: (_) => AddMiddlewareItemDialog(
-                         currentMiddlewareId: middlewareId,
+                         currentMiddlewareId: widget.middlewareId,
                          ancestorIds: currentMw?.historyMiddlewareIDs ?? [],
                          existingChildIds: middleware.children ?? [],
                          onAdd: (childId) {
@@ -110,7 +121,7 @@ class MiddlewareView extends ConsumerWidget {
     );
   }
 
-  Widget _buildListItem(BuildContext context, WidgetRef ref, String childId, bool isEditing, Key? key) {
+  Widget _buildListItem(BuildContext context, WidgetRef ref, String childId, bool isEditing, int index, Key? key) {
     // Helper to build Delete action
     Widget? trailing;
     if (isEditing) {
@@ -123,7 +134,10 @@ class MiddlewareView extends ConsumerWidget {
                 ref.read(currentMiddlewareProvider.notifier).removeChild(childId);
              },
            ),
-           const Icon(Icons.drag_handle),
+           ReorderableDragStartListener(
+             index: index,
+             child: const Icon(Icons.drag_handle),
+           ),
          ],
        );
     } else {
@@ -136,7 +150,13 @@ class MiddlewareView extends ConsumerWidget {
         key: key,
         leading: Icon(AppMeta.getIconData(childMiddleware.icon)),
         title: Text(childMiddleware.name),
-        trailing: trailing,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.chevron_right),
+            if (isEditing) trailing!,
+          ],
+        ),
         onTap: isEditing ? null : () {
           ref.read(currentMiddlewareProvider.notifier).push(childMiddleware);
           ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID(childMiddleware.id);

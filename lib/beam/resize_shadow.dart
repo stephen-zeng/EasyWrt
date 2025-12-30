@@ -17,11 +17,17 @@ class ResizeShadow extends StatelessWidget {
   Widget build(BuildContext context) {
     if (width <= 0 || height <= 0) return const SizedBox.shrink();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = isDark 
+        ? Colors.white.withValues(alpha: 0.1) 
+        : Colors.black.withValues(alpha: 0.1);
+
     return CustomPaint(
       painter: _ShadowPainter(
         cellWidth: cellWidth,
         width: width,
         height: height,
+        color: color,
       ),
     );
   }
@@ -31,11 +37,13 @@ class _ShadowPainter extends CustomPainter {
   final double cellWidth;
   final double width;
   final double height;
+  final Color color;
 
   _ShadowPainter({
     required this.cellWidth,
     required this.width,
     required this.height,
+    required this.color,
   });
 
   @override
@@ -54,7 +62,7 @@ class _ShadowPainter extends CustomPainter {
     );
 
     final shadowPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 0.1)
+      ..color = color
       ..style = PaintingStyle.fill;
       
     // Draw rounded rect for shadow
@@ -68,6 +76,7 @@ class _ShadowPainter extends CustomPainter {
   bool shouldRepaint(covariant _ShadowPainter oldDelegate) {
     return oldDelegate.width != width ||
            oldDelegate.height != height ||
-           oldDelegate.cellWidth != cellWidth;
+           oldDelegate.cellWidth != cellWidth ||
+           oldDelegate.color != color;
   }
 }

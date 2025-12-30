@@ -16,21 +16,21 @@ class AppMeta {
   static const double maxStripeWidthPx = maxStripeWidthRem * rem; // 560.0
 
   /// Calculates the width of a single grid cell (1x1) given the stripe width.
-  static double calculateCellWidth(double stripeWidthPx) {
-    const double gapPx = rem;
-    // Account for 1rem padding on each side (total 2rem)
-    final gridWidth = stripeWidthPx - (2 * gapPx);
-    if (gridWidth < (3 * gapPx)) return 0;
-    return (gridWidth - (3 * gapPx)) / 4;
+  static double calculateCellWidth(double stripeWidthPx, {double gutter = rem, double edgeGap = rem}) {
+    // Account for edgeGap padding on each side (total 2 * edgeGap)
+    final gridWidth = stripeWidthPx - (2 * edgeGap);
+    // Subtract gutters between the 4 columns (3 * gutter)
+    if (gridWidth < (3 * gutter)) return 0;
+    return (gridWidth - (3 * gutter)) / 4;
   }
 
   /// Calculates the pixel dimensions for a widget spanning [w] x [h] grid units.
-  static Size calculateWidgetSize(double stripeWidthPx, int w, int h) {
-    final cellWidth = calculateCellWidth(stripeWidthPx);
+  static Size calculateWidgetSize(double stripeWidthPx, int w, int h, {double gutter = rem, double edgeGap = rem}) {
+    final cellWidth = calculateCellWidth(stripeWidthPx, gutter: gutter, edgeGap: edgeGap);
     final cellHeight = cellWidth;
     
-    final widthPx = (w * cellWidth) + ((w - 1) * rem);
-    final heightPx = (h * cellHeight) + ((h - 1) * rem);
+    final widthPx = (w * cellWidth) + ((w - 1) * gutter);
+    final heightPx = (h * cellHeight) + ((h - 1) * gutter);
     
     return Size(widthPx, heightPx);
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
@@ -59,13 +60,15 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     }
     if (maxRow == 0) maxRow = 1; // Minimum 1 row
 
-    final cellWidth = AppMeta.calculateCellWidth(widget.width);
+    final gutter = AppMeta.rem;
+    final edgeGap = widget.isEditing ? AppMeta.rem : AppMeta.rem / 2;
+    
+    final cellWidth = AppMeta.calculateCellWidth(widget.width, gutter: gutter, edgeGap: edgeGap);
     final cellHeight = cellWidth; // Square cells
-    final gap = AppMeta.rem;
 
-    // Height includes grid rows, gaps between rows, and 1rem padding on top and bottom
+    // Height includes grid rows, gutters between rows, and edgeGap padding on top and bottom
     final totalHeight =
-        (maxRow * cellHeight) + ((maxRow - 1) * gap) + (2 * gap);
+        (maxRow * cellHeight) + ((maxRow - 1) * gutter) + (2 * edgeGap);
 
     // Concept: render layers
     List<Widget> stackChildren = [];
@@ -73,27 +76,27 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     // 0. Shadows (Bottom-most layer)
     if (widget.isEditing) {
       for (var w in widget.stripe.widgets) {
-        stackChildren.add(_buildShadow(context, w, cellWidth, gap));
+        stackChildren.add(_buildShadow(context, w, cellWidth, gutter, edgeGap));
       }
     }
 
     // 1. Grid Placeholders
     if (widget.isEditing) {
       stackChildren.addAll(
-        _buildGridPlaceholders(context, maxRow, cellWidth, gap),
+        _buildGridPlaceholders(context, maxRow, cellWidth, gutter, edgeGap),
       );
     }
 
     // 2. Widgets
     for (var w in widget.stripe.widgets) {
-      stackChildren.add(_buildWidget(context, w, cellWidth, gap));
+      stackChildren.add(_buildWidget(context, w, cellWidth, gutter, edgeGap));
     }
 
     // 3. Edit Controls (Top layer)
     if (widget.isEditing) {
       for (var w in widget.stripe.widgets) {
         stackChildren.addAll(
-          _buildEditControls(context, w, cellWidth, gap),
+          _buildEditControls(context, w, cellWidth, gutter, edgeGap),
         );
       }
     }
@@ -122,8 +125,8 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
 
     Widget container = Container(
       width: widget.width,
-      height: totalHeight > (2 * gap) ? totalHeight : 100, // Fallback
-      // padding: EdgeInsets.all(gap), // REMOVED
+      height: totalHeight > (2 * edgeGap) ? totalHeight : 100, // Fallback
+      // padding: EdgeInsets.all(edgeGap), // REMOVED
       decoration: widget.isEditing
           ? BoxDecoration(
               border: Border.all(
@@ -157,8 +160,8 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
 
           for (int r = 0; r < maxRow; r++) {
             for (int c = 0; c < 4; c++) {
-              final px = (c * cellWidth) + (c * gap) + gap;
-              final py = (r * cellWidth) + (r * gap) + gap;
+              final px = (c * cellWidth) + (c * gutter) + edgeGap;
+              final py = (r * cellWidth) + (r * gutter) + edgeGap;
 
               final dx = widgetTopLeft.dx - px;
               final dy = widgetTopLeft.dy - py;
@@ -182,10 +185,10 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
           final y = bestY;
 
           if (x != -1 && y != -1) {
-            final targetLeft = (x * cellWidth) + (x * gap) + gap;
-            final targetTop = (y * cellWidth) + (y * gap) + gap;
+            final targetLeft = (x * cellWidth) + (x * gutter) + edgeGap;
+            final targetTop = (y * cellWidth) + (y * gutter) + edgeGap;
             final targetPixelSize =
-                AppMeta.calculateWidgetSize(widget.width, w, h);
+                AppMeta.calculateWidgetSize(widget.width, w, h, gutter: gutter, edgeGap: edgeGap);
             final targetRect = Rect.fromLTWH(targetLeft, targetTop,
                 targetPixelSize.width, targetPixelSize.height);
 
@@ -243,10 +246,11 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     BuildContext context,
     WidgetInstance w,
     double cellWidth,
-    double gap,
+    double gutter,
+    double edgeGap,
   ) {
-    final left = (w.x * cellWidth) + (w.x * gap) + gap;
-    final top = (w.y * cellWidth) + (w.y * gap) + gap;
+    final left = (w.x * cellWidth) + (w.x * gutter) + edgeGap;
+    final top = (w.y * cellWidth) + (w.y * gutter) + edgeGap;
     final notifier = _getNotifier(w.id);
 
     return Positioned(
@@ -269,13 +273,19 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     BuildContext context,
     int rows,
     double cellWidth,
-    double gap,
+    double gutter,
+    double edgeGap,
   ) {
     List<Widget> placeholders = [];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final placeholderColor = isDark 
+        ? Colors.white.withValues(alpha: 0.1) 
+        : Colors.black.withValues(alpha: 0.05);
+
     for (int y = 0; y < rows; y++) {
       for (int x = 0; x < 4; x++) {
-        final left = (x * cellWidth) + (x * gap) + gap;
-        final top = (y * cellWidth) + (y * gap) + gap;
+        final left = (x * cellWidth) + (x * gutter) + edgeGap;
+        final top = (y * cellWidth) + (y * gutter) + edgeGap;
 
         placeholders.add(
           Positioned(
@@ -285,7 +295,7 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
             height: cellWidth,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withValues(alpha: 0.1),
+                color: placeholderColor,
                 shape: BoxShape.circle,
               ),
             ),
@@ -300,11 +310,12 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     BuildContext context,
     WidgetInstance w,
     double cellWidth,
-    double gap,
+    double gutter,
+    double edgeGap,
   ) {
-    final left = (w.x * cellWidth) + (w.x * gap) + gap;
-    final top = (w.y * cellWidth) + (w.y * gap) + gap;
-    final size = AppMeta.calculateWidgetSize(widget.width, w.width, w.height);
+    final left = (w.x * cellWidth) + (w.x * gutter) + edgeGap;
+    final top = (w.y * cellWidth) + (w.y * gutter) + edgeGap;
+    final size = AppMeta.calculateWidgetSize(widget.width, w.width, w.height, gutter: gutter, edgeGap: edgeGap);
 
     // Wrap Widget in GridSizeScope
     final child = SizedBox(
@@ -327,6 +338,7 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
         },
         child: Draggable<String>(
           data: '${widget.stripe.id}/${w.id}/${w.width}/${w.height}',
+          onDragStarted: HapticFeedback.mediumImpact,
           feedback: Material(
             color: Colors.transparent,
             child: Opacity(
@@ -358,11 +370,12 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     BuildContext context,
     WidgetInstance w,
     double cellWidth,
-    double gap,
+    double gutter,
+    double edgeGap,
   ) {
-    final left = (w.x * cellWidth) + (w.x * gap) + gap;
-    final top = (w.y * cellWidth) + (w.y * gap) + gap;
-    final size = AppMeta.calculateWidgetSize(widget.width, w.width, w.height);
+    final left = (w.x * cellWidth) + (w.x * gutter) + edgeGap;
+    final top = (w.y * cellWidth) + (w.y * gutter) + edgeGap;
+    final size = AppMeta.calculateWidgetSize(widget.width, w.width, w.height, gutter: gutter, edgeGap: edgeGap);
     final notifier = _getNotifier(w.id);
 
     return [
