@@ -17,8 +17,12 @@ class HierarchySeeder {
 
     // Force clear for development to apply structure changes
     // 强制清除以便开发时应用结构更改
-    await middlewareBox.clear();
-    await pageBox.clear();
+    // await middlewareBox.clear();
+    // await pageBox.clear();
+
+    if (middlewareBox.containsKey('router_root')) {
+      return;
+    }
 
     // Create Page: Internal Device
     // 创建页面: Internal Device
@@ -26,7 +30,7 @@ class HierarchySeeder {
       id: 'internal_device_page',
       name: 'Internal Device',
       icon: 'hard_drive',
-      widgetChildren: ['CpuUsageWidget', 'MemoryUsageWidget'],
+      isEditable: true,
     );
     await pageBox.put(internalDevicePage.id, internalDevicePage);
 

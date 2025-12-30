@@ -1,27 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
 
-/// AddWidgetDialog
 /// AddWidgetDialog
 /// 
 /// Function: A dialog to select a widget to add to a page.
-/// Function: 选择要添加到页面的组件的对话框。
-/// Inputs: 
-/// Inputs: 
-///   - [onAdd]: Callback with selected widget name.
-///   - [onAdd]: 带有选定组件名称的回调。
-/// Outputs: 
-/// Outputs: 
-///   - [Widget]: List of available widgets.
-///   - [Widget]: 可用组件列表。
-class AddWidgetDialog extends StatelessWidget {
-  final Function(String) onAdd;
+class AddWidgetDialog extends ConsumerWidget {
+  final ValueChanged<String> onAdd;
 
   const AddWidgetDialog({super.key, required this.onAdd});
 
   @override
-  Widget build(BuildContext context) {
-    // List of available widgets
-    final availableWidgets = ['CpuUsageWidget', 'MemoryUsageWidget', 'NetworkTrafficWidget'];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalog = ref.watch(widgetCatalogProvider);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -36,13 +27,15 @@ class AddWidgetDialog extends StatelessWidget {
           const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
-              itemCount: availableWidgets.length,
+              itemCount: catalog.length,
               itemBuilder: (context, index) {
-                final widgetName = availableWidgets[index];
+                final widget = catalog[index];
                 return ListTile(
-                  title: Text(widgetName),
+                  leading: Icon(widget.icon),
+                  title: Text(widget.name),
+                  subtitle: Text(widget.description),
                   onTap: () {
-                    onAdd(widgetName);
+                    onAdd(widget.typeKey);
                     Navigator.of(context).pop();
                   },
                 );

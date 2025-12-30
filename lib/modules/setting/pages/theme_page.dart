@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easywrt/beam/responsive_layout.dart';
+import 'package:easywrt/beam/window/responsive_layout.dart';
 import 'package:easywrt/modules/setting/theme/theme_provider.dart';
 
 /// ThemePage
@@ -21,17 +21,12 @@ class ThemePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
+    final isLandscape = ResponsiveLayout.isLandscape(context);
 
     return Scaffold(
       appBar: AppBar(
-        leading: !ResponsiveLayout.isLandscape(context)
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  context.go('/setting');
-                },
-              )
-            : null,
+        // Automatically implies leading back button in Portrait (Nested Navigator)
+        // In Landscape, no leading is shown (Root Navigator can't pop this specific page in split view)
         title: const Text('Theme Settings'),
       ),
       body: ListView(

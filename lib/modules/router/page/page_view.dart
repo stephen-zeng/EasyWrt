@@ -2,168 +2,236 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:easywrt/beam/responsive_layout.dart';
+import 'package:easywrt/beam/window/responsive_layout.dart';
+import 'package:easywrt/beam/widget/stripe_widget.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
-import 'package:easywrt/modules/router/controllers/current_page_controller.dart';
-import 'package:easywrt/modules/router/widgets/cpu_usage/cpu_usage_widget.dart';
-import 'package:easywrt/modules/router/widgets/add_widget_dialog.dart';
-import 'package:easywrt/modules/router/widgets/memory_usage/memory_usage_widget.dart';
-import 'package:easywrt/modules/router/widgets/network_traffic/network_traffic_widget.dart';
+import 'package:easywrt/utils/init/meta.dart';
+import 'package:easywrt/modules/router/controllers/edit_controller.dart';
+import 'package:easywrt/modules/router/page/add_widget_dialog.dart';
 
-/// RouterPageView
-/// RouterPageView
-/// 
-/// Function: Renders a page and its configured widgets. Supports edit mode for layout customization.
-/// Function: 渲染页面及其配置的组件。支持用于自定义布局的编辑模式。
-/// Inputs: 
-/// Inputs: 
-///   - [pageId]: ID of the page to display.
-///   - [pageId]: 要显示的页面 ID。
-/// Outputs: 
-/// Outputs: 
-///   - [Widget]: List/Reorderable list of widgets.
-///   - [Widget]: 组件的列表/可重新排序列表。
-class RouterPageView extends ConsumerWidget {
+class RouterPageView extends ConsumerStatefulWidget {
   final String pageId;
 
   const RouterPageView({super.key, required this.pageId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<RouterPageView> createState() => _RouterPageViewState();
+}
+
+class _RouterPageViewState extends ConsumerState<RouterPageView> {
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pageId = widget.pageId;
+
     final isLandscape = ResponsiveLayout.isLandscape(context);
+    final editState = ref.watch(editManagerProvider);
+    final isEditing = editState.isEditing && editState.editingPageId == pageId;
+    final editController = ref.read(editManagerProvider.notifier);
 
     return ValueListenableBuilder(
       valueListenable: Hive.box<PageItem>('pages').listenable(),
       builder: (context, Box<PageItem> box, _) {
-        final page = box.get(pageId);
+        // Use working copy if editing, otherwise hive data
+        PageItem? page = box.get(pageId);
+        if (isEditing && editState.workingPage != null) {
+          page = editState.workingPage;
+        }
 
         if (page == null) {
           return const Center(child: Text('Page not found'));
         }
 
-        // Init/Sync CurrentPage
-        final currentPage = ref.watch(currentPageProvider);
-        if (currentPage == null || currentPage.id != pageId) {
-             Future.microtask(() {
-                 ref.read(currentPageProvider.notifier).init(page);
-             });
-        }
-        
-        final isEditMode = currentPage?.isEditMode ?? false;
-
-        final widgets = page.widgetChildren ?? [];
+        // Init/Sync CurrentPage (Legacy support if needed)
+        // ref.read(currentPageProvider.notifier).init(page);
 
         return Scaffold(
           appBar: AppBar(
-            automaticallyImplyLeading: !isLandscape, // Hide back button in landscape
-            leading: !isLandscape 
-              ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  // In Portrait, back clears the PID selection to return to Middleware
-                  final state = GoRouterState.of(context);
-                  final currentMid = state.uri.queryParameters['mid'] ?? 'router_root';
-                  context.go(Uri(
-                    path: '/router',
-                    queryParameters: {
-                      'mid': currentMid,
-                      'animateType': 'fromLeft',
-                    }, // Clear PID
-                  ).toString());
-                },
-              )
-              : null,
+            automaticallyImplyLeading: !isLandscape && !isEditing,
+            leading: _buildLeading(context, isLandscape, isEditing, editController),
             title: Text(page.name),
-            actions: [
-              IconButton(
-                icon: Icon(isEditMode ? Icons.done : Icons.edit),
-                onPressed: () {
-                  ref.read(currentPageProvider.notifier).toggleEditMode();
-                },
-              ),
-              if (isEditMode)
-                IconButton(
-                  icon: const Icon(Icons.add),
+            actions: _buildActions(context, page, isEditing, editController),
+          ),
+          body: LayoutBuilder(
+            builder: (context, constraints) {
+              final stripes = page!.stripes ?? [];
+              
+              // Responsive Logic
+              final minWidth = AppMeta.minStripeWidthPx;
+              final maxStripeWidth = AppMeta.maxStripeWidthPx;
+              
+              final contentPaddingValue = isEditing ? AppMeta.rem : AppMeta.rem / 2;
+              final gap = isEditing ? AppMeta.rem : 0.0;
+              final horizontalPadding = contentPaddingValue * 2;
+              final availW = constraints.maxWidth - horizontalPadding;
+              
+              final int itemCount = stripes.length + (isEditing ? 1 : 0);
+
+              // Note: When !isEditing, gap is 0, so calculation needs to be careful not to divide by zero if minWidth is small (it's not).
+              // Actually the formula (availW + gap) / (minWidth + gap) handles gap=0 fine.
+              
+              int cols = ((availW + gap) / (minWidth + gap)).floor();
+              // If we have fewer items than space allows, limit cols to itemCount
+              // to prevent items from being too narrow/aligned left unnecessarily.
+              // They will expand up to maxStripeWidth and be centered.
+              if (itemCount > 0 && cols > itemCount) {
+                cols = itemCount;
+              }
+              if (cols < 1) cols = 1;
+
+              double stripeWidth = (availW - (cols - 1) * gap) / cols;
+              bool scrollHorizontal = false;
+
+              // Apply constraints
+              if (stripeWidth < minWidth) {
+                stripeWidth = minWidth;
+                scrollHorizontal = true;
+              } else if (stripeWidth > maxStripeWidth) {
+                stripeWidth = maxStripeWidth;
+              }
+
+              final List<Widget> children = [
+                ...stripes.map((s) => StripeWidget(
+                      key: ValueKey(s.id),
+                      stripe: s,
+                      isEditing: isEditing,
+                      width: stripeWidth,
+                    )),
+                if (isEditing)
+                  _buildEmptyStripePlaceholder(context, stripeWidth),
+              ];
+
+              Widget content = SingleChildScrollView(
+                padding: EdgeInsets.all(contentPaddingValue),
+                child: Center(
+                  child: Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    alignment: WrapAlignment.start,
+                    children: children,
+                  ),
+                ),
+              );
+
+              if (scrollHorizontal) {
+                content = SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: minWidth + horizontalPadding),
+                    child: content,
+                  ),
+                );
+              }
+
+              return content;
+            },
+          ),
+          floatingActionButton: isEditing
+              ? FloatingActionButton(
                   onPressed: () {
                     showModalBottomSheet(
                       context: context,
-                      builder: (context) => AddWidgetDialog(
-                        onAdd: (widgetName) async {
-                          final newWidgets = List<String>.from(widgets)..add(widgetName);
-                          final newPage = PageItem(
-                            id: page.id,
-                            name: page.name,
-                            icon: page.icon,
-                            widgetChildren: newWidgets,
-                          );
-                          await box.put(page.id, newPage);
+                      builder: (_) => AddWidgetDialog(
+                        onAdd: (widgetKey) {
+                           ref.read(editManagerProvider.notifier).addWidget(widgetKey);
                         },
                       ),
                     );
                   },
-                ),
-            ],
-          ),
-          body: isEditMode
-              ? ReorderableListView(
-                  padding: const EdgeInsets.all(16),
-                  onReorder: (oldIndex, newIndex) async {
-                    if (oldIndex < newIndex) {
-                      newIndex -= 1;
-                    }
-                    final newWidgets = List<String>.from(widgets);
-                    final item = newWidgets.removeAt(oldIndex);
-                    newWidgets.insert(newIndex, item);
-
-                     final newPage = PageItem(
-                            id: page.id,
-                            name: page.name,
-                            icon: page.icon,
-                            widgetChildren: newWidgets,
-                          );
-                    await box.put(page.id, newPage);
-                  },
-                  children: [
-                    for (int i = 0; i < widgets.length; i++)
-                      KeyedSubtree(
-                        key: ValueKey('${widgets[i]}_$i'),
-                        child: Padding(
-                           padding: const EdgeInsets.only(bottom: 16),
-                           child: _buildWidget(widgets[i]),
-                        ),
-                      ),
-                  ],
+                  child: const Icon(Icons.add),
                 )
-              : ListView(
-                  padding: const EdgeInsets.all(16),
-                  children: [
-                    for (final widgetName in widgets)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: _buildWidget(widgetName),
-                      ),
-                  ],
-                ),
+              : null,
         );
       },
     );
   }
 
-  Widget _buildWidget(String widgetName) {
-    switch (widgetName) {
-      case 'CpuUsageWidget':
-        return const CpuUsageWidget();
-      case 'MemoryUsageWidget':
-        return const MemoryUsageWidget();
-      case 'NetworkTrafficWidget':
-        return const NetworkTrafficWidget();
-      default:
-        return Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text('Unknown Widget: $widgetName'),
+  Widget? _buildLeading(BuildContext context, bool isLandscape, bool isEditing, EditController controller) {
+    if (isEditing) {
+      return IconButton(
+        icon: const Icon(Icons.close),
+        onPressed: () {
+          // Confirm discard?
+          controller.discard();
+        },
+      );
+    }
+    // In Portrait (Nested Navigator), we let automaticallyImplyLeading create the BackButton.
+    // In Landscape, we don't want a back button (usually).
+    // If we wanted to enforce it in Portrait:
+    // if (!isLandscape) return const BackButton();
+    return null; 
+  }
+
+
+  List<Widget> _buildActions(BuildContext context, PageItem page, bool isEditing, EditController controller) {
+    if (isEditing) {
+      return [
+        IconButton(
+          icon: const Icon(Icons.check),
+          onPressed: () {
+            controller.save();
+          },
+        ),
+      ];
+    } else {
+      // Menu
+      return [
+        IconButton(
+            onPressed: () {
+              controller.enterEditMode(page);
+            },
+            icon: const Icon(Icons.edit)
+        )
+      ];
+    }
+  }
+
+  Widget _buildEmptyStripePlaceholder(BuildContext context, double width) {
+    return DragTarget<String>(
+      onWillAcceptWithDetails: (details) => true,
+      onAcceptWithDetails: (details) {
+         final data = details.data;
+         final parts = data.split('/');
+         if (parts.length >= 2) {
+           final sourceStripeId = parts[0];
+           final widgetId = parts[1];
+           ref.read(editManagerProvider.notifier).moveWidgetToNewStripe(sourceStripeId, widgetId);
+         }
+      },
+      builder: (context, candidateData, rejectedData) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final baseColor = isDark ? Colors.white54 : Colors.grey;
+        
+        return Container(
+          height: 100,
+          width: width,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: candidateData.isNotEmpty ? Theme.of(context).primaryColor : baseColor.withValues(alpha: 0.5), 
+              style: BorderStyle.solid
+            ),
+            borderRadius: BorderRadius.circular(8),
+            color: candidateData.isNotEmpty ? Theme.of(context).primaryColor.withValues(alpha: 0.1) : null,
+          ),
+          child: Center(
+            child: Text(
+              'Drag widget here to create new stripe', 
+              style: TextStyle(color: baseColor)
+            ),
           ),
         );
-    }
+      },
+    );
   }
 }
