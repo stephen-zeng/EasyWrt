@@ -31,22 +31,6 @@ class SettingSplitWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     final page = state.uri.queryParameters['page'];
 
-    // Cupertino Transition
-    Widget cupertinoTransition(Widget child, Animation<double> animation) {
-      final key = child.key;
-      // debugPrint("Transitioning to key: ${key.toString()}");
-      if (key is ValueKey<String> && key.value.startsWith('page_')) {
-        return CupertinoPageTransition(
-          primaryRouteAnimation: animation,
-          secondaryRouteAnimation: const AlwaysStoppedAnimation(0.0),
-          linearTransition: false,
-          child: child,
-        );
-      }
-      // Fallback for Root: Just Fade
-      return FadeTransition(opacity: animation, child: child);
-    }
-
     Widget getPageWidget(String? pageName) {
       switch (pageName) {
         case 'router_manager':
@@ -60,27 +44,33 @@ class SettingSplitWrapper extends StatelessWidget {
 
     // Portrait Mode
     if (!ResponsiveLayout.isLandscape(context)) {
-      final Widget child;
-      final String keyName;
+       final List<Page> pages = [
+         const CupertinoPage(
+           key: ValueKey('mid_setting_root'),
+           child: SettingRootMiddleware(),
+         ),
+       ];
       
-      if (page != null) {
-        child = getPageWidget(page);
-        keyName = 'page_$page';
-      } else {
-        child = const SettingRootMiddleware();
-        keyName = 'mid_setting_root';
-      }
+       if (page != null) {
+          pages.add(CupertinoPage(
+            key: ValueKey('page_$page'),
+            child: getPageWidget(page),
+          ));
+       }
 
-      return AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        switchInCurve: Curves.linear, 
-        switchOutCurve: Curves.linear,
-        transitionBuilder: cupertinoTransition,
-        child: KeyedSubtree(
-          key: ValueKey(keyName),
-          child: child,
-        ),
-      );
+       return Navigator(
+          key: const ValueKey('setting_navigator'),
+          pages: pages,
+          onPopPage: (route, result) {
+             if (!route.didPop(result)) return false;
+
+             if (page != null) {
+                // Popped Page -> Go to Root
+                context.go('/setting');
+             }
+             return true; 
+          },
+       );
     }
 
     // Landscape Mode

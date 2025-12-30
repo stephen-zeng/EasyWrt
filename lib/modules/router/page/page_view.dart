@@ -8,6 +8,7 @@ import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/modules/router/controllers/edit_controller.dart';
 import 'package:easywrt/modules/router/page/add_widget_dialog.dart';
+
 class RouterPageView extends ConsumerStatefulWidget {
   final String pageId;
 
@@ -165,24 +166,13 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
         },
       );
     }
-    if (!isLandscape) {
-      return IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () {
-          final state = GoRouterState.of(context);
-          final currentMid = state.uri.queryParameters['mid'] ?? 'router_root';
-          context.go(Uri(
-            path: '/router',
-            queryParameters: {
-              'mid': currentMid,
-              'animateType': 'fromLeft',
-            },
-          ).toString());
-        },
-      );
-    }
-    return null;
+    // In Portrait (Nested Navigator), we let automaticallyImplyLeading create the BackButton.
+    // In Landscape, we don't want a back button (usually).
+    // If we wanted to enforce it in Portrait:
+    // if (!isLandscape) return const BackButton();
+    return null; 
   }
+
 
   List<Widget> _buildActions(BuildContext context, PageItem page, bool isEditing, EditController controller) {
     if (isEditing) {

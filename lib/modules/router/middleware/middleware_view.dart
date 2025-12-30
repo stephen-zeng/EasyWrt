@@ -7,6 +7,7 @@ import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/modules/router/controllers/current_middleware_controller.dart';
 import 'package:easywrt/modules/router/middleware/add_middleware_item_dialog.dart';
 import 'package:easywrt/utils/init/meta.dart';
+import 'package:easywrt/beam/window/responsive_layout.dart';
 
 /// MiddlewareView
 /// MiddlewareView
@@ -35,33 +36,19 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
           return const Center(child: Text('Middleware not found'));
         }
 
-        // Sync Provider with current URL/ID
+        // Note: Provider initialization is now handled by RouterSplitWrapper
+
         final currentMw = ref.watch(currentMiddlewareProvider);
-        if (currentMw == null || currentMw.middlewareItem.id != widget.middlewareId) {
-             Future.microtask(() {
-                 ref.read(currentMiddlewareProvider.notifier).init(middleware);
-             });
-        }
-        
         // Check History for AppBar visibility
         final hasHistory = currentMw != null && currentMw.historyMiddlewareIDs.isNotEmpty;
+        final isLandscape = ResponsiveLayout.isLandscape(context);
 
         return Scaffold(
           appBar: AppBar(
-            leading: hasHistory && !_isEditing ? IconButton(
+            automaticallyImplyLeading: !isLandscape && !_isEditing,
+            leading: hasHistory && !_isEditing && isLandscape ? IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: () {
-                 final notifier = ref.read(currentMiddlewareProvider.notifier);
-                 final prevId = notifier.pop();
-                 if (prevId != null) {
-                     final prevItem = box.get(prevId);
-                     if (prevItem != null) {
-                         notifier.replaceCurrent(prevItem);
-                         notifier.saveSlideMiddlewareID(widget.middlewareId);
-                         _go(context, mid: prevId);
-                     }
-                 }
-              },
+              onPressed: () => _handleBack(context, box),
             ): null,
             title: Text(middleware.name),
             actions: [
@@ -119,6 +106,19 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
         );
       },
     );
+  }
+
+  void _handleBack(BuildContext context, Box<MiddlewareItem> box) {
+    final notifier = ref.read(currentMiddlewareProvider.notifier);
+    final prevId = notifier.pop();
+    if (prevId != null) {
+      final prevItem = box.get(prevId);
+      if (prevItem != null) {
+        notifier.replaceCurrent(prevItem);
+        notifier.saveSlideMiddlewareID(widget.middlewareId);
+        _go(context, mid: prevId);
+      }
+    }
   }
 
   Widget _buildListItem(BuildContext context, WidgetRef ref, String childId, bool isEditing, int index, Key? key) {

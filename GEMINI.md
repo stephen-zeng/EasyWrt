@@ -29,4 +29,5 @@ Dart 3.x (Flutter 3.x): Follow standard conventions
 
 <!-- MANUAL ADDITIONS START -->
 - Fixed RenderFlex overflow in memory_usage_widget.dart by wrapping text in Flexible with ellipsis.
+- Implemented native swipe-to-return in portrait mode by using nested Navigator stack in RouterSplitWrapper and SettingSplitWrapper.
 <!-- MANUAL ADDITIONS END -->

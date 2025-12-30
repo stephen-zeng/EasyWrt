@@ -25,17 +25,10 @@ class RouterManagementPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routers = ref.watch(routerListProvider);
+    final isLandscape = ResponsiveLayout.isLandscape(context);
 
     return Scaffold(
       appBar: AppBar(
-        leading: !ResponsiveLayout.isLandscape(context)
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () {
-                  context.go('/setting');
-                },
-              )
-            : null,
         title: const Text('Manage Routers'),
       ),
       floatingActionButton: FloatingActionButton(
