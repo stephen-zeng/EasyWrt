@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easywrt/modules/router/widgets/base_widget.dart';
+import 'package:easywrt/modules/router/widgets/base/base_widget.dart';
 import 'package:easywrt/modules/router/widgets/cpu_usage/cpu_usage_widget.dart';
 import 'package:easywrt/modules/router/widgets/memory_usage/memory_usage_widget.dart';
 import 'package:easywrt/modules/router/widgets/network_traffic/network_traffic_widget.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easywrt/beam/responsive_layout.dart';
+import 'package:easywrt/beam/window/responsive_layout.dart';
 import 'middlewares/setting_root_middleware.dart';
 import 'pages/router_management_page.dart';
 import 'pages/theme_page.dart';

@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
-import 'package:easywrt/modules/router/widgets/widget_factory.dart';
+import 'package:easywrt/modules/router/widgets/base/widget_factory.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter/foundation.dart';
 

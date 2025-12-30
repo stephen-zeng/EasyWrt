@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:easywrt/beam/stripe_widget.dart';
+import 'package:easywrt/beam/widget/stripe_widget.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 
 void main() {

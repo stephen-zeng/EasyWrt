@@ -5,10 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/modules/router/controllers/edit_controller.dart';
-import 'package:easywrt/modules/router/widgets/widget_factory.dart';
-import 'package:easywrt/beam/grid_size_scope.dart';
-import 'package:easywrt/beam/resize_handle.dart';
-import 'package:easywrt/beam/resize_shadow.dart';
+import 'package:easywrt/modules/router/widgets/base/widget_factory.dart';
+import 'package:easywrt/beam/widget/grid_size_scope.dart';
+import 'package:easywrt/beam/widget/resize_handle.dart';
+import 'package:easywrt/beam/widget/resize_shadow.dart';
 
 final dragAnchorOffsetProvider = StateProvider<Offset>((ref) => Offset.zero);
 

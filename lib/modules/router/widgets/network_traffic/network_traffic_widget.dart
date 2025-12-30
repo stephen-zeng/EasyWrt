@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easywrt/modules/router/controllers/rpc_controller.dart';
 import 'package:easywrt/utils/init/meta.dart';
-import 'package:easywrt/modules/router/widgets/base_widget.dart';
+import 'package:easywrt/modules/router/widgets/base/base_widget.dart';
 import 'network_traffic_service.dart';
 
 class NetworkTrafficWidget extends BaseWidget<Map<String, NetworkRate>> {

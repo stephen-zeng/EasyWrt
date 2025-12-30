@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easywrt/beam/grid_size_scope.dart';
-import 'package:easywrt/beam/widget_edit_scope.dart';
+import 'package:easywrt/beam/widget/grid_size_scope.dart';
+import 'package:easywrt/modules/router/widgets/base/widget_edit_scope.dart';
 import 'package:easywrt/modules/router/controllers/edit_controller.dart';
 
 /// Abstract base class for all dashboard widgets.

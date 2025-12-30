@@ -6,7 +6,7 @@ import 'package:easywrt/modules/router/controllers/current_router_controller.dar
 import 'package:easywrt/modules/router/controllers/connection_controller.dart';
 import 'package:easywrt/modules/setting/theme/theme_provider.dart';
 import 'package:easywrt/modules/setting/items/router_dialog.dart';
-import 'package:easywrt/beam/responsive_layout.dart';
+import 'package:easywrt/beam/window/responsive_layout.dart';
 
 /// RouterManagementPage
 /// RouterManagementPage

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easywrt/beam/responsive_layout.dart';
+import 'package:easywrt/beam/window/responsive_layout.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'middleware/middleware_view.dart';
 import 'page/page_view.dart';

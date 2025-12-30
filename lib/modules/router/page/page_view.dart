@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:easywrt/beam/responsive_layout.dart';
-import 'package:easywrt/beam/stripe_widget.dart';
+import 'package:easywrt/beam/window/responsive_layout.dart';
+import 'package:easywrt/beam/widget/stripe_widget.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/modules/router/controllers/edit_controller.dart';
-import 'package:easywrt/modules/router/widgets/add_widget_dialog.dart';
+import 'package:easywrt/modules/router/page/add_widget_dialog.dart';
 class RouterPageView extends ConsumerStatefulWidget {
   final String pageId;
 
