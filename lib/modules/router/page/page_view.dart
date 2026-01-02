@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart' hide PageView;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:easywrt/modules/router/controllers/current_page_controller.dart';
 import 'package:easywrt/beam/widget/grid_size_scope.dart';
 import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
 import 'package:easywrt/modules/router/widgets/base/base_widget.dart';
@@ -18,6 +20,19 @@ class PageView extends ConsumerWidget {
     super.key,
     required this.pageId,
   });
+
+  void _handleBack(BuildContext context, WidgetRef ref) {
+    final notifier = ref.read(currentPageProvider.notifier);
+    final prevId = notifier.pop();
+    if (prevId != null) {
+       final state = GoRouterState.of(context);
+       final mid = state.uri.queryParameters['mid'] ?? 'router_root';
+       context.go(Uri(
+          path: '/router',
+          queryParameters: {'mid': mid, 'pid': prevId}
+       ).toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -47,11 +62,18 @@ class PageView extends ConsumerWidget {
     }
 
     final isLandscape = ResponsiveLayout.isLandscape(context);
+    final pageState = ref.watch(currentPageProvider);
+    final hasHistory = pageState != null && pageState.historyPageIDs.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widgetInstance.name),
-        leading: isLandscape ? null : const BackButton(),
+        leading: (isLandscape && hasHistory)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => _handleBack(context, ref),
+              )
+            : (isLandscape ? null : const BackButton()),
       ),
       body: GridSizeScope(
         width: 0,
@@ -83,7 +105,7 @@ class PageView extends ConsumerWidget {
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: !isLandscape && !isEditing,
-            leading: _buildLeading(context, isLandscape, isEditing, editController),
+            leading: _buildLeading(context, ref, isLandscape, isEditing, editController),
             title: Text(page.name),
             actions: _buildActions(context, page, isEditing, editController),
           ),
@@ -176,7 +198,7 @@ class PageView extends ConsumerWidget {
     );
   }
 
-  Widget? _buildLeading(BuildContext context, bool isLandscape, bool isEditing, EditController controller) {
+  Widget? _buildLeading(BuildContext context, WidgetRef ref, bool isLandscape, bool isEditing, EditController controller) {
     if (isEditing) {
       return IconButton(
         icon: const Icon(Icons.close),
@@ -184,6 +206,16 @@ class PageView extends ConsumerWidget {
           // Confirm discard?
           controller.discard();
         },
+      );
+    }
+    
+    final pageState = ref.watch(currentPageProvider);
+    final hasHistory = pageState != null && pageState.historyPageIDs.isNotEmpty;
+
+    if (isLandscape && hasHistory) {
+      return IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: () => _handleBack(context, ref),
       );
     }
     return null; 

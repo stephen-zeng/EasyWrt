@@ -375,6 +375,7 @@ mixin _$CurrentPage {
   List<String> get path => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get icon => throw _privateConstructorUsedError;
+  List<String> get historyPageIDs => throw _privateConstructorUsedError;
   bool get isEditMode => throw _privateConstructorUsedError;
   List<String>? get widgetChildren => throw _privateConstructorUsedError;
 
@@ -395,6 +396,7 @@ abstract class $CurrentPageCopyWith<$Res> {
       List<String> path,
       String name,
       String icon,
+      List<String> historyPageIDs,
       bool isEditMode,
       List<String>? widgetChildren});
 }
@@ -416,6 +418,7 @@ class _$CurrentPageCopyWithImpl<$Res, $Val extends CurrentPage>
     Object? path = null,
     Object? name = null,
     Object? icon = null,
+    Object? historyPageIDs = null,
     Object? isEditMode = null,
     Object? widgetChildren = freezed,
   }) {
@@ -436,6 +439,10 @@ class _$CurrentPageCopyWithImpl<$Res, $Val extends CurrentPage>
           ? _value.icon
           : icon // ignore: cast_nullable_to_non_nullable
               as String,
+      historyPageIDs: null == historyPageIDs
+          ? _value.historyPageIDs
+          : historyPageIDs // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       isEditMode: null == isEditMode
           ? _value.isEditMode
           : isEditMode // ignore: cast_nullable_to_non_nullable
@@ -461,6 +468,7 @@ abstract class _$$CurrentPageImplCopyWith<$Res>
       List<String> path,
       String name,
       String icon,
+      List<String> historyPageIDs,
       bool isEditMode,
       List<String>? widgetChildren});
 }
@@ -480,6 +488,7 @@ class __$$CurrentPageImplCopyWithImpl<$Res>
     Object? path = null,
     Object? name = null,
     Object? icon = null,
+    Object? historyPageIDs = null,
     Object? isEditMode = null,
     Object? widgetChildren = freezed,
   }) {
@@ -500,6 +509,10 @@ class __$$CurrentPageImplCopyWithImpl<$Res>
           ? _value.icon
           : icon // ignore: cast_nullable_to_non_nullable
               as String,
+      historyPageIDs: null == historyPageIDs
+          ? _value._historyPageIDs
+          : historyPageIDs // ignore: cast_nullable_to_non_nullable
+              as List<String>,
       isEditMode: null == isEditMode
           ? _value.isEditMode
           : isEditMode // ignore: cast_nullable_to_non_nullable
@@ -520,9 +533,11 @@ class _$CurrentPageImpl implements _CurrentPage {
       required final List<String> path,
       required this.name,
       required this.icon,
+      final List<String> historyPageIDs = const [],
       this.isEditMode = false,
       final List<String>? widgetChildren})
       : _path = path,
+        _historyPageIDs = historyPageIDs,
         _widgetChildren = widgetChildren;
 
   factory _$CurrentPageImpl.fromJson(Map<String, dynamic> json) =>
@@ -542,6 +557,15 @@ class _$CurrentPageImpl implements _CurrentPage {
   final String name;
   @override
   final String icon;
+  final List<String> _historyPageIDs;
+  @override
+  @JsonKey()
+  List<String> get historyPageIDs {
+    if (_historyPageIDs is EqualUnmodifiableListView) return _historyPageIDs;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_historyPageIDs);
+  }
+
   @override
   @JsonKey()
   final bool isEditMode;
@@ -557,7 +581,7 @@ class _$CurrentPageImpl implements _CurrentPage {
 
   @override
   String toString() {
-    return 'CurrentPage(id: $id, path: $path, name: $name, icon: $icon, isEditMode: $isEditMode, widgetChildren: $widgetChildren)';
+    return 'CurrentPage(id: $id, path: $path, name: $name, icon: $icon, historyPageIDs: $historyPageIDs, isEditMode: $isEditMode, widgetChildren: $widgetChildren)';
   }
 
   @override
@@ -569,6 +593,8 @@ class _$CurrentPageImpl implements _CurrentPage {
             const DeepCollectionEquality().equals(other._path, _path) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.icon, icon) || other.icon == icon) &&
+            const DeepCollectionEquality()
+                .equals(other._historyPageIDs, _historyPageIDs) &&
             (identical(other.isEditMode, isEditMode) ||
                 other.isEditMode == isEditMode) &&
             const DeepCollectionEquality()
@@ -583,6 +609,7 @@ class _$CurrentPageImpl implements _CurrentPage {
       const DeepCollectionEquality().hash(_path),
       name,
       icon,
+      const DeepCollectionEquality().hash(_historyPageIDs),
       isEditMode,
       const DeepCollectionEquality().hash(_widgetChildren));
 
@@ -606,6 +633,7 @@ abstract class _CurrentPage implements CurrentPage {
       required final List<String> path,
       required final String name,
       required final String icon,
+      final List<String> historyPageIDs,
       final bool isEditMode,
       final List<String>? widgetChildren}) = _$CurrentPageImpl;
 
@@ -620,6 +648,8 @@ abstract class _CurrentPage implements CurrentPage {
   String get name;
   @override
   String get icon;
+  @override
+  List<String> get historyPageIDs;
   @override
   bool get isEditMode;
   @override

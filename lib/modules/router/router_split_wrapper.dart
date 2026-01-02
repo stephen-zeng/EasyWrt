@@ -9,6 +9,7 @@ import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'middleware/middleware_view.dart';
 import 'page/page_view.dart' as custom_page;
 import 'controllers/current_middleware_controller.dart';
+import 'controllers/current_page_controller.dart';
 
 class RouterSplitWrapper extends ConsumerStatefulWidget {
   final GoRouterState state;
@@ -114,8 +115,16 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
              if (!route.didPop(result)) return false;
 
              if (pid != null) {
-                // Popped Page -> Go to Middleware
-                _go(context, mid: mid);
+                // Check Page History
+                final pageNotifier = ref.read(currentPageProvider.notifier);
+                final prevPageId = pageNotifier.pop();
+
+                if (prevPageId != null) {
+                   _go(context, mid: mid, pid: prevPageId);
+                } else {
+                   // Popped Page -> Go to Middleware
+                   _go(context, mid: mid);
+                }
              } else {
                 // Popped Middleware -> Go to previous Middleware
                 final notifier = ref.read(currentMiddlewareProvider.notifier);

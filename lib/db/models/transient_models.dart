@@ -50,6 +50,7 @@ abstract class CurrentPage with _$CurrentPage {
     required List<String> path,
     required String name,
     required String icon,
+    @Default([]) List<String> historyPageIDs,
     @Default(false) bool isEditMode,
     List<String>? widgetChildren,
   }) = _CurrentPage;

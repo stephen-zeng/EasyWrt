@@ -6,21 +6,78 @@ class CurrentPageNotifier extends StateNotifier<CurrentPage?> {
   CurrentPageNotifier() : super(null);
 
   void init(PageItem pageItem) {
-    // If already initialized with this page, do nothing (preserve edit mode)
     if (state != null && state!.id == pageItem.id) {
-        // Just update metadata if needed, but keep edit mode
-        // For now, assuming static metadata from Hive
         return;
     }
     
     state = CurrentPage(
       id: pageItem.id,
-      path: [], // Path handling might be complex, skipping for now as it's not critical
+      path: [],
       name: pageItem.name,
       icon: pageItem.icon,
       isEditMode: false,
       widgetChildren: pageItem.widgetChildren,
+      historyPageIDs: [],
     );
+  }
+
+  void push({
+    required String id, 
+    required String name, 
+    required String icon, 
+    List<String>? widgetChildren
+  }) {
+    if (state == null) {
+      // First load, no history
+      state = CurrentPage(
+        id: id,
+        path: [],
+        name: name,
+        icon: icon,
+        isEditMode: false,
+        widgetChildren: widgetChildren,
+        historyPageIDs: [],
+      );
+      return;
+    }
+
+    if (state!.id == id) return;
+
+    final newHistory = List<String>.from(state!.historyPageIDs)..add(state!.id);
+    state = CurrentPage(
+      id: id,
+      path: [],
+      name: name,
+      icon: icon,
+      isEditMode: false,
+      widgetChildren: widgetChildren,
+      historyPageIDs: newHistory,
+    );
+  }
+
+  String? pop() {
+    if (state == null || state!.historyPageIDs.isEmpty) return null;
+
+    final prevId = state!.historyPageIDs.last;
+    final newHistory = List<String>.from(state!.historyPageIDs)..removeLast();
+    
+    // We don't have the full object of previous page here to restore name/icon/children immediately.
+    // However, the caller (RouterSplitWrapper) usually re-initializes or we can just update ID 
+    // and rely on `init` or `build` to fetch data?
+    // 
+    // Problem: If I update state here with just ID, `build` might crash if name/icon are dummy.
+    // 
+    // Alternative: `pop` returns the ID, and the caller (UI) is responsible for fetching data and calling `init` or `push` (replace)?
+    // Or we rely on `RouterSplitWrapper` calling `init` when PID changes.
+    // 
+    // In `CurrentMiddlewareNotifier`, `pop` updates `state` with `historyMiddlewareIDs: newHistory`.
+    // It keeps the *current* item but effectively we are about to switch away from it.
+    // Actually `CurrentMiddlewareNotifier.pop` returns `lastId` and removes it from history. 
+    // It does NOT update `middlewareItem` to the previous one. 
+    // The caller (`MiddlewareView._handleBack`) calls `notifier.replaceCurrent(prevItem)`.
+    
+    state = state!.copyWith(historyPageIDs: newHistory);
+    return prevId;
   }
   
   void toggleEditMode() {
