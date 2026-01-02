@@ -62,6 +62,26 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     return FadeTransition(opacity: animation, child: child);
   }
 
+  void _syncMiddlewareHistory(String mid) {
+    final mwState = ref.read(currentMiddlewareProvider);
+    
+    // If state matches MID, do nothing
+    if (mwState != null && mwState.middlewareItem.id == mid) return;
+
+    // Fetch and Push
+    if (Hive.isBoxOpen('middlewares')) {
+        final box = Hive.box<MiddlewareItem>('middlewares');
+        final item = box.get(mid);
+        if (item != null) {
+            Future.microtask(() {
+                final notifier = ref.read(currentMiddlewareProvider.notifier);
+                notifier.push(item);
+                notifier.saveSlideMiddlewareID(item.id);
+            });
+        }
+    }
+  }
+
   void _syncPageHistory(String? pid) {
     final pageState = ref.read(currentPageProvider);
     
@@ -119,22 +139,10 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     final mid = widget.state.uri.queryParameters['mid'] ?? 'router_root';
     final pid = widget.state.uri.queryParameters['pid'];
 
-    // Sync Provider with current URL/ID
-    final currentMw = ref.watch(currentMiddlewareProvider);
-    if (currentMw == null || currentMw.middlewareItem.id != mid) {
-       // Ensure box is open
-       if (Hive.isBoxOpen('middlewares')) {
-          final box = Hive.box<MiddlewareItem>('middlewares');
-          final item = box.get(mid);
-          if (item != null) {
-              Future.microtask(() {
-                 ref.read(currentMiddlewareProvider.notifier).init(item);
-              });
-          }
-       }
-    }
-
+    _syncMiddlewareHistory(mid);
     _syncPageHistory(pid);
+
+    final currentMw = ref.watch(currentMiddlewareProvider);
 
     // Portrait Mode
     if (!ResponsiveLayout.isLandscape(context)) {

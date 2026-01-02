@@ -159,9 +159,8 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
           ],
         ),
         onTap: isEditing ? null : () {
-          ref.read(currentMiddlewareProvider.notifier).push(childMiddleware);
-          ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID(childMiddleware.id);
           _go(context, mid: childId);
+          ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID(childMiddleware.id);
         },
       );
     }
@@ -202,7 +201,8 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
                   onTap: isEditing ? null : () {
                     _go(context, pid: childId);
                     ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID('');
-                  },      );
+                  },
+      );
     }
     return SizedBox.shrink(key: key);
   }
