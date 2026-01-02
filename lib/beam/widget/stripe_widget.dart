@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/modules/router/controllers/edit_controller.dart';
+import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
+import 'package:easywrt/modules/router/controllers/current_page_controller.dart';
 import 'package:easywrt/modules/router/widgets/base/widget_factory.dart';
 import 'package:easywrt/beam/widget/grid_size_scope.dart';
 import 'package:easywrt/beam/widget/resize_handle.dart';
@@ -335,13 +337,29 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
       content = GestureDetector(
         onLongPress: () {
           HapticFeedback.mediumImpact();
+          
+          final targetId = 'widget_${w.widgetTypeKey}';
+          final catalog = ref.read(widgetCatalogProvider);
+          String widgetName = 'Widget';
+          try {
+             final widgetDef = catalog.firstWhere((item) => item.typeKey == w.widgetTypeKey);
+             widgetName = widgetDef.name;
+          } catch (_) {}
+
+          ref.read(currentPageProvider.notifier).push(
+             id: targetId,
+             name: widgetName,
+             icon: '',
+             widgetChildren: null
+          );
+
           final state = GoRouterState.of(context);
           final mid = state.uri.queryParameters['mid'] ?? 'router_root';
           context.go(Uri(
             path: '/router',
             queryParameters: {
               'mid': mid,
-              'pid': 'widget_${w.widgetTypeKey}',
+              'pid': targetId,
             },
           ).toString());
         },
