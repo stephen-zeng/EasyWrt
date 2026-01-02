@@ -61,22 +61,13 @@ class CurrentPageNotifier extends StateNotifier<CurrentPage?> {
     final prevId = state!.historyPageIDs.last;
     final newHistory = List<String>.from(state!.historyPageIDs)..removeLast();
     
-    // We don't have the full object of previous page here to restore name/icon/children immediately.
-    // However, the caller (RouterSplitWrapper) usually re-initializes or we can just update ID 
-    // and rely on `init` or `build` to fetch data?
-    // 
-    // Problem: If I update state here with just ID, `build` might crash if name/icon are dummy.
-    // 
-    // Alternative: `pop` returns the ID, and the caller (UI) is responsible for fetching data and calling `init` or `push` (replace)?
-    // Or we rely on `RouterSplitWrapper` calling `init` when PID changes.
-    // 
-    // In `CurrentMiddlewareNotifier`, `pop` updates `state` with `historyMiddlewareIDs: newHistory`.
-    // It keeps the *current* item but effectively we are about to switch away from it.
-    // Actually `CurrentMiddlewareNotifier.pop` returns `lastId` and removes it from history. 
-    // It does NOT update `middlewareItem` to the previous one. 
-    // The caller (`MiddlewareView._handleBack`) calls `notifier.replaceCurrent(prevItem)`.
-    
-    state = state!.copyWith(historyPageIDs: newHistory);
+    // Update state to reflect the previous page as current.
+    // Note: We retain the old name/icon as we don't have the previous page's metadata here,
+    // but PageView fetches display data independently so this is safe for history tracking.
+    state = state!.copyWith(
+      id: prevId,
+      historyPageIDs: newHistory,
+    );
     return prevId;
   }
   
