@@ -1,0 +1,85 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easywrt/beam/widget/grid_size_scope.dart';
+
+/// Abstract base class for all dashboard widgets.
+/// Handles data fetching, state (loading/error), and layout dispatch.
+abstract class BaseWidget<T> extends ConsumerWidget {
+  const BaseWidget({super.key});
+
+  /// Unique key identifying this widget type (e.g. 'cpu_usage').
+  String get typeKey;
+
+  /// Display name of the widget.
+  String get name;
+
+  /// Brief description of the widget.
+  String get description;
+
+  /// Icon for the widget.
+  IconData get icon;
+
+  /// List of supported grid sizes.
+  List<String> get supportedSizes;
+
+  /// Default size when first added to a dashboard.
+  String get defaultSize => '1x1';
+
+  /// The data stream to watch.
+  AsyncValue<T> watchData(WidgetRef ref);
+
+  /// Standard build method for ConsumerWidget.
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scope = GridSizeScope.maybeOf(context);
+    final sizeStr = scope?.sizeString ?? defaultSize;
+
+    final asyncValue = watchData(ref);
+    
+    return asyncValue.when(
+      data: (data) {
+        switch (sizeStr) {
+          case '1x1': return render1x1(context, data, ref);
+          case '1x2': return render1x2(context, data, ref);
+          case '2x1': return render2x1(context, data, ref);
+          case '2x2': return render2x2(context, data, ref);
+          case '2x4': return render2x4(context, data, ref);
+          case '4x2': return render4x2(context, data, ref);
+          case '4x4': return render4x4(context, data, ref);
+          case '0x0': return renderPage(context, data, ref); // Convention for Page Mode
+          default: return renderDefault(context, data, ref);
+        }
+      },
+      error: (err, stack) {
+         if (sizeStr == '0x0') return buildError(context, err);
+         if (sizeStr == '1x1') return render1x1(context, null, ref);
+         return buildError(context, err);
+      },
+      loading: () {
+         if (sizeStr == '0x0') return buildLoading(context);
+         if (sizeStr == '1x1') return render1x1(context, null, ref);
+         return buildLoading(context);
+      },
+    );
+  }
+
+  // --- Render methods ---
+
+  /// Renders the widget as a full page.
+  /// Default implementation returns a placeholder.
+  Widget renderPage(BuildContext context, T data, WidgetRef ref) {
+    return Center(child: Text('$name Page Not Implemented'));
+  }
+
+  Widget renderDefault(BuildContext context, T data, WidgetRef ref) => const Center(child: Text('Not implemented'));
+  Widget render1x1(BuildContext context, T? data, WidgetRef ref);
+  Widget render1x2(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render2x1(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render2x2(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render2x4(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render4x2(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  Widget render4x4(BuildContext context, T data, WidgetRef ref) => renderDefault(context, data, ref);
+  
+  Widget buildLoading(BuildContext context);
+  Widget buildError(BuildContext context, Object error);
+}
