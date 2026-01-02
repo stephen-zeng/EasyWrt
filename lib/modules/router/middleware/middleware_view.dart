@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/modules/router/controllers/current_middleware_controller.dart';
+import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
 import 'package:easywrt/modules/router/middleware/add_middleware_item_dialog.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/beam/window/responsive_layout.dart';
@@ -163,6 +164,32 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
           _go(context, mid: childId);
         },
       );
+    }
+
+    // Check for Widget Item
+    if (childId.startsWith('widget_')) {
+      final typeKey = childId.replaceFirst('widget_', '');
+      final catalog = ref.read(widgetCatalogProvider);
+      try {
+        final widgetItem = catalog.firstWhere((w) => w.typeKey == typeKey);
+        return ListTile(
+          key: key,
+          leading: Icon(widgetItem.icon),
+          title: Text(widgetItem.name),
+          trailing: isEditing ? trailing : null,
+          onTap: isEditing ? null : () {
+            _go(context, pid: childId);
+            ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID('');
+          },
+        );
+      } catch (_) {
+        return ListTile(
+          key: key,
+          leading: const Icon(Icons.error),
+          title: Text('Unknown Widget: $typeKey'),
+          trailing: isEditing ? trailing : null,
+        );
+      }
     }
 
     final childPage = Hive.box<PageItem>('pages').get(childId);

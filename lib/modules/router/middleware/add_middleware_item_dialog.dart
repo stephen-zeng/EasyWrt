@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/utils/init/meta.dart';
+import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
 
-class AddMiddlewareItemDialog extends StatelessWidget {
+class AddMiddlewareItemDialog extends ConsumerWidget {
   final String currentMiddlewareId;
   final List<String> ancestorIds;
   final List<String> existingChildIds;
@@ -18,10 +20,11 @@ class AddMiddlewareItemDialog extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Fetch all available items
     final allMiddlewares = Hive.box<MiddlewareItem>('middlewares').values.toList();
     final allPages = Hive.box<PageItem>('pages').values.toList();
+    final catalog = ref.watch(widgetCatalogProvider);
 
     // Filter Logic
     final availableMiddlewares = allMiddlewares.where((m) {
@@ -35,6 +38,8 @@ class AddMiddlewareItemDialog extends StatelessWidget {
       if (existingChildIds.contains(p.id)) return false; // Already added
       return true;
     }).toList();
+    
+    // Widgets are always available (duplicates allowed per spec EC-04)
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -78,7 +83,22 @@ class AddMiddlewareItemDialog extends StatelessWidget {
                     },
                   )),
                 ],
-                if (availableMiddlewares.isEmpty && availablePages.isEmpty)
+                if (catalog.isNotEmpty) ...[
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Text('Widgets', style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).hintColor)),
+                  ),
+                  ...catalog.map((w) => ListTile(
+                    leading: Icon(w.icon),
+                    title: Text(w.name),
+                    subtitle: Text(w.description),
+                    onTap: () {
+                      onAdd('widget_${w.typeKey}');
+                      Navigator.of(context).pop();
+                    },
+                  )),
+                ],
+                if (availableMiddlewares.isEmpty && availablePages.isEmpty && catalog.isEmpty)
                   const Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Center(child: Text('No items available to add.')),
