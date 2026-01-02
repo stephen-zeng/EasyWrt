@@ -98,7 +98,7 @@ As a user viewing a dashboard, I want to long-press a widget to jump to its deta
     - **FR-001.3**: WidgetPage instances MUST share the same data state/instance as their dashboard widget counterparts to ensure consistency.
 - **FR-002**: The system MUST implement `WidgetPage` as a top-level navigation destination.
     - **FR-002.1**: `WidgetPage` MUST accept a `typeKey` to identify the target Widget.
-    - **FR-002.2**: `WidgetPage` MUST instantiate the correct Widget using `WidgetFactory` and invoke its `renderPage` method.
+    - **FR-002.2**: `WidgetPage` MUST instantiate the correct Widget using `WidgetCatalogProvider` and invoke its `renderPage` method.
     - **FR-002.3**: The system wrapper MUST provide the global layout (AppBar with Widget name, Back Button) for WidgetPages, consistent with standard Pages. If accessed via deep-link without history, the Back Button MUST navigate to the primary Dashboard.
     - **FR-002.4**: `WidgetPage` MUST support receiving configuration parameters via URL query strings.
 - **FR-003**: The system MUST support adding Widgets to Middleware lists.
