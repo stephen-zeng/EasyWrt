@@ -7,8 +7,7 @@ import 'package:easywrt/beam/window/responsive_layout.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'middleware/middleware_view.dart';
-import 'page/page_view.dart';
-import 'page/widget_page.dart';
+import 'page/page_view.dart' as custom_page;
 import 'controllers/current_middleware_controller.dart';
 
 class RouterSplitWrapper extends ConsumerStatefulWidget {
@@ -104,9 +103,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
        if (pid != null) {
           pages.add(CupertinoPage(
              key: ValueKey('page_$pid'),
-             child: pid.startsWith('widget_')
-                 ? WidgetPage(pageId: pid)
-                 : RouterPageView(pageId: pid),
+             child: custom_page.PageView(pageId: pid),
           ));
        }
 
@@ -174,9 +171,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
                 child: KeyedSubtree(
                   key: ValueKey('right_${pid ?? 'empty'}'),
                   child: pid != null
-                      ? (pid.startsWith('widget_')
-                          ? WidgetPage(pageId: pid)
-                          : RouterPageView(pageId: pid))
+                      ? custom_page.PageView(pageId: pid)
                       : const Scaffold(
                           body: Center(
                             child: Text('Select a page from the left menu'),

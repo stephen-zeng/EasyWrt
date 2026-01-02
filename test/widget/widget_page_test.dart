@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide PageView;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:easywrt/modules/router/page/widget_page.dart';
+import 'package:easywrt/modules/router/page/page_view.dart';
 import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
 import 'package:easywrt/modules/router/widgets/base/base_widget.dart';
 
@@ -27,14 +27,14 @@ class TestWidget extends BaseWidget<void> {
 }
 
 void main() {
-  testWidgets('WidgetPage renders correctly for valid ID', (tester) async {
+  testWidgets('PageView renders widget correctly for valid widget ID', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           widgetCatalogProvider.overrideWithValue([const TestWidget()]),
         ],
         child: const MaterialApp(
-          home: WidgetPage(pageId: 'widget_test_widget'),
+          home: PageView(pageId: 'widget_test_widget'),
         ),
       ),
     );
@@ -43,27 +43,14 @@ void main() {
     expect(find.text('Page Content'), findsOneWidget); // Body
   });
 
-  testWidgets('WidgetPage shows error for invalid ID', (tester) async {
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: MaterialApp(
-          home: WidgetPage(pageId: 'invalid_format'),
-        ),
-      ),
-    );
-
-    expect(find.text('Error'), findsOneWidget);
-    expect(find.text('Invalid Widget Page ID'), findsOneWidget);
-  });
-
-  testWidgets('WidgetPage shows not found for missing widget', (tester) async {
+  testWidgets('PageView shows not found for missing widget', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           widgetCatalogProvider.overrideWithValue([]),
         ],
         child: const MaterialApp(
-          home: WidgetPage(pageId: 'widget_unknown'),
+          home: PageView(pageId: 'widget_unknown'),
         ),
       ),
     );
