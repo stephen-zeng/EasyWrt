@@ -163,6 +163,26 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
           child: MiddlewareView(middlewareId: mid),
        ));
 
+       // Add Page History + Current Page
+       final pageState = ref.watch(currentPageProvider);
+       final List<String> pageStack = [];
+
+       if (pageState != null) {
+           pageStack.addAll(pageState.historyPageIDs);
+           // If pageState.id != pid, it means we are transitioning (likely a push), 
+           // so we treat pageState.id as implicitly in history for this frame.
+           if (pid != null && pageState.id != pid) {
+               pageStack.add(pageState.id);
+           }
+       }
+       
+       for (final pId in pageStack) {
+           pages.add(CupertinoPage(
+               key: ValueKey('page_$pId'),
+               child: custom_page.PageView(pageId: pId),
+           ));
+       }
+
        // Add current PID if exists
        if (pid != null) {
           pages.add(CupertinoPage(
