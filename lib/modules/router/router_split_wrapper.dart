@@ -10,6 +10,7 @@ import 'middleware/middleware_view.dart';
 import 'page/page_view.dart' as custom_page;
 import 'controllers/current_middleware_controller.dart';
 import 'controllers/current_page_controller.dart';
+import 'controllers/widget_catalog_controller.dart';
 
 class RouterSplitWrapper extends ConsumerStatefulWidget {
   final GoRouterState state;
@@ -61,6 +62,58 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     return FadeTransition(opacity: animation, child: child);
   }
 
+  void _syncPageHistory(String? pid) {
+    final pageState = ref.read(currentPageProvider);
+    
+    if (pid == null) {
+       if (pageState != null) {
+          Future.microtask(() => ref.read(currentPageProvider.notifier).clear());
+       }
+       return;
+    }
+
+    // If state matches PID, do nothing (already synced)
+    if (pageState != null && pageState.id == pid) return;
+
+    // Push new page to history
+    Future.microtask(() {
+       _pushPageToHistory(pid);
+    });
+  }
+
+  void _pushPageToHistory(String pid) {
+     String name = 'Page';
+     String icon = '';
+     List<String>? children;
+
+     if (pid.startsWith('widget_')) {
+        final typeKey = pid.replaceFirst('widget_', '');
+        final catalog = ref.read(widgetCatalogProvider);
+        try {
+           final widgetDef = catalog.firstWhere((w) => w.typeKey == typeKey);
+           name = widgetDef.name;
+        } catch (_) {
+           name = 'Unknown Widget';
+        }
+     } else {
+        if (Hive.isBoxOpen('pages')) {
+           final page = Hive.box<PageItem>('pages').get(pid);
+           if (page != null) {
+              name = page.name;
+              icon = page.icon;
+              children = page.widgetChildren;
+           }
+        }
+     }
+
+     ref.read(currentPageProvider.notifier).push(
+        id: pid,
+        name: name,
+        icon: icon,
+        widgetChildren: children
+     );
+  }
+
   @override
   Widget build(BuildContext context) {
     final mid = widget.state.uri.queryParameters['mid'] ?? 'router_root';
@@ -80,6 +133,8 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
           }
        }
     }
+
+    _syncPageHistory(pid);
 
     // Portrait Mode
     if (!ResponsiveLayout.isLandscape(context)) {

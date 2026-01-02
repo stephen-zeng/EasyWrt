@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
-import 'package:easywrt/modules/router/controllers/current_page_controller.dart';
 import 'package:easywrt/modules/router/controllers/current_middleware_controller.dart';
 import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
 import 'package:easywrt/modules/router/middleware/add_middleware_item_dialog.dart';
@@ -179,12 +178,6 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
           title: Text(widgetItem.name),
           trailing: isEditing ? trailing : null,
           onTap: isEditing ? null : () {
-            ref.read(currentPageProvider.notifier).push(
-              id: childId,
-              name: widgetItem.name,
-              icon: '',
-              widgetChildren: null,
-            );
             _go(context, pid: childId);
             ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID('');
           },
@@ -207,12 +200,6 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
         title: Text(childPage.name),
         trailing: isEditing ? trailing : null, // Pages don't have chevron usually unless specifically requested
                   onTap: isEditing ? null : () {
-                    ref.read(currentPageProvider.notifier).push(
-                      id: childId,
-                      name: childPage.name,
-                      icon: childPage.icon,
-                      widgetChildren: childPage.widgetChildren,
-                    );
                     _go(context, pid: childId);
                     ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID('');
                   },      );
