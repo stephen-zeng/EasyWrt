@@ -25,6 +25,9 @@ class RouterSplitWrapper extends ConsumerStatefulWidget {
 }
 
 class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
+  final GlobalKey<NavigatorState> _leftNavigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _rightNavigatorKey = GlobalKey<NavigatorState>();
+  final GlobalKey<NavigatorState> _portraitNavigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void initState() {
@@ -39,27 +42,6 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
         if (pid != null) 'pid': pid,
       },
     ).toString());
-  }
-
-  Widget slideTransition(Widget child, Animation<double> animation) {
-    final key = child.key;
-    final currentMw = ref.read(currentMiddlewareProvider);
-    final slideId = currentMw?.slideMiddlewareID;
-    debugPrint("Slide Transition Key: $key, SlideID: $slideId");
-
-    if (key is ValueKey<String> &&
-        (key.value.startsWith('page_') ||
-            key.value == 'mid_$slideId' ||
-            key.value == 'left_$slideId')) {
-      return CupertinoPageTransition(
-        primaryRouteAnimation: animation,
-        secondaryRouteAnimation: const AlwaysStoppedAnimation(0.0),
-        linearTransition: false,
-        child: child,
-      );
-    }
-
-    return FadeTransition(opacity: animation, child: child);
   }
 
   void _syncMiddlewareHistory(String mid) {
@@ -134,6 +116,94 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
      );
   }
 
+  List<Page> _buildMiddlewarePages(String currentMid) {
+    final currentMw = ref.watch(currentMiddlewareProvider);
+    final history = currentMw?.historyMiddlewareIDs ?? [];
+    
+    final mwStack = <String>{...history, currentMid};
+    
+    return mwStack.map((mid) => CupertinoPage(
+      key: ValueKey('mid_$mid'),
+      name: mid,
+      child: MiddlewareView(middlewareId: mid),
+    )).toList();
+  }
+
+  List<Page> _buildPagePages(String? currentPid) {
+    final pageState = ref.watch(currentPageProvider);
+    final uniquePageStack = <String>{};
+
+    if (pageState != null) {
+        uniquePageStack.addAll(pageState.historyPageIDs);
+        // If transitioning, ensure we capture the current logic
+        if (currentPid != null && pageState.id != currentPid) {
+            uniquePageStack.add(pageState.id);
+        }
+    }
+
+    if (currentPid != null) {
+       uniquePageStack.add(currentPid);
+    }
+    
+    if (uniquePageStack.isEmpty) {
+        return [
+           const CupertinoPage(
+              key: ValueKey('empty_page'),
+              child: Scaffold(
+                body: Center(child: Text('Select a page')),
+              ),
+           )
+        ];
+    }
+
+    return uniquePageStack.map((pid) => CupertinoPage(
+      key: ValueKey('page_$pid'),
+      name: pid,
+      child: custom_page.PageView(pageId: pid),
+    )).toList();
+  }
+  
+  bool _handleMiddlewarePop(String currentMid, String? currentPid) {
+      final notifier = ref.read(currentMiddlewareProvider.notifier);
+      final prevId = notifier.pop();
+      if (prevId != null) {
+          if (Hive.isBoxOpen('middlewares')) {
+              final box = Hive.box<MiddlewareItem>('middlewares');
+              final prevItem = box.get(prevId);
+              if (prevItem != null) {
+                  notifier.replaceCurrent(prevItem);
+                  notifier.saveSlideMiddlewareID(currentMid); // For animation direction if needed
+                  _go(context, mid: prevId, pid: currentPid); // Keep current PID? Usually independent
+              }
+          }
+          return true;
+      }
+      return false;
+  }
+
+  bool _handlePagePop(String currentMid, String? currentPid) {
+      if (currentPid == null) return false;
+      
+      final pageNotifier = ref.read(currentPageProvider.notifier);
+      final prevPageId = pageNotifier.pop();
+
+      if (prevPageId != null) {
+          _go(context, mid: currentMid, pid: prevPageId);
+      } else {
+          // If no history page, we might be closing the page pane? 
+          // But in split view, page pane usually stays. 
+          // Or if we are in portrait, this pops back to middleware.
+          // In Landscape, maybe we just don't pop the last page?
+          // Or we go to a state with no page?
+          // Let's assume we go to no page if it was the last one, OR we stay.
+          // For now, if we pop the last page, we go to pid=null?
+          // Let's stick to the behavior: Pop page -> prevPage. 
+          // If no prevPage -> remove pid (pid=null).
+          _go(context, mid: currentMid, pid: null);
+      }
+      return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final mid = widget.state.uri.queryParameters['mid'] ?? 'router_root';
@@ -142,82 +212,36 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     _syncMiddlewareHistory(mid);
     _syncPageHistory(pid);
 
-    final currentMw = ref.watch(currentMiddlewareProvider);
+    final middlewarePages = _buildMiddlewarePages(mid);
+    final pagePages = _buildPagePages(pid);
 
     // Portrait Mode
     if (!ResponsiveLayout.isLandscape(context)) {
-       final history = currentMw?.historyMiddlewareIDs ?? [];
-       final List<Page> pages = [];
-
-       // Deduplicate Middleware IDs
-       final mwStack = <String>{...history, mid};
-
-       for (final hMid in mwStack) {
-          pages.add(CupertinoPage(
-             key: ValueKey('mid_$hMid'),
-             child: MiddlewareView(middlewareId: hMid),
-          ));
-       }
-
-       // Add Page History + Current Page
-       final pageState = ref.watch(currentPageProvider);
-       // Deduplicate Page IDs
-       final uniquePageStack = <String>{};
-
-       if (pageState != null) {
-           uniquePageStack.addAll(pageState.historyPageIDs);
-           // If pageState.id != pid, it means we are transitioning (likely a push), 
-           // so we treat pageState.id as implicitly in history for this frame.
-           if (pid != null && pageState.id != pid) {
-               uniquePageStack.add(pageState.id);
-           }
-       }
-
-       if (pid != null) {
-          uniquePageStack.add(pid);
-       }
+       // Combine stacks: Middleware Stack + Page Stack
+       // Note: Page Stack already includes the empty check? No, _buildPagePages handles empty.
+       // In portrait, if pid is null, we just show middleware stack.
        
-       for (final pId in uniquePageStack) {
-           pages.add(CupertinoPage(
-               key: ValueKey('page_$pId'),
-               child: custom_page.PageView(pageId: pId),
-           ));
+       final List<Page> combinedPages = [...middlewarePages];
+       
+       if (pid != null) {
+           // Filter out the 'empty_page' placeholder if it exists
+           final validPagePages = pagePages.where((p) => p.key != const ValueKey('empty_page')).toList();
+           combinedPages.addAll(validPagePages);
        }
 
        return Navigator(
-          key: const ValueKey('router_navigator'),
-          pages: pages,
+          key: _portraitNavigatorKey,
+          pages: combinedPages,
           onPopPage: (route, result) {
              if (!route.didPop(result)) return false;
 
+             // Determine what we popped
+             // If we have pages, we likely popped a page
              if (pid != null) {
-                // Check Page History
-                final pageNotifier = ref.read(currentPageProvider.notifier);
-                final prevPageId = pageNotifier.pop();
-
-                if (prevPageId != null) {
-                   _go(context, mid: mid, pid: prevPageId);
-                } else {
-                   // Popped Page -> Go to Middleware
-                   _go(context, mid: mid);
-                }
+                 return _handlePagePop(mid, pid);
              } else {
-                // Popped Middleware -> Go to previous Middleware
-                final notifier = ref.read(currentMiddlewareProvider.notifier);
-                final prevId = notifier.pop();
-                if (prevId != null) {
-                   if (Hive.isBoxOpen('middlewares')) {
-                      final box = Hive.box<MiddlewareItem>('middlewares');
-                      final prevItem = box.get(prevId);
-                      if (prevItem != null) {
-                         notifier.replaceCurrent(prevItem);
-                         notifier.saveSlideMiddlewareID(mid);
-                         _go(context, mid: prevId);
-                      }
-                   }
-                }
+                 return _handleMiddlewarePop(mid, pid);
              }
-             return true; 
           },
        );
     }
@@ -225,8 +249,6 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     // Landscape Mode
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Left Pane: 300, Divider: 1
-        // Right Pane Min: minStripeWidth (304) + padding (32) = 336
         const double leftPaneWidth = 300.0;
         const double dividerWidth = 1.0;
         const double rightPanePadding = 32.0;
@@ -239,30 +261,24 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
           children: [
             SizedBox(
               width: leftPaneWidth,
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) => slideTransition(child, animation),
-                child: KeyedSubtree(
-                  key: ValueKey('left_$mid'),
-                  child: MiddlewareView(middlewareId: mid),
-                ),
+              child: Navigator(
+                 key: _leftNavigatorKey,
+                 pages: middlewarePages,
+                 onPopPage: (route, result) {
+                    if (!route.didPop(result)) return false;
+                    return _handleMiddlewarePop(mid, pid);
+                 },
               ),
             ),
             const VerticalDivider(width: dividerWidth),
             Expanded(
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 100),
-                transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
-                child: KeyedSubtree(
-                  key: ValueKey('right_${pid ?? 'empty'}'),
-                  child: pid != null
-                      ? custom_page.PageView(pageId: pid)
-                      : const Scaffold(
-                          body: Center(
-                            child: Text('Select a page from the left menu'),
-                          ),
-                        ),
-                ),
+              child: Navigator(
+                 key: _rightNavigatorKey,
+                 pages: pagePages,
+                 onPopPage: (route, result) {
+                    if (!route.didPop(result)) return false;
+                    return _handlePagePop(mid, pid);
+                 },
               ),
             ),
           ],
