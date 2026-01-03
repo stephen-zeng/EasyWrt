@@ -149,7 +149,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
        const CupertinoPage(
           key: ValueKey('empty_page'),
           child: Scaffold(
-            body: Center(child: Text('Select a page')),
+            body: Center(child: Icon(Icons.router)),
           ),
        )
     ];
