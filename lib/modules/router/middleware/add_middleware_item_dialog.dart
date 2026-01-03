@@ -28,6 +28,7 @@ class AddMiddlewareItemDialog extends ConsumerWidget {
 
     // Filter Logic
     final availableMiddlewares = allMiddlewares.where((m) {
+      if (m.id == 'router_root') return false; // Root cannot be added as a child
       if (m.id == currentMiddlewareId) return false; // Self
       if (ancestorIds.contains(m.id)) return false; // Ancestors (Recursion check)
       if (existingChildIds.contains(m.id)) return false; // Already added

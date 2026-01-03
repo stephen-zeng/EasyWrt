@@ -29,6 +29,10 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
   final GlobalKey<NavigatorState> _rightNavigatorKey = GlobalKey<NavigatorState>();
   final GlobalKey<NavigatorState> _portraitNavigatorKey = GlobalKey<NavigatorState>();
 
+  // Local History Stacks
+  List<String> _middlewareStack = [];
+  List<String> _pageStack = [];
+
   @override
   void initState() {
     super.initState();
@@ -44,163 +48,146 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     ).toString());
   }
 
-  void _syncMiddlewareHistory(String mid) {
-    final mwState = ref.read(currentMiddlewareProvider);
-    
-    // If state matches MID, do nothing
-    if (mwState != null && mwState.middlewareItem.id == mid) return;
-
-    // Fetch and Push
+  void _updateState(String mid, String? pid) {
+    // Update Middleware State
     if (Hive.isBoxOpen('middlewares')) {
         final box = Hive.box<MiddlewareItem>('middlewares');
         final item = box.get(mid);
         if (item != null) {
             Future.microtask(() {
-                final notifier = ref.read(currentMiddlewareProvider.notifier);
-                notifier.push(item);
-                notifier.saveSlideMiddlewareID(item.id);
+                ref.read(currentMiddlewareProvider.notifier).replaceCurrent(item);
             });
         }
     }
-  }
 
-  void _syncPageHistory(String? pid) {
-    final pageState = ref.read(currentPageProvider);
-    
-    if (pid == null) {
-       if (pageState != null) {
-          Future.microtask(() => ref.read(currentPageProvider.notifier).clear());
+    // Update Page State
+    if (pid != null) {
+       String name = 'Page';
+       String icon = '';
+       List<String>? children;
+
+       if (pid.startsWith('widget_')) {
+          final typeKey = pid.replaceFirst('widget_', '');
+          final catalog = ref.read(widgetCatalogProvider);
+          try {
+             final widgetDef = catalog.firstWhere((w) => w.typeKey == typeKey);
+             name = widgetDef.name;
+          } catch (_) {
+             name = 'Unknown Widget';
+          }
+       } else {
+          if (Hive.isBoxOpen('pages')) {
+             final page = Hive.box<PageItem>('pages').get(pid);
+             if (page != null) {
+                name = page.name;
+                icon = page.icon;
+                children = page.widgetChildren;
+             }
+          }
        }
-       return;
+       Future.microtask(() {
+          ref.read(currentPageProvider.notifier).setPage(
+              id: pid,
+              name: name,
+              icon: icon,
+              widgetChildren: children
+          );
+       });
+    } else {
+        Future.microtask(() => ref.read(currentPageProvider.notifier).clear());
     }
-
-    // If state matches PID, do nothing (already synced)
-    if (pageState != null && pageState.id == pid) return;
-
-    // Push new page to history
-    Future.microtask(() {
-       _pushPageToHistory(pid);
-    });
   }
 
-  void _pushPageToHistory(String pid) {
-     String name = 'Page';
-     String icon = '';
-     List<String>? children;
-
-     if (pid.startsWith('widget_')) {
-        final typeKey = pid.replaceFirst('widget_', '');
-        final catalog = ref.read(widgetCatalogProvider);
-        try {
-           final widgetDef = catalog.firstWhere((w) => w.typeKey == typeKey);
-           name = widgetDef.name;
-        } catch (_) {
-           name = 'Unknown Widget';
-        }
-     } else {
-        if (Hive.isBoxOpen('pages')) {
-           final page = Hive.box<PageItem>('pages').get(pid);
-           if (page != null) {
-              name = page.name;
-              icon = page.icon;
-              children = page.widgetChildren;
-           }
-        }
-     }
-
-     ref.read(currentPageProvider.notifier).push(
-        id: pid,
-        name: name,
-        icon: icon,
-        widgetChildren: children
-     );
+  void _syncStack(List<String> stack, String? current) {
+      if (current == null) {
+          stack.clear();
+          return;
+      }
+      
+      if (stack.isEmpty) {
+          stack.add(current);
+          return;
+      }
+      
+      // If no change, return
+      if (stack.last == current) return;
+      
+      // Check if current is already in stack (Back/Up navigation)
+      final index = stack.indexOf(current);
+      if (index != -1) {
+          // Truncate to existing instance
+          stack.length = index + 1;
+      } else {
+          // Push new
+          stack.add(current);
+      }
   }
 
-  List<Page> _buildMiddlewarePages(String currentMid) {
-    final currentMw = ref.watch(currentMiddlewareProvider);
-    final history = currentMw?.historyMiddlewareIDs ?? [];
-    
-    final mwStack = <String>{...history, currentMid};
-    
-    return mwStack.map((mid) => CupertinoPage(
+  void _syncMiddlewareStack(String mid) {
+      // Ensure root is always first if empty or reset
+      if (_middlewareStack.isEmpty && mid != 'router_root') {
+          _middlewareStack.add('router_root');
+      }
+      _syncStack(_middlewareStack, mid);
+  }
+
+  void _syncPageStack(String? pid) {
+      _syncStack(_pageStack, pid);
+  }
+
+  List<Page> _buildMiddlewarePages() {
+    return _middlewareStack.map((mid) => CupertinoPage(
       key: ValueKey('mid_$mid'),
       name: mid,
       child: MiddlewareView(middlewareId: mid),
     )).toList();
   }
 
-  List<Page> _buildPagePages(String? currentPid) {
-    final pageState = ref.watch(currentPageProvider);
-    final uniquePageStack = <String>{};
-
-    if (pageState != null) {
-        uniquePageStack.addAll(pageState.historyPageIDs);
-        // If transitioning, ensure we capture the current logic
-        if (currentPid != null && pageState.id != currentPid) {
-            uniquePageStack.add(pageState.id);
-        }
-    }
-
-    if (currentPid != null) {
-       uniquePageStack.add(currentPid);
-    }
+  List<Page> _buildPagePages() {
+    final List<Page> pages = [
+       const CupertinoPage(
+          key: ValueKey('empty_page'),
+          child: Scaffold(
+            body: Center(child: Text('Select a page')),
+          ),
+       )
+    ];
     
-    if (uniquePageStack.isEmpty) {
-        return [
-           const CupertinoPage(
-              key: ValueKey('empty_page'),
-              child: Scaffold(
-                body: Center(child: Text('Select a page')),
-              ),
-           )
-        ];
+    for (final pid in _pageStack) {
+       pages.add(CupertinoPage(
+         key: ValueKey('page_$pid'),
+         name: pid,
+         child: custom_page.PageView(pageId: pid),
+       ));
     }
-
-    return uniquePageStack.map((pid) => CupertinoPage(
-      key: ValueKey('page_$pid'),
-      name: pid,
-      child: custom_page.PageView(pageId: pid),
-    )).toList();
+    return pages;
   }
   
   bool _handleMiddlewarePop(String currentMid, String? currentPid) {
-      final notifier = ref.read(currentMiddlewareProvider.notifier);
-      final prevId = notifier.pop();
-      if (prevId != null) {
-          if (Hive.isBoxOpen('middlewares')) {
-              final box = Hive.box<MiddlewareItem>('middlewares');
-              final prevItem = box.get(prevId);
-              if (prevItem != null) {
-                  notifier.replaceCurrent(prevItem);
-                  notifier.saveSlideMiddlewareID(currentMid); // For animation direction if needed
-                  _go(context, mid: prevId, pid: currentPid); // Keep current PID? Usually independent
-              }
-          }
-          return true;
-      }
-      return false;
+      if (_middlewareStack.length <= 1) return false; // Can't pop root
+
+      // Pop local stack to find previous
+      // Note: We don't modify stack directly here, we traverse history.
+      // Actually, standard Navigator pop removes the last route.
+      // But since we are driven by state (URL -> build -> pages), 
+      // we just need to find the *target* ID and go there.
+      
+      final prevId = _middlewareStack[_middlewareStack.length - 2];
+      _go(context, mid: prevId, pid: currentPid);
+      return true;
   }
 
   bool _handlePagePop(String currentMid, String? currentPid) {
-      if (currentPid == null) return false;
+      if (_pageStack.isEmpty) return false;
       
-      final pageNotifier = ref.read(currentPageProvider.notifier);
-      final prevPageId = pageNotifier.pop();
-
-      if (prevPageId != null) {
-          _go(context, mid: currentMid, pid: prevPageId);
+      String? nextPid;
+      if (_pageStack.length > 1) {
+          nextPid = _pageStack[_pageStack.length - 2];
       } else {
-          // If no history page, we might be closing the page pane? 
-          // But in split view, page pane usually stays. 
-          // Or if we are in portrait, this pops back to middleware.
-          // In Landscape, maybe we just don't pop the last page?
-          // Or we go to a state with no page?
-          // Let's assume we go to no page if it was the last one, OR we stay.
-          // For now, if we pop the last page, we go to pid=null?
-          // Let's stick to the behavior: Pop page -> prevPage. 
-          // If no prevPage -> remove pid (pid=null).
-          _go(context, mid: currentMid, pid: null);
+          nextPid = null;
       }
+      
+      _go(context, mid: currentMid, pid: nextPid);
       return true;
   }
 
@@ -209,22 +196,19 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     final mid = widget.state.uri.queryParameters['mid'] ?? 'router_root';
     final pid = widget.state.uri.queryParameters['pid'];
 
-    _syncMiddlewareHistory(mid);
-    _syncPageHistory(pid);
+    _updateState(mid, pid);
+    _syncMiddlewareStack(mid);
+    _syncPageStack(pid);
 
-    final middlewarePages = _buildMiddlewarePages(mid);
-    final pagePages = _buildPagePages(pid);
+    final middlewarePages = _buildMiddlewarePages();
+    final pagePages = _buildPagePages();
 
     // Portrait Mode
     if (!ResponsiveLayout.isLandscape(context)) {
        // Combine stacks: Middleware Stack + Page Stack
-       // Note: Page Stack already includes the empty check? No, _buildPagePages handles empty.
-       // In portrait, if pid is null, we just show middleware stack.
-       
        final List<Page> combinedPages = [...middlewarePages];
        
        if (pid != null) {
-           // Filter out the 'empty_page' placeholder if it exists
            final validPagePages = pagePages.where((p) => p.key != const ValueKey('empty_page')).toList();
            combinedPages.addAll(validPagePages);
        }
@@ -235,8 +219,6 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
           onPopPage: (route, result) {
              if (!route.didPop(result)) return false;
 
-             // Determine what we popped
-             // If we have pages, we likely popped a page
              if (pid != null) {
                  return _handlePagePop(mid, pid);
              } else {

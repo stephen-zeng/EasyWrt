@@ -21,19 +21,6 @@ class PageView extends ConsumerWidget {
     required this.pageId,
   });
 
-  void _handleBack(BuildContext context, WidgetRef ref) {
-    final notifier = ref.read(currentPageProvider.notifier);
-    final prevId = notifier.pop();
-    if (prevId != null) {
-       final state = GoRouterState.of(context);
-       final mid = state.uri.queryParameters['mid'] ?? 'router_root';
-       context.go(Uri(
-          path: '/router',
-          queryParameters: {'mid': mid, 'pid': prevId}
-       ).toString());
-    }
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (pageId.startsWith('widget_')) {
@@ -61,19 +48,9 @@ class PageView extends ConsumerWidget {
       );
     }
 
-    final isLandscape = ResponsiveLayout.isLandscape(context);
-    final pageState = ref.watch(currentPageProvider);
-    final hasHistory = pageState != null && pageState.historyPageIDs.isNotEmpty;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widgetInstance.name),
-        leading: (isLandscape && hasHistory)
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => _handleBack(context, ref),
-              )
-            : (isLandscape ? null : const BackButton()),
       ),
       body: GridSizeScope(
         width: 0,
@@ -104,7 +81,6 @@ class PageView extends ConsumerWidget {
 
         return Scaffold(
           appBar: AppBar(
-            automaticallyImplyLeading: !isLandscape && !isEditing,
             leading: _buildLeading(context, ref, isLandscape, isEditing, editController),
             title: Text(page.name),
             actions: _buildActions(context, page, isEditing, editController),
@@ -206,16 +182,6 @@ class PageView extends ConsumerWidget {
           // Confirm discard?
           controller.discard();
         },
-      );
-    }
-    
-    final pageState = ref.watch(currentPageProvider);
-    final hasHistory = pageState != null && pageState.historyPageIDs.isNotEmpty;
-
-    if (isLandscape && hasHistory) {
-      return IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: () => _handleBack(context, ref),
       );
     }
     return null; 

@@ -176,8 +176,6 @@ CurrentMiddleware _$CurrentMiddlewareFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$CurrentMiddleware {
   MiddlewareItem get middlewareItem => throw _privateConstructorUsedError;
-  List<String> get historyMiddlewareIDs => throw _privateConstructorUsedError;
-  String get slideMiddlewareID => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -191,10 +189,7 @@ abstract class $CurrentMiddlewareCopyWith<$Res> {
           CurrentMiddleware value, $Res Function(CurrentMiddleware) then) =
       _$CurrentMiddlewareCopyWithImpl<$Res, CurrentMiddleware>;
   @useResult
-  $Res call(
-      {MiddlewareItem middlewareItem,
-      List<String> historyMiddlewareIDs,
-      String slideMiddlewareID});
+  $Res call({MiddlewareItem middlewareItem});
 }
 
 /// @nodoc
@@ -211,22 +206,12 @@ class _$CurrentMiddlewareCopyWithImpl<$Res, $Val extends CurrentMiddleware>
   @override
   $Res call({
     Object? middlewareItem = null,
-    Object? historyMiddlewareIDs = null,
-    Object? slideMiddlewareID = null,
   }) {
     return _then(_value.copyWith(
       middlewareItem: null == middlewareItem
           ? _value.middlewareItem
           : middlewareItem // ignore: cast_nullable_to_non_nullable
               as MiddlewareItem,
-      historyMiddlewareIDs: null == historyMiddlewareIDs
-          ? _value.historyMiddlewareIDs
-          : historyMiddlewareIDs // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      slideMiddlewareID: null == slideMiddlewareID
-          ? _value.slideMiddlewareID
-          : slideMiddlewareID // ignore: cast_nullable_to_non_nullable
-              as String,
     ) as $Val);
   }
 }
@@ -239,10 +224,7 @@ abstract class _$$CurrentMiddlewareImplCopyWith<$Res>
       __$$CurrentMiddlewareImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {MiddlewareItem middlewareItem,
-      List<String> historyMiddlewareIDs,
-      String slideMiddlewareID});
+  $Res call({MiddlewareItem middlewareItem});
 }
 
 /// @nodoc
@@ -257,22 +239,12 @@ class __$$CurrentMiddlewareImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? middlewareItem = null,
-    Object? historyMiddlewareIDs = null,
-    Object? slideMiddlewareID = null,
   }) {
     return _then(_$CurrentMiddlewareImpl(
       middlewareItem: null == middlewareItem
           ? _value.middlewareItem
           : middlewareItem // ignore: cast_nullable_to_non_nullable
               as MiddlewareItem,
-      historyMiddlewareIDs: null == historyMiddlewareIDs
-          ? _value._historyMiddlewareIDs
-          : historyMiddlewareIDs // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      slideMiddlewareID: null == slideMiddlewareID
-          ? _value.slideMiddlewareID
-          : slideMiddlewareID // ignore: cast_nullable_to_non_nullable
-              as String,
     ));
   }
 }
@@ -280,32 +252,17 @@ class __$$CurrentMiddlewareImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$CurrentMiddlewareImpl implements _CurrentMiddleware {
-  const _$CurrentMiddlewareImpl(
-      {required this.middlewareItem,
-      required final List<String> historyMiddlewareIDs,
-      required this.slideMiddlewareID})
-      : _historyMiddlewareIDs = historyMiddlewareIDs;
+  const _$CurrentMiddlewareImpl({required this.middlewareItem});
 
   factory _$CurrentMiddlewareImpl.fromJson(Map<String, dynamic> json) =>
       _$$CurrentMiddlewareImplFromJson(json);
 
   @override
   final MiddlewareItem middlewareItem;
-  final List<String> _historyMiddlewareIDs;
-  @override
-  List<String> get historyMiddlewareIDs {
-    if (_historyMiddlewareIDs is EqualUnmodifiableListView)
-      return _historyMiddlewareIDs;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_historyMiddlewareIDs);
-  }
-
-  @override
-  final String slideMiddlewareID;
 
   @override
   String toString() {
-    return 'CurrentMiddleware(middlewareItem: $middlewareItem, historyMiddlewareIDs: $historyMiddlewareIDs, slideMiddlewareID: $slideMiddlewareID)';
+    return 'CurrentMiddleware(middlewareItem: $middlewareItem)';
   }
 
   @override
@@ -314,20 +271,12 @@ class _$CurrentMiddlewareImpl implements _CurrentMiddleware {
         (other.runtimeType == runtimeType &&
             other is _$CurrentMiddlewareImpl &&
             (identical(other.middlewareItem, middlewareItem) ||
-                other.middlewareItem == middlewareItem) &&
-            const DeepCollectionEquality()
-                .equals(other._historyMiddlewareIDs, _historyMiddlewareIDs) &&
-            (identical(other.slideMiddlewareID, slideMiddlewareID) ||
-                other.slideMiddlewareID == slideMiddlewareID));
+                other.middlewareItem == middlewareItem));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      middlewareItem,
-      const DeepCollectionEquality().hash(_historyMiddlewareIDs),
-      slideMiddlewareID);
+  int get hashCode => Object.hash(runtimeType, middlewareItem);
 
   @JsonKey(ignore: true)
   @override
@@ -346,19 +295,13 @@ class _$CurrentMiddlewareImpl implements _CurrentMiddleware {
 
 abstract class _CurrentMiddleware implements CurrentMiddleware {
   const factory _CurrentMiddleware(
-      {required final MiddlewareItem middlewareItem,
-      required final List<String> historyMiddlewareIDs,
-      required final String slideMiddlewareID}) = _$CurrentMiddlewareImpl;
+      {required final MiddlewareItem middlewareItem}) = _$CurrentMiddlewareImpl;
 
   factory _CurrentMiddleware.fromJson(Map<String, dynamic> json) =
       _$CurrentMiddlewareImpl.fromJson;
 
   @override
   MiddlewareItem get middlewareItem;
-  @override
-  List<String> get historyMiddlewareIDs;
-  @override
-  String get slideMiddlewareID;
   @override
   @JsonKey(ignore: true)
   _$$CurrentMiddlewareImplCopyWith<_$CurrentMiddlewareImpl> get copyWith =>
@@ -375,7 +318,6 @@ mixin _$CurrentPage {
   List<String> get path => throw _privateConstructorUsedError;
   String get name => throw _privateConstructorUsedError;
   String get icon => throw _privateConstructorUsedError;
-  List<String> get historyPageIDs => throw _privateConstructorUsedError;
   bool get isEditMode => throw _privateConstructorUsedError;
   List<String>? get widgetChildren => throw _privateConstructorUsedError;
 
@@ -396,7 +338,6 @@ abstract class $CurrentPageCopyWith<$Res> {
       List<String> path,
       String name,
       String icon,
-      List<String> historyPageIDs,
       bool isEditMode,
       List<String>? widgetChildren});
 }
@@ -418,7 +359,6 @@ class _$CurrentPageCopyWithImpl<$Res, $Val extends CurrentPage>
     Object? path = null,
     Object? name = null,
     Object? icon = null,
-    Object? historyPageIDs = null,
     Object? isEditMode = null,
     Object? widgetChildren = freezed,
   }) {
@@ -439,10 +379,6 @@ class _$CurrentPageCopyWithImpl<$Res, $Val extends CurrentPage>
           ? _value.icon
           : icon // ignore: cast_nullable_to_non_nullable
               as String,
-      historyPageIDs: null == historyPageIDs
-          ? _value.historyPageIDs
-          : historyPageIDs // ignore: cast_nullable_to_non_nullable
-              as List<String>,
       isEditMode: null == isEditMode
           ? _value.isEditMode
           : isEditMode // ignore: cast_nullable_to_non_nullable
@@ -468,7 +404,6 @@ abstract class _$$CurrentPageImplCopyWith<$Res>
       List<String> path,
       String name,
       String icon,
-      List<String> historyPageIDs,
       bool isEditMode,
       List<String>? widgetChildren});
 }
@@ -488,7 +423,6 @@ class __$$CurrentPageImplCopyWithImpl<$Res>
     Object? path = null,
     Object? name = null,
     Object? icon = null,
-    Object? historyPageIDs = null,
     Object? isEditMode = null,
     Object? widgetChildren = freezed,
   }) {
@@ -509,10 +443,6 @@ class __$$CurrentPageImplCopyWithImpl<$Res>
           ? _value.icon
           : icon // ignore: cast_nullable_to_non_nullable
               as String,
-      historyPageIDs: null == historyPageIDs
-          ? _value._historyPageIDs
-          : historyPageIDs // ignore: cast_nullable_to_non_nullable
-              as List<String>,
       isEditMode: null == isEditMode
           ? _value.isEditMode
           : isEditMode // ignore: cast_nullable_to_non_nullable
@@ -533,11 +463,9 @@ class _$CurrentPageImpl implements _CurrentPage {
       required final List<String> path,
       required this.name,
       required this.icon,
-      final List<String> historyPageIDs = const [],
       this.isEditMode = false,
       final List<String>? widgetChildren})
       : _path = path,
-        _historyPageIDs = historyPageIDs,
         _widgetChildren = widgetChildren;
 
   factory _$CurrentPageImpl.fromJson(Map<String, dynamic> json) =>
@@ -557,15 +485,6 @@ class _$CurrentPageImpl implements _CurrentPage {
   final String name;
   @override
   final String icon;
-  final List<String> _historyPageIDs;
-  @override
-  @JsonKey()
-  List<String> get historyPageIDs {
-    if (_historyPageIDs is EqualUnmodifiableListView) return _historyPageIDs;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_historyPageIDs);
-  }
-
   @override
   @JsonKey()
   final bool isEditMode;
@@ -581,7 +500,7 @@ class _$CurrentPageImpl implements _CurrentPage {
 
   @override
   String toString() {
-    return 'CurrentPage(id: $id, path: $path, name: $name, icon: $icon, historyPageIDs: $historyPageIDs, isEditMode: $isEditMode, widgetChildren: $widgetChildren)';
+    return 'CurrentPage(id: $id, path: $path, name: $name, icon: $icon, isEditMode: $isEditMode, widgetChildren: $widgetChildren)';
   }
 
   @override
@@ -593,8 +512,6 @@ class _$CurrentPageImpl implements _CurrentPage {
             const DeepCollectionEquality().equals(other._path, _path) &&
             (identical(other.name, name) || other.name == name) &&
             (identical(other.icon, icon) || other.icon == icon) &&
-            const DeepCollectionEquality()
-                .equals(other._historyPageIDs, _historyPageIDs) &&
             (identical(other.isEditMode, isEditMode) ||
                 other.isEditMode == isEditMode) &&
             const DeepCollectionEquality()
@@ -609,7 +526,6 @@ class _$CurrentPageImpl implements _CurrentPage {
       const DeepCollectionEquality().hash(_path),
       name,
       icon,
-      const DeepCollectionEquality().hash(_historyPageIDs),
       isEditMode,
       const DeepCollectionEquality().hash(_widgetChildren));
 
@@ -633,7 +549,6 @@ abstract class _CurrentPage implements CurrentPage {
       required final List<String> path,
       required final String name,
       required final String icon,
-      final List<String> historyPageIDs,
       final bool isEditMode,
       final List<String>? widgetChildren}) = _$CurrentPageImpl;
 
@@ -648,8 +563,6 @@ abstract class _CurrentPage implements CurrentPage {
   String get name;
   @override
   String get icon;
-  @override
-  List<String> get historyPageIDs;
   @override
   bool get isEditMode;
   @override

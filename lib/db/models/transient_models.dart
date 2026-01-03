@@ -24,14 +24,12 @@ abstract class CurrentRouter with _$CurrentRouter {
 /// CurrentMiddleware
 /// CurrentMiddleware
 /// 
-/// Function: Transient model for currently active middleware state with history.
-/// Function: 带有历史记录的当前活动中间件状态的临时模型。
+/// Function: Transient model for currently active middleware state.
+/// Function: 当前活动中间件状态的临时模型。
 @freezed
 abstract class CurrentMiddleware with _$CurrentMiddleware {
   const factory CurrentMiddleware({
     required MiddlewareItem middlewareItem,
-    required List<String> historyMiddlewareIDs,
-    required String slideMiddlewareID,
   }) = _CurrentMiddleware;
 
   factory CurrentMiddleware.fromJson(Map<String, dynamic> json) =>
@@ -50,7 +48,6 @@ abstract class CurrentPage with _$CurrentPage {
     required List<String> path,
     required String name,
     required String icon,
-    @Default([]) List<String> historyPageIDs,
     @Default(false) bool isEditMode,
     List<String>? widgetChildren,
   }) = _CurrentPage;
