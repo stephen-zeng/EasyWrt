@@ -92,6 +92,42 @@ class CpuUsageWidget extends BaseWidget<List<double>> {
     );
   }
 
+  @override
+  Widget renderPage(BuildContext context, List<double> load, WidgetRef ref) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('System Load Average', style: Theme.of(context).textTheme.headlineSmall),
+          const SizedBox(height: 24),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                   title: const Text('1 Minute Average'),
+                   trailing: Text(load.isNotEmpty ? load[0].toStringAsFixed(2) : '0.00', style: Theme.of(context).textTheme.titleLarge),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                   title: const Text('5 Minute Average'),
+                   trailing: Text(load.length > 1 ? load[1].toStringAsFixed(2) : '0.00', style: Theme.of(context).textTheme.titleLarge),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                   title: const Text('15 Minute Average'),
+                   trailing: Text(load.length > 2 ? load[2].toStringAsFixed(2) : '0.00', style: Theme.of(context).textTheme.titleLarge),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text('CPU usage details from RPC system.info call.', style: Theme.of(context).textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+
   Widget _buildCard(BuildContext context, Widget child) {
     return Card(
       margin: EdgeInsets.zero,

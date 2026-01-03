@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/modules/router/controllers/current_middleware_controller.dart';
+import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
 import 'package:easywrt/modules/router/middleware/add_middleware_item_dialog.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/beam/window/responsive_layout.dart';
@@ -39,17 +40,10 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
         // Note: Provider initialization is now handled by RouterSplitWrapper
 
         final currentMw = ref.watch(currentMiddlewareProvider);
-        // Check History for AppBar visibility
-        final hasHistory = currentMw != null && currentMw.historyMiddlewareIDs.isNotEmpty;
         final isLandscape = ResponsiveLayout.isLandscape(context);
 
         return Scaffold(
           appBar: AppBar(
-            automaticallyImplyLeading: !isLandscape && !_isEditing,
-            leading: hasHistory && !_isEditing && isLandscape ? IconButton(
-              icon: const Icon(Icons.arrow_back),
-              onPressed: () => _handleBack(context, box),
-            ): null,
             title: Text(middleware.name),
             actions: [
               IconButton(
@@ -93,7 +87,7 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
                       context: context,
                       builder: (_) => AddMiddlewareItemDialog(
                          currentMiddlewareId: widget.middlewareId,
-                         ancestorIds: currentMw?.historyMiddlewareIDs ?? [],
+                         ancestorIds: const [],
                          existingChildIds: middleware.children ?? [],
                          onAdd: (childId) {
                             ref.read(currentMiddlewareProvider.notifier).addChild(childId);
@@ -106,19 +100,6 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
         );
       },
     );
-  }
-
-  void _handleBack(BuildContext context, Box<MiddlewareItem> box) {
-    final notifier = ref.read(currentMiddlewareProvider.notifier);
-    final prevId = notifier.pop();
-    if (prevId != null) {
-      final prevItem = box.get(prevId);
-      if (prevItem != null) {
-        notifier.replaceCurrent(prevItem);
-        notifier.saveSlideMiddlewareID(widget.middlewareId);
-        _go(context, mid: prevId);
-      }
-    }
   }
 
   Widget _buildListItem(BuildContext context, WidgetRef ref, String childId, bool isEditing, int index, Key? key) {
@@ -158,11 +139,34 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
           ],
         ),
         onTap: isEditing ? null : () {
-          ref.read(currentMiddlewareProvider.notifier).push(childMiddleware);
-          ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID(childMiddleware.id);
           _go(context, mid: childId);
         },
       );
+    }
+
+    // Check for Widget Item
+    if (childId.startsWith('widget_')) {
+      final typeKey = childId.replaceFirst('widget_', '');
+      final catalog = ref.read(widgetCatalogProvider);
+      try {
+        final widgetItem = catalog.firstWhere((w) => w.typeKey == typeKey);
+        return ListTile(
+          key: key,
+          leading: Icon(widgetItem.icon),
+          title: Text(widgetItem.name),
+          trailing: isEditing ? trailing : null,
+          onTap: isEditing ? null : () {
+            _go(context, pid: childId);
+          },
+        );
+      } catch (_) {
+        return ListTile(
+          key: key,
+          leading: const Icon(Icons.error),
+          title: Text('Unknown Widget: $typeKey'),
+          trailing: isEditing ? trailing : null,
+        );
+      }
     }
 
     final childPage = Hive.box<PageItem>('pages').get(childId);
@@ -172,10 +176,9 @@ class _MiddlewareViewState extends ConsumerState<MiddlewareView> {
         leading: Icon(AppMeta.getIconData(childPage.icon)),
         title: Text(childPage.name),
         trailing: isEditing ? trailing : null, // Pages don't have chevron usually unless specifically requested
-        onTap: isEditing ? null : () {
-          _go(context, pid: childId);
-          ref.read(currentMiddlewareProvider.notifier).saveSlideMiddlewareID('');
-        },
+                  onTap: isEditing ? null : () {
+                    _go(context, pid: childId);
+                  },
       );
     }
     return SizedBox.shrink(key: key);

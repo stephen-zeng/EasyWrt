@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
 import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/modules/router/controllers/edit_controller.dart';
@@ -329,6 +330,24 @@ class _StripeWidgetState extends ConsumerState<StripeWidget> {
     );
 
     Widget content = child;
+
+    if (!widget.isEditing) {
+      content = GestureDetector(
+        onLongPress: () {
+          HapticFeedback.mediumImpact();
+          final state = GoRouterState.of(context);
+          final mid = state.uri.queryParameters['mid'] ?? 'router_root';
+          context.go(Uri(
+            path: '/router',
+            queryParameters: {
+              'mid': mid,
+              'pid': 'widget_${w.widgetTypeKey}',
+            },
+          ).toString());
+        },
+        child: content,
+      );
+    }
 
     if (widget.isEditing) {
       content = Listener(

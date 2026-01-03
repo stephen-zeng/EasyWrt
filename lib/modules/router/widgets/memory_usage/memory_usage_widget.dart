@@ -33,6 +33,71 @@ class MemoryUsageWidget extends BaseWidget<MemoryUsage?> {
   }
 
   @override
+  Widget renderPage(BuildContext context, MemoryUsage? usage, WidgetRef ref) {
+    if (usage == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppMeta.defaultPadding),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          SizedBox(
+            height: 200,
+            width: 200,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CircularProgressIndicator(
+                  value: usage.percent,
+                  strokeWidth: 20,
+                  backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  strokeCap: StrokeCap.round,
+                ),
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${(usage.percent * 100).toStringAsFixed(1)}%',
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
+                      Text(
+                        'Used',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          Card(
+            child: Column(
+              children: [
+                _buildDetailTile(context, 'Used Memory', usage.used),
+                const Divider(height: 1),
+                _buildDetailTile(context, 'Free Memory', usage.free),
+                const Divider(height: 1),
+                _buildDetailTile(context, 'Total Memory', usage.total, isTotal: true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailTile(BuildContext context, String label, double bytes, {bool isTotal = false}) {
+     final mb = (bytes / AppMeta.bytesPerMegabyte).toStringAsFixed(2);
+     return ListTile(
+       title: Text(label),
+       trailing: Text('$mb MB', style: isTotal ? const TextStyle(fontWeight: FontWeight.bold) : null),
+     );
+  }
+
+  @override
   Widget render2x1(BuildContext context, MemoryUsage? usage, WidgetRef ref) {
     return Card(
       margin: EdgeInsets.zero,

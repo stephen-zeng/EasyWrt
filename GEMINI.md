@@ -4,6 +4,8 @@ Auto-generated from all feature plans. Last updated: 2025-12-12
 
 ## Active Technologies
 - Hive (Local NoSQL) (002-customization)
+- Dart 3.9.2 (Flutter 3.x) (003-widget-as-page)
+- Hive (for MiddlewareItem persistence) (003-widget-as-page)
 
 - Dart 3.x (Flutter 3.x) (001-framework-design)
 
@@ -23,11 +25,10 @@ tests/
 Dart 3.x (Flutter 3.x): Follow standard conventions
 
 ## Recent Changes
+- 003-widget-as-page: Added Dart 3.9.2 (Flutter 3.x)
 - 002-customization: Added Dart 3.x (Flutter 3.x)
 
 - 001-framework-design: Added Dart 3.x (Flutter 3.x)
 
 <!-- MANUAL ADDITIONS START -->
-- Fixed RenderFlex overflow in memory_usage_widget.dart by wrapping text in Flexible with ellipsis.
-- Implemented native swipe-to-return in portrait mode by using nested Navigator stack in RouterSplitWrapper and SettingSplitWrapper.
 <!-- MANUAL ADDITIONS END -->

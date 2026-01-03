@@ -176,8 +176,6 @@ CurrentMiddleware _$CurrentMiddlewareFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$CurrentMiddleware {
   MiddlewareItem get middlewareItem => throw _privateConstructorUsedError;
-  List<String> get historyMiddlewareIDs => throw _privateConstructorUsedError;
-  String get slideMiddlewareID => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -191,10 +189,7 @@ abstract class $CurrentMiddlewareCopyWith<$Res> {
           CurrentMiddleware value, $Res Function(CurrentMiddleware) then) =
       _$CurrentMiddlewareCopyWithImpl<$Res, CurrentMiddleware>;
   @useResult
-  $Res call(
-      {MiddlewareItem middlewareItem,
-      List<String> historyMiddlewareIDs,
-      String slideMiddlewareID});
+  $Res call({MiddlewareItem middlewareItem});
 }
 
 /// @nodoc
@@ -211,22 +206,12 @@ class _$CurrentMiddlewareCopyWithImpl<$Res, $Val extends CurrentMiddleware>
   @override
   $Res call({
     Object? middlewareItem = null,
-    Object? historyMiddlewareIDs = null,
-    Object? slideMiddlewareID = null,
   }) {
     return _then(_value.copyWith(
       middlewareItem: null == middlewareItem
           ? _value.middlewareItem
           : middlewareItem // ignore: cast_nullable_to_non_nullable
               as MiddlewareItem,
-      historyMiddlewareIDs: null == historyMiddlewareIDs
-          ? _value.historyMiddlewareIDs
-          : historyMiddlewareIDs // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      slideMiddlewareID: null == slideMiddlewareID
-          ? _value.slideMiddlewareID
-          : slideMiddlewareID // ignore: cast_nullable_to_non_nullable
-              as String,
     ) as $Val);
   }
 }
@@ -239,10 +224,7 @@ abstract class _$$CurrentMiddlewareImplCopyWith<$Res>
       __$$CurrentMiddlewareImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {MiddlewareItem middlewareItem,
-      List<String> historyMiddlewareIDs,
-      String slideMiddlewareID});
+  $Res call({MiddlewareItem middlewareItem});
 }
 
 /// @nodoc
@@ -257,22 +239,12 @@ class __$$CurrentMiddlewareImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? middlewareItem = null,
-    Object? historyMiddlewareIDs = null,
-    Object? slideMiddlewareID = null,
   }) {
     return _then(_$CurrentMiddlewareImpl(
       middlewareItem: null == middlewareItem
           ? _value.middlewareItem
           : middlewareItem // ignore: cast_nullable_to_non_nullable
               as MiddlewareItem,
-      historyMiddlewareIDs: null == historyMiddlewareIDs
-          ? _value._historyMiddlewareIDs
-          : historyMiddlewareIDs // ignore: cast_nullable_to_non_nullable
-              as List<String>,
-      slideMiddlewareID: null == slideMiddlewareID
-          ? _value.slideMiddlewareID
-          : slideMiddlewareID // ignore: cast_nullable_to_non_nullable
-              as String,
     ));
   }
 }
@@ -280,32 +252,17 @@ class __$$CurrentMiddlewareImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$CurrentMiddlewareImpl implements _CurrentMiddleware {
-  const _$CurrentMiddlewareImpl(
-      {required this.middlewareItem,
-      required final List<String> historyMiddlewareIDs,
-      required this.slideMiddlewareID})
-      : _historyMiddlewareIDs = historyMiddlewareIDs;
+  const _$CurrentMiddlewareImpl({required this.middlewareItem});
 
   factory _$CurrentMiddlewareImpl.fromJson(Map<String, dynamic> json) =>
       _$$CurrentMiddlewareImplFromJson(json);
 
   @override
   final MiddlewareItem middlewareItem;
-  final List<String> _historyMiddlewareIDs;
-  @override
-  List<String> get historyMiddlewareIDs {
-    if (_historyMiddlewareIDs is EqualUnmodifiableListView)
-      return _historyMiddlewareIDs;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_historyMiddlewareIDs);
-  }
-
-  @override
-  final String slideMiddlewareID;
 
   @override
   String toString() {
-    return 'CurrentMiddleware(middlewareItem: $middlewareItem, historyMiddlewareIDs: $historyMiddlewareIDs, slideMiddlewareID: $slideMiddlewareID)';
+    return 'CurrentMiddleware(middlewareItem: $middlewareItem)';
   }
 
   @override
@@ -314,20 +271,12 @@ class _$CurrentMiddlewareImpl implements _CurrentMiddleware {
         (other.runtimeType == runtimeType &&
             other is _$CurrentMiddlewareImpl &&
             (identical(other.middlewareItem, middlewareItem) ||
-                other.middlewareItem == middlewareItem) &&
-            const DeepCollectionEquality()
-                .equals(other._historyMiddlewareIDs, _historyMiddlewareIDs) &&
-            (identical(other.slideMiddlewareID, slideMiddlewareID) ||
-                other.slideMiddlewareID == slideMiddlewareID));
+                other.middlewareItem == middlewareItem));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      middlewareItem,
-      const DeepCollectionEquality().hash(_historyMiddlewareIDs),
-      slideMiddlewareID);
+  int get hashCode => Object.hash(runtimeType, middlewareItem);
 
   @JsonKey(ignore: true)
   @override
@@ -346,19 +295,13 @@ class _$CurrentMiddlewareImpl implements _CurrentMiddleware {
 
 abstract class _CurrentMiddleware implements CurrentMiddleware {
   const factory _CurrentMiddleware(
-      {required final MiddlewareItem middlewareItem,
-      required final List<String> historyMiddlewareIDs,
-      required final String slideMiddlewareID}) = _$CurrentMiddlewareImpl;
+      {required final MiddlewareItem middlewareItem}) = _$CurrentMiddlewareImpl;
 
   factory _CurrentMiddleware.fromJson(Map<String, dynamic> json) =
       _$CurrentMiddlewareImpl.fromJson;
 
   @override
   MiddlewareItem get middlewareItem;
-  @override
-  List<String> get historyMiddlewareIDs;
-  @override
-  String get slideMiddlewareID;
   @override
   @JsonKey(ignore: true)
   _$$CurrentMiddlewareImplCopyWith<_$CurrentMiddlewareImpl> get copyWith =>

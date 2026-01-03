@@ -54,18 +54,23 @@ abstract class BaseWidget<T> extends ConsumerWidget {
           case '2x4': return render2x4(context, data, ref);
           case '4x2': return render4x2(context, data, ref);
           case '4x4': return render4x4(context, data, ref);
+          case '0x0': return renderPage(context, data, ref);
           default: return renderDefault(context, data, ref);
         }
       },
       error: (err, stack) {
-        if (sizeStr == '1x1') {
+        if (sizeStr == '0x0') {
+          return buildError(context, err);
+        } else if (sizeStr == '1x1') {
           return render1x1(context, null, ref);
         } else {
           return buildError(context, err);
         }
       },
       loading: () {
-        if (sizeStr == '1x1') {
+        if (sizeStr == '0x0') {
+          return buildLoading(context);
+        } else if (sizeStr == '1x1') {
           return render1x1(context, null, ref);
         } else {
           return buildLoading(context);
@@ -120,6 +125,12 @@ abstract class BaseWidget<T> extends ConsumerWidget {
 
   // --- Render methods to be implemented/overridden by subclasses ---
   
+  /// Renders the widget as a full page.
+  /// Default implementation returns a placeholder.
+  Widget renderPage(BuildContext context, T data, WidgetRef ref) {
+    return Center(child: Text('$name Page Not Implemented'));
+  }
+
   Widget renderDefault(BuildContext context, T data, WidgetRef ref) => const Center(child: Text('Not implemented'));
 
   /// Default implementation for 1x1 size: displays the widget's icon.

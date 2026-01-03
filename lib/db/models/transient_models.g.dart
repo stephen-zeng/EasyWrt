@@ -24,18 +24,12 @@ _$CurrentMiddlewareImpl _$$CurrentMiddlewareImplFromJson(
     _$CurrentMiddlewareImpl(
       middlewareItem: MiddlewareItem.fromJson(
           json['middlewareItem'] as Map<String, dynamic>),
-      historyMiddlewareIDs: (json['historyMiddlewareIDs'] as List<dynamic>)
-          .map((e) => e as String)
-          .toList(),
-      slideMiddlewareID: json['slideMiddlewareID'] as String,
     );
 
 Map<String, dynamic> _$$CurrentMiddlewareImplToJson(
         _$CurrentMiddlewareImpl instance) =>
     <String, dynamic>{
       'middlewareItem': instance.middlewareItem,
-      'historyMiddlewareIDs': instance.historyMiddlewareIDs,
-      'slideMiddlewareID': instance.slideMiddlewareID,
     };
 
 _$CurrentPageImpl _$$CurrentPageImplFromJson(Map<String, dynamic> json) =>

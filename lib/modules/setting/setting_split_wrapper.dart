@@ -96,7 +96,7 @@ class SettingSplitWrapper extends StatelessWidget {
                   ? getPageWidget(page)
                   : const Scaffold(
                       body: Center(
-                        child: Text('Select a setting from the left menu'),
+                        child: Icon(Icons.settings),
                       ),
                     ),
             ),

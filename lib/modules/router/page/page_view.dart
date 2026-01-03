@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide PageView;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:easywrt/modules/router/controllers/current_page_controller.dart';
+import 'package:easywrt/beam/widget/grid_size_scope.dart';
+import 'package:easywrt/modules/router/controllers/widget_catalog_controller.dart';
+import 'package:easywrt/modules/router/widgets/base/base_widget.dart';
 import 'package:easywrt/beam/window/responsive_layout.dart';
 import 'package:easywrt/beam/widget/stripe_widget.dart';
 import 'package:easywrt/db/models/hierarchy_items.dart';
@@ -9,31 +13,54 @@ import 'package:easywrt/utils/init/meta.dart';
 import 'package:easywrt/modules/router/controllers/edit_controller.dart';
 import 'package:easywrt/modules/router/page/add_widget_dialog.dart';
 
-class RouterPageView extends ConsumerStatefulWidget {
+class PageView extends ConsumerWidget {
   final String pageId;
 
-  const RouterPageView({super.key, required this.pageId});
+  const PageView({
+    super.key,
+    required this.pageId,
+  });
 
   @override
-  ConsumerState<RouterPageView> createState() => _RouterPageViewState();
-}
-
-class _RouterPageViewState extends ConsumerState<RouterPageView> {
-
-  @override
-  void initState() {
-    super.initState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (pageId.startsWith('widget_')) {
+      return _buildWidgetPage(context, ref);
+    } else {
+      return _buildRouterPage(context, ref);
+    }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  Widget _buildWidgetPage(BuildContext context, WidgetRef ref) {
+    final typeKey = pageId.replaceFirst('widget_', '');
+    final catalog = ref.watch(widgetCatalogProvider);
+    
+    BaseWidget? widgetInstance;
+    try {
+      widgetInstance = catalog.firstWhere((w) => w.typeKey == typeKey);
+    } catch (_) {
+      widgetInstance = null;
+    }
+
+    if (widgetInstance == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Not Found')),
+        body: Center(child: Text('Widget type "$typeKey" not found in catalog')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widgetInstance.name),
+      ),
+      body: GridSizeScope(
+        width: 0,
+        height: 0,
+        child: widgetInstance,
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final pageId = widget.pageId;
-
+  Widget _buildRouterPage(BuildContext context, WidgetRef ref) {
     final isLandscape = ResponsiveLayout.isLandscape(context);
     final editState = ref.watch(editManagerProvider);
     final isEditing = editState.isEditing && editState.editingPageId == pageId;
@@ -52,13 +79,9 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
           return const Center(child: Text('Page not found'));
         }
 
-        // Init/Sync CurrentPage (Legacy support if needed)
-        // ref.read(currentPageProvider.notifier).init(page);
-
         return Scaffold(
           appBar: AppBar(
-            automaticallyImplyLeading: !isLandscape && !isEditing,
-            leading: _buildLeading(context, isLandscape, isEditing, editController),
+            leading: _buildLeading(context, ref, isLandscape, isEditing, editController),
             title: Text(page.name),
             actions: _buildActions(context, page, isEditing, editController),
           ),
@@ -77,13 +100,8 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
               
               final int itemCount = stripes.length + (isEditing ? 1 : 0);
 
-              // Note: When !isEditing, gap is 0, so calculation needs to be careful not to divide by zero if minWidth is small (it's not).
-              // Actually the formula (availW + gap) / (minWidth + gap) handles gap=0 fine.
-              
               int cols = ((availW + gap) / (minWidth + gap)).floor();
-              // If we have fewer items than space allows, limit cols to itemCount
-              // to prevent items from being too narrow/aligned left unnecessarily.
-              // They will expand up to maxStripeWidth and be centered.
+              
               if (itemCount > 0 && cols > itemCount) {
                 cols = itemCount;
               }
@@ -108,7 +126,7 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
                       width: stripeWidth,
                     )),
                 if (isEditing)
-                  _buildEmptyStripePlaceholder(context, stripeWidth),
+                  _buildEmptyStripePlaceholder(context, stripeWidth, ref),
               ];
 
               Widget content = SingleChildScrollView(
@@ -156,7 +174,7 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
     );
   }
 
-  Widget? _buildLeading(BuildContext context, bool isLandscape, bool isEditing, EditController controller) {
+  Widget? _buildLeading(BuildContext context, WidgetRef ref, bool isLandscape, bool isEditing, EditController controller) {
     if (isEditing) {
       return IconButton(
         icon: const Icon(Icons.close),
@@ -166,13 +184,8 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
         },
       );
     }
-    // In Portrait (Nested Navigator), we let automaticallyImplyLeading create the BackButton.
-    // In Landscape, we don't want a back button (usually).
-    // If we wanted to enforce it in Portrait:
-    // if (!isLandscape) return const BackButton();
     return null; 
   }
-
 
   List<Widget> _buildActions(BuildContext context, PageItem page, bool isEditing, EditController controller) {
     if (isEditing) {
@@ -197,7 +210,7 @@ class _RouterPageViewState extends ConsumerState<RouterPageView> {
     }
   }
 
-  Widget _buildEmptyStripePlaceholder(BuildContext context, double width) {
+  Widget _buildEmptyStripePlaceholder(BuildContext context, double width, WidgetRef ref) {
     return DragTarget<String>(
       onWillAcceptWithDetails: (details) => true,
       onAcceptWithDetails: (details) {

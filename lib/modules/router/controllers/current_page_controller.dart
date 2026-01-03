@@ -5,21 +5,22 @@ import 'package:easywrt/db/models/transient_models.dart';
 class CurrentPageNotifier extends StateNotifier<CurrentPage?> {
   CurrentPageNotifier() : super(null);
 
-  void init(PageItem pageItem) {
-    // If already initialized with this page, do nothing (preserve edit mode)
-    if (state != null && state!.id == pageItem.id) {
-        // Just update metadata if needed, but keep edit mode
-        // For now, assuming static metadata from Hive
-        return;
-    }
-    
+  void setPage({
+    required String id, 
+    required String name, 
+    required String icon, 
+    List<String>? widgetChildren
+  }) {
+    // Preserve edit mode if same page
+    final isEdit = (state?.id == id) ? (state?.isEditMode ?? false) : false;
+
     state = CurrentPage(
-      id: pageItem.id,
-      path: [], // Path handling might be complex, skipping for now as it's not critical
-      name: pageItem.name,
-      icon: pageItem.icon,
-      isEditMode: false,
-      widgetChildren: pageItem.widgetChildren,
+      id: id,
+      path: [],
+      name: name,
+      icon: icon,
+      isEditMode: isEdit,
+      widgetChildren: widgetChildren,
     );
   }
   
