@@ -149,46 +149,39 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
        final history = currentMw?.historyMiddlewareIDs ?? [];
        final List<Page> pages = [];
 
-       // Add history items
-       for (final hMid in history) {
+       // Deduplicate Middleware IDs
+       final mwStack = <String>{...history, mid};
+
+       for (final hMid in mwStack) {
           pages.add(CupertinoPage(
              key: ValueKey('mid_$hMid'),
              child: MiddlewareView(middlewareId: hMid),
           ));
        }
 
-       // Add current MID
-       pages.add(CupertinoPage(
-          key: ValueKey('mid_$mid'),
-          child: MiddlewareView(middlewareId: mid),
-       ));
-
        // Add Page History + Current Page
        final pageState = ref.watch(currentPageProvider);
-       final List<String> pageStack = [];
+       // Deduplicate Page IDs
+       final uniquePageStack = <String>{};
 
        if (pageState != null) {
-           pageStack.addAll(pageState.historyPageIDs);
+           uniquePageStack.addAll(pageState.historyPageIDs);
            // If pageState.id != pid, it means we are transitioning (likely a push), 
            // so we treat pageState.id as implicitly in history for this frame.
            if (pid != null && pageState.id != pid) {
-               pageStack.add(pageState.id);
+               uniquePageStack.add(pageState.id);
            }
        }
+
+       if (pid != null) {
+          uniquePageStack.add(pid);
+       }
        
-       for (final pId in pageStack) {
+       for (final pId in uniquePageStack) {
            pages.add(CupertinoPage(
                key: ValueKey('page_$pId'),
                child: custom_page.PageView(pageId: pId),
            ));
-       }
-
-       // Add current PID if exists
-       if (pid != null) {
-          pages.add(CupertinoPage(
-             key: ValueKey('page_$pid'),
-             child: custom_page.PageView(pageId: pid),
-          ));
        }
 
        return Navigator(
