@@ -99,28 +99,29 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
   }
 
   void _syncStack(List<String> stack, String? current) {
-      if (current == null) {
-          stack.clear();
-          return;
-      }
-      
-      if (stack.isEmpty) {
-          stack.add(current);
-          return;
-      }
-      
-      // If no change, return
-      if (stack.last == current) return;
-      
-      // Check if current is already in stack (Back/Up navigation)
-      final index = stack.indexOf(current);
-      if (index != -1) {
-          // Truncate to existing instance
-          stack.length = index + 1;
-      } else {
-          // Push new
-          stack.add(current);
-      }
+    if (current == null) {
+      stack.clear();
+      return;
+    }
+
+    if (stack.isEmpty) {
+      stack.add(current);
+      return;
+    }
+
+    // If no change, return
+    if (stack.last == current) return;
+
+    // Check if current is already in stack (Back/Up navigation)
+    final index = stack.indexOf(current);
+    if (index != -1) {
+      // Truncate to existing instance
+      stack.length = index + 1;
+    } else {
+      // Push new
+      stack.add(current);
+    }
+
   }
 
   void _syncMiddlewareStack(String mid) {
@@ -152,7 +153,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
           ),
        )
     ];
-    
+
     for (final pid in _pageStack) {
        pages.add(CupertinoPage(
          key: ValueKey('page_$pid'),
@@ -163,32 +164,30 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
     return pages;
   }
   
-  bool _handleMiddlewarePop(String currentMid, String? currentPid) {
-      if (_middlewareStack.length <= 1) return false; // Can't pop root
-
-      // Pop local stack to find previous
-      // Note: We don't modify stack directly here, we traverse history.
-      // Actually, standard Navigator pop removes the last route.
-      // But since we are driven by state (URL -> build -> pages), 
-      // we just need to find the *target* ID and go there.
-      
-      final prevId = _middlewareStack[_middlewareStack.length - 2];
-      _go(context, mid: prevId, pid: currentPid);
-      return true;
-  }
-
-  bool _handlePagePop(String currentMid, String? currentPid) {
-      if (_pageStack.isEmpty) return false;
-      
-      String? nextPid;
-      if (_pageStack.length > 1) {
-          nextPid = _pageStack[_pageStack.length - 2];
-      } else {
-          nextPid = null;
-      }
-      
-      _go(context, mid: currentMid, pid: nextPid);
-      return true;
+  void _handleRemoval(Page page, String currentMid, String? currentPid) {
+     final key = page.key;
+     if (key is ValueKey<String>) {
+        final val = key.value;
+        
+        // Handle Middleware Removal
+        if (val.startsWith('mid_')) {
+            if (_middlewareStack.length >= 2) {
+                final prevId = _middlewareStack[_middlewareStack.length - 2];
+                _go(context, mid: prevId, pid: currentPid);
+            }
+        }
+        
+        // Handle Page Removal
+        if (val.startsWith('page_')) {
+            String? nextPid;
+            if (_pageStack.length >= 2) {
+                nextPid = _pageStack[_pageStack.length - 2];
+            } else {
+                nextPid = null;
+            }
+            _go(context, mid: currentMid, pid: nextPid);
+        }
+     }
   }
 
   @override
@@ -216,15 +215,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
        return Navigator(
           key: _portraitNavigatorKey,
           pages: combinedPages,
-          onPopPage: (route, result) {
-             if (!route.didPop(result)) return false;
-
-             if (pid != null) {
-                 return _handlePagePop(mid, pid);
-             } else {
-                 return _handleMiddlewarePop(mid, pid);
-             }
-          },
+          onDidRemovePage: (page) => _handleRemoval(page, mid, pid),
        );
     }
 
@@ -246,10 +237,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
               child: Navigator(
                  key: _leftNavigatorKey,
                  pages: middlewarePages,
-                 onPopPage: (route, result) {
-                    if (!route.didPop(result)) return false;
-                    return _handleMiddlewarePop(mid, pid);
-                 },
+                 onDidRemovePage: (page) => _handleRemoval(page, mid, pid),
               ),
             ),
             const VerticalDivider(width: dividerWidth),
@@ -257,10 +245,7 @@ class _RouterSplitWrapperState extends ConsumerState<RouterSplitWrapper> {
               child: Navigator(
                  key: _rightNavigatorKey,
                  pages: pagePages,
-                 onPopPage: (route, result) {
-                    if (!route.didPop(result)) return false;
-                    return _handlePagePop(mid, pid);
-                 },
+                 onDidRemovePage: (page) => _handleRemoval(page, mid, pid),
               ),
             ),
           ],
